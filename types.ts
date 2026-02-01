@@ -1,6 +1,10 @@
 
-export type Category = 'Men' | 'Women' | 'Wall Clocks' | 'Smart Clocks' | 'Luxury Series';
 export type ProductTag = 'Latest' | 'Best Seller' | 'Offer' | 'New Arrival' | 'None';
+
+export interface KeyFeature {
+  title: string;
+  description: string;
+}
 
 export interface Product {
   id: string;
@@ -8,9 +12,10 @@ export interface Product {
   description: string;
   price: number;
   original_price?: number;
-  category: Category;
+  category: string; // Changed from fixed union to string for dynamic support
   images: string[];
   specs: Record<string, string>;
+  key_features: KeyFeature[]; // New field
   tag: ProductTag;
   stock: number;
   rating: number;
@@ -46,10 +51,7 @@ export interface Order {
   created_at: string;
 }
 
-export interface SiteConfig {
+export interface Category {
   id: string;
-  brand_name: string;
-  announcement_text: string;
-  contact_email: string;
-  contact_phone: string;
+  name: string;
 }

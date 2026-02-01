@@ -7,6 +7,7 @@ interface AppState {
   products: Product[];
   banners: Banner[];
   orders: Order[];
+  categories: Category[]; // Dynamic categories
   wishlist: string[];
   isLoading: boolean;
   
@@ -16,6 +17,8 @@ interface AppState {
   deleteProduct: (id: string) => Promise<void>;
   upsertBanner: (b: Partial<Banner>) => Promise<void>;
   deleteBanner: (id: string) => Promise<void>;
+  upsertCategory: (c: Partial<Category>) => Promise<void>;
+  deleteCategory: (id: string) => Promise<void>;
   updateOrderStatus: (id: string, status: Order['status']) => Promise<void>;
   toggleWishlist: (id: string) => void;
 }
@@ -26,21 +29,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [products, setProducts] = useState<Product[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [pRes, bRes, oRes] = await Promise.all([
+      const [pRes, bRes, oRes, cRes] = await Promise.all([
         supabase.from('products').select('*').order('created_at', { ascending: false }),
         supabase.from('banners').select('*').order('display_order', { ascending: true }),
-        supabase.from('orders').select('*').order('created_at', { ascending: false })
+        supabase.from('orders').select('*').order('created_at', { ascending: false }),
+        supabase.from('categories').select('*').order('name', { ascending: true })
       ]);
 
       if (pRes.data) setProducts(pRes.data);
       if (bRes.data) setBanners(bRes.data);
       if (oRes.data) setOrders(oRes.data);
+      if (cRes.data) {
+        setCategories(cRes.data);
+      } else {
+        // Default categories if table is empty
+        setCategories([
+          { id: '1', name: 'Luxury Series' },
+          { id: '2', name: 'Wall Clocks' },
+          { id: '3', name: 'Men' },
+          { id: '4', name: 'Women' }
+        ]);
+      }
     } catch (err) {
       console.error("Error fetching AEVO data:", err);
     } finally {
@@ -72,6 +88,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!error) await fetchData();
   };
 
+  const upsertCategory = async (c: Partial<Category>) => {
+    const { error } = await supabase.from('categories').upsert(c);
+    if (!error) await fetchData();
+  };
+
+  const deleteCategory = async (id: string) => {
+    const { error } = await supabase.from('categories').delete().eq('id', id);
+    if (!error) await fetchData();
+  };
+
   const updateOrderStatus = async (id: string, status: Order['status']) => {
     const { error } = await supabase.from('orders').update({ status }).eq('id', id);
     if (!error) await fetchData();
@@ -83,8 +109,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <AppContext.Provider value={{
-      products, banners, orders, wishlist, isLoading,
-      fetchData, upsertProduct, deleteProduct, upsertBanner, deleteBanner, updateOrderStatus, toggleWishlist
+      products, banners, orders, wishlist, isLoading, categories,
+      fetchData, upsertProduct, deleteProduct, upsertBanner, deleteBanner, 
+      upsertCategory, deleteCategory, updateOrderStatus, toggleWishlist
     }}>
       {children}
     </AppContext.Provider>

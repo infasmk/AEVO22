@@ -15,6 +15,8 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?auto=format&fit=crop&q=80&w=1000'
     ],
     specs: { 'Movement': 'Mechanical', 'Material': '24k Gold' },
+    // Fix: Added missing required key_features
+    key_features: [],
     tag: 'Best Seller',
     stock: 5,
     rating: 4.9,
@@ -32,6 +34,8 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?auto=format&fit=crop&q=80&w=1000'
     ],
     specs: { 'Movement': 'Quartz', 'Material': 'Brushed Steel' },
+    // Fix: Added missing required key_features
+    key_features: [],
     tag: 'Latest',
     stock: 15,
     rating: 4.7,
@@ -51,6 +55,8 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1533139502658-0198f920d8e8?auto=format&fit=crop&q=80&w=1000'
     ],
     specs: { 'Movement': 'Automatic', 'Material': 'Rose Gold' },
+    // Fix: Added missing required key_features
+    key_features: [],
     tag: 'Offer',
     stock: 8,
     rating: 4.8,
@@ -68,6 +74,8 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=80&w=1000'
     ],
     specs: { 'Battery': '7 Days', 'Display': 'AMOLED' },
+    // Fix: Added missing required key_features
+    key_features: [],
     tag: 'Latest',
     stock: 20,
     rating: 4.6,
@@ -85,6 +93,8 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?auto=format&fit=crop&q=80&w=1000'
     ],
     specs: { 'Movement': 'Automatic', 'Material': 'Ceramic' },
+    // Fix: Added missing required key_features
+    key_features: [],
     tag: 'New Arrival',
     stock: 12,
     rating: 4.9,
@@ -104,6 +114,8 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1508057198894-247b23fe5ade?auto=format&fit=crop&q=80&w=1000'
     ],
     specs: { 'Movement': 'Quartz', 'Material': 'Alabaster' },
+    // Fix: Added missing required key_features
+    key_features: [],
     tag: 'Offer',
     stock: 3,
     rating: 4.8,

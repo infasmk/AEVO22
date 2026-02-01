@@ -3,14 +3,14 @@ import React, { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useStore } from '../store';
 import ProductCard from '../components/ProductCard';
-import { Category } from '../types';
 
 const Shop: React.FC = () => {
   const { products } = useStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const [sortBy, setSortBy] = useState('latest');
   
-  const categories: Category[] = ['Men', 'Women', 'Wall Clocks', 'Smart Clocks', 'Luxury Series'];
+  // Fix: categories should be string[] to match Product.category which is a string
+  const categories: string[] = ['Men', 'Women', 'Wall Clocks', 'Smart Clocks', 'Luxury Series'];
   const activeCategory = searchParams.get('category');
 
   const filteredProducts = useMemo(() => {
