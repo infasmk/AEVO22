@@ -10,6 +10,13 @@ import ProductDetail from './pages/ProductDetail';
 import Wishlist from './pages/Wishlist';
 import LoadingScreen from './components/LoadingScreen';
 
+// Admin Imports
+import AdminLayout from './pages/Admin/AdminLayout';
+import AdminDashboard from './pages/Admin/Dashboard';
+import AdminProducts from './pages/Admin/Products';
+import AdminBanners from './pages/Admin/Banners';
+import AdminOrders from './pages/Admin/Orders';
+
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -21,13 +28,14 @@ const ScrollToTop = () => {
 const MainContent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [exitAnimation, setExitAnimation] = useState(false);
+  const location = useLocation();
+  const isAdminPath = location.pathname.startsWith('/admin');
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setExitAnimation(true);
-      // Wait for exit animation to complete before unmounting
       setTimeout(() => setIsLoading(false), 800);
-    }, 2222);
+    }, 2500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -36,6 +44,20 @@ const MainContent: React.FC = () => {
       <div className={exitAnimation ? 'animate-scaleOut' : ''}>
         <LoadingScreen />
       </div>
+    );
+  }
+
+  // Admin section has its own layout, so we skip general Header/Footer
+  if (isAdminPath) {
+    return (
+      <Routes>
+        <Route element={<AdminLayout />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/products" element={<AdminProducts />} />
+          <Route path="/admin/banners" element={<AdminBanners />} />
+          <Route path="/admin/orders" element={<AdminOrders />} />
+        </Route>
+      </Routes>
     );
   }
 
@@ -48,6 +70,7 @@ const MainContent: React.FC = () => {
           <Route path="/shop" element={<Shop />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="*" element={<Home />} />
         </Routes>
       </div>
       <Footer />

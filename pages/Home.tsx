@@ -6,15 +6,17 @@ import ProductCard from '../components/ProductCard';
 import { ProductTag } from '../types';
 
 const Home: React.FC = () => {
-  const { banners, products } = useStore();
+  const { banners, products, isLoading } = useStore();
   const [activeBanner, setActiveBanner] = useState(0);
   const [activeTab, setActiveTab] = useState<ProductTag | 'All'>('All');
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveBanner(prev => (prev + 1) % banners.length);
-    }, 8000);
-    return () => clearInterval(timer);
+    if (banners.length > 0) {
+      const timer = setInterval(() => {
+        setActiveBanner(prev => (prev + 1) % banners.length);
+      }, 8000);
+      return () => clearInterval(timer);
+    }
   }, [banners.length]);
 
   const filteredProducts = useMemo(() => {
@@ -24,84 +26,95 @@ const Home: React.FC = () => {
 
   const tabs: (ProductTag | 'All')[] = ['All', 'Latest', 'Best Seller', 'Offer'];
 
+  if (isLoading && products.length === 0) {
+    return <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center text-[10px] uppercase tracking-[1em] opacity-20 italic">Curating Pieces...</div>;
+  }
+
   return (
     <main className="min-h-screen bg-[#FDFBF7]">
       {/* Hero Section */}
-      <section className="relative h-[85vh] w-full overflow-hidden">
-        {banners.map((banner, index) => (
+      <section className="relative h-[90vh] w-full overflow-hidden bg-[#1A1918]">
+        {banners.length > 0 ? banners.map((banner, index) => (
           <div 
             key={banner.id}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === activeBanner ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+            className={`absolute inset-0 transition-opacity duration-1500 ease-in-out ${index === activeBanner ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
           >
-            <img src={banner.image} alt={banner.title} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/20" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-6">
-              <span className="text-[10px] font-bold uppercase tracking-[0.5em] mb-6 animate-fadeIn">{banner.tag}</span>
-              <h1 className="text-6xl md:text-8xl font-serif mb-12 max-w-5xl leading-tight">
+            <img src={banner.image_url} alt={banner.title} className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-[10s]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1A1918] via-transparent to-transparent" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-8">
+              <span className="text-[10px] font-bold uppercase tracking-[0.6em] mb-8 text-[#C5A059] animate-fadeInUp">
+                {banner.tag_label}
+              </span>
+              <h1 className="text-6xl md:text-9xl font-serif mb-12 max-w-6xl leading-[0.9] italic animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
                 {banner.title}
               </h1>
-              <button className="bg-white text-black px-12 py-5 uppercase text-[10px] font-bold tracking-[0.3em] hover:bg-[#C5A059] hover:text-white transition-all duration-500 shadow-xl">
-                Shop Clocks
+              <p className="text-white/50 text-xl font-light italic mb-12 max-w-2xl animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
+                {banner.subtitle}
+              </p>
+              <button className="group relative overflow-hidden bg-white text-black px-16 py-6 rounded-full uppercase text-[10px] font-black tracking-[0.4em] hover:text-white transition-colors duration-500 animate-fadeInUp" style={{ animationDelay: '0.6s' }}>
+                <span className="relative z-10">Discover Piece</span>
+                <div className="absolute inset-0 bg-[#C5A059] -translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
               </button>
             </div>
           </div>
-        ))}
+        )) : (
+          <div className="absolute inset-0 flex items-center justify-center text-white/20 text-xs uppercase tracking-widest">Awaiting Masterpiece Assets</div>
+        )}
         
         {/* Controls */}
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-12">
-          <button onClick={() => setActiveBanner(prev => (prev - 1 + banners.length) % banners.length)} className="text-white/50 hover:text-white transition-colors">
-            <ChevronLeft className="w-8 h-8" />
-          </button>
-          <div className="flex space-x-4">
-            {banners.map((_, i) => (
-              <div key={i} className={`h-1 w-8 transition-all duration-500 ${i === activeBanner ? 'bg-white' : 'bg-white/20'}`} />
-            ))}
+        {banners.length > 1 && (
+          <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-16">
+            <button onClick={() => setActiveBanner(prev => (prev - 1 + banners.length) % banners.length)} className="text-white/20 hover:text-[#C5A059] transition-all transform hover:scale-125">
+              <ChevronLeft className="w-10 h-10" />
+            </button>
+            <div className="flex space-x-6">
+              {banners.map((_, i) => (
+                <button 
+                  key={i} 
+                  onClick={() => setActiveBanner(i)}
+                  className={`h-0.5 transition-all duration-1000 ${i === activeBanner ? 'w-16 bg-[#C5A059]' : 'w-8 bg-white/10'}`} 
+                />
+              ))}
+            </div>
+            <button onClick={() => setActiveBanner(prev => (prev + 1) % banners.length)} className="text-white/20 hover:text-[#C5A059] transition-all transform hover:scale-125">
+              <ChevronRight className="w-10 h-10" />
+            </button>
           </div>
-          <button onClick={() => setActiveBanner(prev => (prev + 1) % banners.length)} className="text-white/50 hover:text-white transition-colors">
-            <ChevronRight className="w-8 h-8" />
-          </button>
-        </div>
+        )}
       </section>
 
-      {/* Filter Tabs */}
-      <section className="pt-24 pb-12">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between border-b border-[#F5F1E9] pb-8">
-            <div className="flex space-x-8 md:space-x-12 mb-8 md:mb-0 overflow-x-auto no-scrollbar pb-2 w-full md:w-auto">
+      {/* Product Discovery Filter */}
+      <section className="pt-32 pb-16">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-center justify-between border-b border-[#F5F1E9] pb-10">
+            <div className="flex space-x-12 overflow-x-auto no-scrollbar w-full md:w-auto">
               {tabs.map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`text-[9px] md:text-[10px] uppercase font-bold tracking-[0.3em] whitespace-nowrap transition-all duration-300 relative pb-4 
-                    ${activeTab === tab ? 'text-black' : 'text-gray-400 hover:text-black'}`}
+                  className={`text-[10px] uppercase font-black tracking-[0.4em] transition-all duration-500 relative pb-6 
+                    ${activeTab === tab ? 'text-black' : 'text-gray-300 hover:text-black'}`}
                 >
                   {tab}
-                  {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#C5A059] transition-all duration-500" />}
+                  {activeTab === tab && <div className="absolute bottom-[-1px] left-0 right-0 h-0.5 bg-[#C5A059]" />}
                 </button>
               ))}
             </div>
-            <div className="text-[9px] uppercase tracking-widest text-gray-400 font-bold">
-              Found {filteredProducts.length} Premium Pieces
+            <div className="text-[10px] uppercase tracking-[0.3em] text-[#C5A059] font-bold mt-8 md:mt-0">
+              Vault Index: {filteredProducts.length} Selections
             </div>
           </div>
         </div>
       </section>
 
-      {/* Product Grid - Updated to 2 columns on mobile/tablet */}
-      <section className="pb-32">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-10">
+      {/* Grid */}
+      <section className="pb-40">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 md:gap-12">
             {filteredProducts.map(product => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
-          
-          {filteredProducts.length === 0 && (
-            <div className="text-center py-40">
-              <h2 className="text-4xl font-serif text-gray-300">No collections found in this category</h2>
-              <button onClick={() => setActiveTab('All')} className="mt-8 uppercase text-[10px] font-bold tracking-widest border-b border-black">View All</button>
-            </div>
-          )}
         </div>
       </section>
     </main>

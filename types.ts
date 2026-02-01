@@ -7,37 +7,49 @@ export interface Product {
   name: string;
   description: string;
   price: number;
-  originalPrice?: number;
+  original_price?: number;
   category: Category;
   images: string[];
   specs: Record<string, string>;
   tag: ProductTag;
   stock: number;
   rating: number;
-  reviewsCount: number;
+  reviews_count: number;
+  created_at?: string;
 }
 
 export interface Banner {
   id: string;
   title: string;
   subtitle: string;
-  image: string;
-  tag: string;
+  image_url: string;
+  tag_label: string;
+  display_order: number;
 }
 
-// Added OrderItem to represent a product in an order with quantity
-export interface OrderItem extends Product {
+export interface OrderItem {
+  id: string;
+  product_id: string;
+  name: string;
+  price: number;
   quantity: number;
+  image: string;
 }
 
-// Added Order interface to match mock data structure
 export interface Order {
   id: string;
-  userId: string;
-  userName: string;
+  user_name: string;
+  user_email: string;
   items: OrderItem[];
-  total: number;
-  status: string;
-  createdAt: string;
-  paymentMethod: string;
+  total_amount: number;
+  status: 'Pending' | 'Artisan Prep' | 'Shipped' | 'Delivered';
+  created_at: string;
+}
+
+export interface SiteConfig {
+  id: string;
+  brand_name: string;
+  announcement_text: string;
+  contact_email: string;
+  contact_phone: string;
 }

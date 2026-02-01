@@ -58,7 +58,7 @@ const ProductDetail: React.FC = () => {
   const strapOptions = [
     { name: 'Italian Leather', description: 'Artisan hand-stitched calfskin.', price: 0 },
     { name: 'Milanese Mesh', description: 'Fluid stainless steel weave.', price: 12500 },
-    { name: 'Brushed Steel', description: 'Robust architectural bracelet.', price: 18000 },
+    { name: 'Brushed Steel', description: 'Robust architectural banner.', price: 18000 },
   ];
 
   const dialOptions = [
@@ -363,9 +363,10 @@ const ProductDetail: React.FC = () => {
                       <span className="text-6xl md:text-7xl font-light text-white tracking-tighter leading-none mb-2 transition-all duration-700">
                         ₹{calculateTotalPrice().toLocaleString('en-IN')}
                       </span>
-                      {product.originalPrice && (
+                      {/* Fix: originalPrice -> original_price */}
+                      {product.original_price && (
                         <span className="text-white/20 line-through text-xl font-light tracking-widest">
-                          ₹{product.originalPrice.toLocaleString('en-IN')}
+                          ₹{product.original_price.toLocaleString('en-IN')}
                         </span>
                       )}
                     </div>
