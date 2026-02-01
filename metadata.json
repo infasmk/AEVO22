@@ -1,0 +1,7 @@
+{
+  "name": "AEVO - finel",
+  "description": "A premium e-commerce experience for luxury clocks, featuring a sleek user interface, comprehensive admin dashboard, and AI-powered concierge.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
