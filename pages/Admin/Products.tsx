@@ -40,7 +40,7 @@ const AdminProducts: React.FC = () => {
       setFormData({
         name: '',
         price: 0,
-        category: categories[0]?.name || '',
+        category: categories.length > 0 ? categories[0].name : 'Luxury Series',
         tag: 'None',
         description: '',
         stock: 0,
