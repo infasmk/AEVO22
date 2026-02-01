@@ -41,7 +41,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Floating Tag - Updated to reveal only on hover with slide animation */}
+      {/* Floating Tag */}
       <div className="absolute top-8 left-8 z-20 transition-all duration-1000 ease-out opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0">
         {product.tag !== 'None' && (
           <span className="bg-white/95 backdrop-blur-xl text-[#2C2A28] text-[8px] px-5 py-2.5 uppercase tracking-[0.3em] font-extrabold rounded-full shadow-2xl border border-black/5 block">
@@ -103,7 +103,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
 
         <div className="flex items-center justify-between pt-5 border-t border-black/5">
-          <p className="text-xl md:text-2xl font-light tracking-tighter text-[#2C2A28]">${product.price.toLocaleString()}</p>
+          <p className="text-xl md:text-2xl font-light tracking-tighter text-[#2C2A28]">₹{product.price.toLocaleString('en-IN')}</p>
           <button 
             onClick={() => navigate(`/product/${product.id}`)}
             className="text-[8px] md:text-[9px] uppercase tracking-[0.4em] font-bold border-b border-transparent hover:border-[#C5A059] hover:text-[#C5A059] transition-all pb-1"

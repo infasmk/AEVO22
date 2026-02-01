@@ -23,8 +23,8 @@ const ProductDetail: React.FC = () => {
 
   const strapOptions = [
     { name: 'Italian Leather', description: 'Artisan hand-stitched calfskin.', price: 0 },
-    { name: 'Milanese Mesh', description: 'Fluid stainless steel weave.', price: 150 },
-    { name: 'Brushed Steel', description: 'Robust architectural bracelet.', price: 200 },
+    { name: 'Milanese Mesh', description: 'Fluid stainless steel weave.', price: 12500 },
+    { name: 'Brushed Steel', description: 'Robust architectural bracelet.', price: 18000 },
   ];
 
   const dialOptions = [
@@ -65,7 +65,7 @@ const ProductDetail: React.FC = () => {
       alert("This piece is currently held in our archives (Sold Out). Please contact our concierge to be notified of future releases.");
       return;
     }
-    alert(`Acquisition request received for the ${product.name}. Our White-Glove service team will contact you within 24 hours to arrange secure delivery and payment.`);
+    alert(`Acquisition request received for the ${product.name}. Our White-Glove service team will contact you within 24 hours to arrange secure delivery and payment in INR.`);
   };
 
   const calculateTotalPrice = () => {
@@ -83,24 +83,28 @@ const ProductDetail: React.FC = () => {
 
   const keyFeatures = [
     { 
-      icon: <Compass className="w-10 h-10" />, 
+      id: '01',
+      icon: <Compass className="w-12 h-12" />, 
       title: "Precision Caliber", 
-      desc: "Chronometer-grade movement with 0.5s daily deviation." 
+      desc: "An in-house chronometer movement engineered with aerospace precision, offering a deviation of less than 0.5 seconds daily." 
     },
     { 
-      icon: <Feather className="w-10 h-10" />, 
+      id: '02',
+      icon: <Feather className="w-12 h-12" />, 
       title: "Hand Finished", 
-      desc: "Every bevel and polish performed by master Geneva artisans." 
+      desc: "Each bevel, bridge, and screw is meticulously polished by master Geneva artisans using century-old techniques." 
     },
     { 
-      icon: <Shield className="w-10 h-10" />, 
+      id: '03',
+      icon: <Shield className="w-12 h-12" />, 
       title: "Legacy Build", 
-      desc: "Surgical-grade 316L steel designed to endure generations." 
+      desc: "Forged from surgical-grade 316L stainless steel, designed to retain its architectural integrity for multiple generations." 
     },
     { 
-      icon: <Diamond className="w-10 h-10" />, 
-      title: "Rare Materials", 
-      desc: "Featuring volcanic obsidian and sapphire crystal lenses." 
+      id: '04',
+      icon: <Diamond className="w-12 h-12" />, 
+      title: "Rare Elements", 
+      desc: "Incorporating rare volcanic obsidian and sapphire crystal lenses to ensure unparalleled clarity and scratch resistance." 
     }
   ];
 
@@ -229,7 +233,7 @@ const ProductDetail: React.FC = () => {
                   <div className="flex justify-between items-baseline">
                     <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-gray-400">Final Investment</span>
                     <span className="text-4xl font-light tracking-tighter text-[#2C2A28] transition-all duration-500">
-                      ${calculateTotalPrice().toLocaleString()}
+                      ₹{calculateTotalPrice().toLocaleString('en-IN')}
                     </span>
                   </div>
                </div>
@@ -237,39 +241,72 @@ const ProductDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* Key Features Section - Excellence in Engineering */}
-        <section className="mb-20 animate-fadeInUp">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-[#F5F1E9] border border-[#F5F1E9] rounded-[3rem] overflow-hidden shadow-2xl">
+        {/* REDESIGNED: The Anatomy of Excellence */}
+        <section className="mb-40 animate-fadeInUp">
+          <div className="text-center mb-24">
+            <span className="text-[#C5A059] uppercase text-[11px] font-bold tracking-[0.8em] block mb-6">The Anatomy of Excellence</span>
+            <h2 className="text-5xl md:text-6xl font-serif text-[#2C2A28]">Engineering Mastery</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
             {keyFeatures.map((feature, idx) => (
-              <div key={idx} className="bg-white p-12 transition-all duration-700 hover:bg-[#FDFBF7] group">
-                <div className="text-[#C5A059] mb-8 transition-transform duration-700 group-hover:scale-110 group-hover:-translate-y-2 block">
-                  {feature.icon}
+              <div 
+                key={feature.id} 
+                className={`flex flex-col md:flex-row gap-10 p-12 bg-white rounded-[3.5rem] border border-[#F5F1E9] transition-all duration-1000 hover:shadow-[0_50px_100px_-20px_rgba(197,160,89,0.1)] group ${
+                  idx % 2 === 0 ? '' : 'md:translate-y-16'
+                }`}
+              >
+                <div className="flex-shrink-0">
+                  <div className="w-24 h-24 bg-[#FDFBF7] rounded-3xl flex items-center justify-center text-[#C5A059] transition-all duration-700 group-hover:scale-110 group-hover:bg-[#C5A059] group-hover:text-white shadow-sm group-hover:shadow-2xl">
+                    {feature.icon}
+                  </div>
                 </div>
-                <h3 className="font-serif text-2xl text-[#2C2A28] mb-4">{feature.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed font-light italic">{feature.desc}</p>
+                <div className="flex flex-col justify-center">
+                  <div className="flex items-center space-x-4 mb-4">
+                    <span className="font-serif text-2xl italic text-[#C5A059] opacity-40">{feature.id}</span>
+                    <h3 className="font-serif text-3xl text-[#2C2A28] leading-tight">{feature.title}</h3>
+                  </div>
+                  <p className="text-gray-400 text-base leading-relaxed font-light italic opacity-80 group-hover:opacity-100 transition-opacity">
+                    {feature.desc}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Action Button - Moved below key features */}
+        {/* Action Button Section */}
         <div className="mb-40 flex flex-col items-center animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-          <div className="w-full max-w-2xl bg-white p-10 rounded-[3rem] shadow-2xl border border-[#F5F1E9]">
+          <div className="w-full max-w-3xl bg-[#2C2A28] p-12 md:p-16 rounded-[4rem] shadow-[0_80px_120px_-30px_rgba(0,0,0,0.4)] text-center relative overflow-hidden group">
+             {/* Decorative background element */}
+             <div className="absolute top-0 right-0 w-64 h-64 bg-[#C5A059] opacity-[0.03] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-1000" />
+             
+             <span className="text-[#C5A059] uppercase text-[10px] font-bold tracking-[0.6em] mb-10 block">Ready to Own a Legacy?</span>
+             <h2 className="text-4xl md:text-5xl font-serif text-white mb-14 italic">"Time waits for no one."</h2>
+             
              <button 
                 onClick={handleBuyNow}
                 disabled={product.stock === 0}
-                className={`w-full py-8 rounded-[2rem] uppercase text-[12px] font-bold tracking-[0.6em] transition-all duration-700 flex items-center justify-center space-x-6 shadow-2xl group ${
+                className={`w-full py-10 rounded-[2.5rem] uppercase text-[13px] font-bold tracking-[0.7em] transition-all duration-700 flex items-center justify-center space-x-6 group ${
                   product.stock === 0 
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 shadow-none' 
-                    : 'bg-[#2C2A28] text-white hover:bg-[#C5A059]'
+                    ? 'bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700' 
+                    : 'bg-[#C5A059] text-white hover:bg-white hover:text-black shadow-2xl'
                 }`}
              >
-               <ShoppingBag className="w-6 h-6 transition-transform duration-700 group-hover:scale-125" />
+               <ShoppingBag className="w-7 h-7 transition-transform duration-700 group-hover:scale-125" />
                <span>{product.stock === 0 ? 'Waitlist for Re-release' : 'Acquire Piece Now'}</span>
              </button>
-             <p className="text-center mt-8 text-[9px] uppercase tracking-[0.3em] text-gray-400 font-bold">
-               Authenticated ownership with physical & digital certificate of origin
-             </p>
+             
+             <div className="flex flex-col md:flex-row items-center justify-center gap-8 mt-14 pt-10 border-t border-white/5">
+                <p className="text-[10px] uppercase tracking-[0.3em] text-white/40 font-bold flex items-center gap-3">
+                  <div className="w-1.5 h-1.5 bg-[#C5A059] rounded-full animate-pulse" />
+                  Physical & Digital Authentication
+                </p>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-white/40 font-bold flex items-center gap-3">
+                  <div className="w-1.5 h-1.5 bg-[#C5A059] rounded-full animate-pulse" />
+                  Insured Doorstep Delivery
+                </p>
+             </div>
           </div>
         </div>
 

@@ -12,12 +12,12 @@ const AdminDashboard: React.FC = () => {
   const totalProducts = products.length;
 
   const data = [
-    { name: 'Jan', sales: 4000 },
-    { name: 'Feb', sales: 3000 },
-    { name: 'Mar', sales: 5000 },
-    { name: 'Apr', sales: 2780 },
-    { name: 'May', sales: 1890 },
-    { name: 'Jun', sales: 2390 },
+    { name: 'Jan', sales: 4000000 },
+    { name: 'Feb', sales: 3000000 },
+    { name: 'Mar', sales: 5000000 },
+    { name: 'Apr', sales: 2780000 },
+    { name: 'May', sales: 1890000 },
+    { name: 'Jun', sales: 2390000 },
   ];
 
   return (
@@ -37,7 +37,7 @@ const AdminDashboard: React.FC = () => {
             <span className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Total Revenue</span>
             <div className="p-2 bg-[#FDFBF7] text-[#C5A059] rounded-lg"><Star className="w-5 h-5" /></div>
           </div>
-          <p className="text-3xl font-light mb-1">${totalSales.toLocaleString()}</p>
+          <p className="text-3xl font-light mb-1">₹{totalSales.toLocaleString('en-IN')}</p>
           <span className="text-xs text-green-500 font-medium">+12.5% from last month</span>
         </div>
         <div className="bg-white p-6 shadow-sm border border-[#F5F1E9]">
@@ -53,7 +53,7 @@ const AdminDashboard: React.FC = () => {
             <span className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Average Order</span>
             <div className="p-2 bg-[#FDFBF7] text-[#C5A059] rounded-lg"><Star className="w-5 h-5" /></div>
           </div>
-          <p className="text-3xl font-light mb-1">${(totalSales / totalOrders).toFixed(2)}</p>
+          <p className="text-3xl font-light mb-1">₹{(totalSales / totalOrders).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
           <span className="text-xs text-red-500 font-medium">-2% from last month</span>
         </div>
         <div className="bg-white p-6 shadow-sm border border-[#F5F1E9]">
@@ -69,7 +69,7 @@ const AdminDashboard: React.FC = () => {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-white p-8 border border-[#F5F1E9]">
-          <h3 className="text-xs font-bold uppercase tracking-widest mb-10">Revenue Overview</h3>
+          <h3 className="text-xs font-bold uppercase tracking-widest mb-10">Revenue Overview (₹)</h3>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data}>
@@ -121,7 +121,7 @@ const AdminDashboard: React.FC = () => {
                 <tr key={order.id} className="text-sm hover:bg-[#FDFBF7] transition-colors">
                   <td className="px-6 py-4 font-medium">{order.id}</td>
                   <td className="px-6 py-4">Customer #{order.userId}</td>
-                  <td className="px-6 py-4 font-medium">${order.total.toLocaleString()}</td>
+                  <td className="px-6 py-4 font-medium">₹{order.total.toLocaleString('en-IN')}</td>
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
                       order.status === 'Delivered' ? 'bg-green-100 text-green-700' :

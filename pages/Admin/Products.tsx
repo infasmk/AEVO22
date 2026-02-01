@@ -111,7 +111,7 @@ const AdminProducts: React.FC = () => {
                   </div>
                 </td>
                 <td className="px-8 py-6 text-sm text-gray-500">{product.category}</td>
-                <td className="px-8 py-6 text-sm font-medium">${product.price.toLocaleString()}</td>
+                <td className="px-8 py-6 text-sm font-medium">₹{product.price.toLocaleString('en-IN')}</td>
                 <td className="px-8 py-6 text-sm">{product.stock} units</td>
                 <td className="px-8 py-6">
                   <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded ${product.tag === 'None' ? 'bg-gray-100 text-gray-400' : 'bg-[#FDFBF7] text-[#C5A059] border border-[#C5A059]'}`}>
@@ -146,7 +146,7 @@ const AdminProducts: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-2">Price ($)</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-2">Price (₹)</label>
                 <input 
                   type="number"
                   className="w-full border border-[#F5F1E9] p-3 text-sm focus:outline-none focus:border-black"

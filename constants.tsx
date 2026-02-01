@@ -6,8 +6,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     id: '1',
     name: 'Aurelius Gold Skeleton',
     description: 'A masterpiece of engineering, featuring a visible mechanical heart and 24k gold accents.',
-    price: 4200,
-    originalPrice: 4800,
+    price: 349000,
+    originalPrice: 399000,
     category: 'Luxury Series',
     images: [
       'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=1000',
@@ -23,7 +23,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     id: '2',
     name: 'Luna Minimalist Wall',
     description: 'Clean lines and silent movement for the modern contemporary space.',
-    price: 850,
+    price: 68500,
     category: 'Wall Clocks',
     images: [
       'https://images.unsplash.com/photo-1508057198894-247b23fe5ade?auto=format&fit=crop&q=80&w=1000',
@@ -39,8 +39,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     id: '3',
     name: 'Elysian Rose Quartz',
     description: 'Feminine elegance captured in soft hues and genuine rose quartz dial.',
-    price: 1200,
-    originalPrice: 1500,
+    price: 98000,
+    originalPrice: 125000,
     category: 'Women',
     images: [
       'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&q=80&w=1000',
@@ -56,7 +56,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     id: '4',
     name: 'Chronos Smart Elite',
     description: 'Blending traditional horology with cutting-edge smart connectivity.',
-    price: 1800,
+    price: 145000,
     category: 'Smart Clocks',
     images: [
       'https://images.unsplash.com/photo-1544117518-30dd5978bbbe?auto=format&fit=crop&q=80&w=1000',
@@ -72,7 +72,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     id: '5',
     name: 'Obsidian Midnight',
     description: 'A statement piece for the modern gentleman, crafted from volcanic glass.',
-    price: 2900,
+    price: 215000,
     category: 'Men',
     images: [
       'https://images.unsplash.com/photo-1587836374828-4dbafa94cf0e?auto=format&fit=crop&q=80&w=1000',
@@ -88,8 +88,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     id: '6',
     name: 'Ivory Horizon Wall',
     description: 'A monolithic wall clock designed for grand minimalist spaces.',
-    price: 1100,
-    originalPrice: 1350,
+    price: 89000,
+    originalPrice: 110000,
     category: 'Wall Clocks',
     images: [
       'https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?auto=format&fit=crop&q=80&w=1000',
@@ -133,7 +133,7 @@ export const MOCK_ORDERS: Order[] = [
     userId: 'u1',
     userName: 'James Wilson',
     items: [{ ...INITIAL_PRODUCTS[0], quantity: 1 }],
-    total: 4200,
+    total: 349000,
     status: 'Shipped',
     createdAt: '2024-03-20T10:30:00Z',
     paymentMethod: 'Credit Card'
@@ -143,7 +143,7 @@ export const MOCK_ORDERS: Order[] = [
     userId: 'u2',
     userName: 'Elena Grace',
     items: [{ ...INITIAL_PRODUCTS[1], quantity: 2 }],
-    total: 1700,
+    total: 137000,
     status: 'Pending',
     createdAt: '2024-03-21T14:15:00Z',
     paymentMethod: 'PayPal'
