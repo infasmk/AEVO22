@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useStore } from '../store';
-import { Star, Share, ChevronLeft, ChevronRight, ShoppingBag } from '../components/Icons';
+import { Star, Share, ChevronLeft, ChevronRight, ShoppingBag, Compass, Feather, Shield, Diamond } from '../components/Icons';
 import ProductCard from '../components/ProductCard';
 
 const ProductDetail: React.FC = () => {
@@ -81,6 +81,29 @@ const ProductDetail: React.FC = () => {
 
   const stockStatus = getStockStatus();
 
+  const keyFeatures = [
+    { 
+      icon: <Compass className="w-10 h-10" />, 
+      title: "Precision Caliber", 
+      desc: "Chronometer-grade movement with 0.5s daily deviation." 
+    },
+    { 
+      icon: <Feather className="w-10 h-10" />, 
+      title: "Hand Finished", 
+      desc: "Every bevel and polish performed by master Geneva artisans." 
+    },
+    { 
+      icon: <Shield className="w-10 h-10" />, 
+      title: "Legacy Build", 
+      desc: "Surgical-grade 316L steel designed to endure generations." 
+    },
+    { 
+      icon: <Diamond className="w-10 h-10" />, 
+      title: "Rare Materials", 
+      desc: "Featuring volcanic obsidian and sapphire crystal lenses." 
+    }
+  ];
+
   return (
     <div className="pt-32 pb-20 bg-[#FDFBF7]">
       <div className="container mx-auto px-8 max-w-7xl">
@@ -94,7 +117,7 @@ const ProductDetail: React.FC = () => {
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 xl:gap-32 mb-40">
-          {/* Gallery Section - Full Bleed Update */}
+          {/* Gallery Section */}
           <div className="space-y-10 lg:sticky lg:top-32 h-fit">
             <div className="aspect-[4/5] bg-white rounded-[3rem] overflow-hidden relative group shadow-2xl border border-[#F5F1E9]">
               <img 
@@ -231,19 +254,24 @@ const ProductDetail: React.FC = () => {
                    Authenticated ownership through private ledger
                  </p>
                </div>
-
-               {/* Technicals */}
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-10 border-t border-[#F5F1E9] animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
-                  {Object.entries(product.specs).map(([key, value]) => (
-                    <div key={key} className="flex justify-between items-center py-2 border-b border-[#FDFBF7]">
-                      <span className="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-bold">{key}</span>
-                      <span className="text-xs text-[#2C2A28] font-medium tracking-tight">{value}</span>
-                    </div>
-                  ))}
-               </div>
             </div>
           </div>
         </div>
+
+        {/* Key Features Section - Excellence in Engineering */}
+        <section className="mb-40 animate-fadeInUp">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-[#F5F1E9] border border-[#F5F1E9] rounded-[3rem] overflow-hidden shadow-2xl">
+            {keyFeatures.map((feature, idx) => (
+              <div key={idx} className="bg-white p-12 transition-all duration-700 hover:bg-[#FDFBF7] group">
+                <div className="text-[#C5A059] mb-8 transition-transform duration-700 group-hover:scale-110 group-hover:-translate-y-2 block">
+                  {feature.icon}
+                </div>
+                <h3 className="font-serif text-2xl text-[#2C2A28] mb-4">{feature.title}</h3>
+                <p className="text-gray-400 text-sm leading-relaxed font-light italic">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* Heritage Section */}
         <section className="py-40 border-y border-[#F5F1E9] text-center mb-40 animate-fadeInUp">
@@ -253,6 +281,26 @@ const ProductDetail: React.FC = () => {
             At AEVO, we believe a clock is not a tool for measuring time, but an anchor in the present. Each {product.name} is hand-finished by master watchmakers with over 40 years of experience, ensuring every oscillation is a tribute to heritage.
           </p>
         </section>
+
+        {/* Technicals */}
+        <div className="mb-40">
+           <div className="flex items-center space-x-6 mb-12">
+             <h2 className="text-4xl font-serif text-[#2C2A28]">Technical Dossier</h2>
+             <div className="h-px flex-1 bg-[#F5F1E9]" />
+           </div>
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+              {Object.entries(product.specs).map(([key, value]) => (
+                <div key={key} className="flex flex-col space-y-2 pb-6 border-b border-[#F5F1E9] group">
+                  <span className="text-[10px] uppercase tracking-[0.4em] text-[#C5A059] font-bold group-hover:translate-x-1 transition-transform">{key}</span>
+                  <span className="text-xl text-[#2C2A28] font-light tracking-tight italic">{value}</span>
+                </div>
+              ))}
+              <div className="flex flex-col space-y-2 pb-6 border-b border-[#F5F1E9]">
+                <span className="text-[10px] uppercase tracking-[0.4em] text-[#C5A059] font-bold">Standard Warranty</span>
+                <span className="text-xl text-[#2C2A28] font-light tracking-tight italic">5 Year Global</span>
+              </div>
+           </div>
+        </div>
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (
