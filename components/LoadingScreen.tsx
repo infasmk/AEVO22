@@ -5,187 +5,163 @@ const LoadingScreen: React.FC = () => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) return 100;
-        // Natural easing-style progress increments
-        const remaining = 100 - prev;
-        const inc = Math.max(1, Math.floor(remaining / 15));
-        return prev + inc;
-      });
-    }, 120); // Sync with 2222ms duration
+    const startTime = Date.now();
+    const duration = 2500; // Elegant slow progression
 
-    return () => clearInterval(interval);
+    const updateProgress = () => {
+      const elapsed = Date.now() - startTime;
+      const nextProgress = Math.min(100, (elapsed / duration) * 100);
+      setProgress(nextProgress);
+
+      if (elapsed < duration) {
+        requestAnimationFrame(updateProgress);
+      }
+    };
+
+    requestAnimationFrame(updateProgress);
   }, []);
 
   return (
     <div className="fixed inset-0 z-[1000] bg-[#1A1918] flex flex-col items-center justify-center overflow-hidden">
-      {/* Dynamic Specular Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div 
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-20"
-          style={{
-            background: `radial-gradient(circle at center, #C5A059 0%, transparent 70%)`,
-            filter: 'blur(100px)',
-            transform: `translate(-50%, -50%) scale(${1 + progress * 0.005})`
-          }}
-        />
+      {/* Background Ambient Glow */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#C5A059] opacity-[0.03] blur-[160px] rounded-full" />
       </div>
 
-      <div className="relative flex flex-col items-center">
-        {/* The Masterpiece Skeleton Watch */}
-        <div className="relative w-72 h-72 mb-20 flex items-center justify-center">
+      <div className="relative flex flex-col items-center justify-center">
+        {/* Stable Clock Container */}
+        <div className="relative w-80 h-80 md:w-96 md:h-96 flex items-center justify-center">
           
-          {/* Outer Polished Case */}
-          <div className="absolute inset-0 rounded-full border border-white/5 shadow-[inset_0_0_40px_rgba(0,0,0,0.5)] bg-gradient-to-br from-white/5 to-transparent" />
-          
-          {/* Animated Internal Gears (Skeleton Movement) */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-30">
-            {/* Main Drive Gear */}
-            <svg width="140" height="140" viewBox="0 0 100 100" className="absolute animate-spin-slow">
-              <path d="M50 10 L55 25 L70 30 L60 45 L65 60 L50 55 L35 60 L40 45 L30 30 L45 25 Z" fill="none" stroke="#C5A059" strokeWidth="0.5" />
-              <circle cx="50" cy="50" r="10" stroke="#C5A059" strokeWidth="0.5" fill="none" />
-              {[...Array(12)].map((_, i) => (
-                <rect key={i} x="49" y="5" width="2" height="8" fill="#C5A059" transform={`rotate(${i * 30} 50 50)`} />
-              ))}
-            </svg>
-            {/* Escapement Wheel */}
-            <svg width="80" height="80" viewBox="0 0 100 100" className="absolute -translate-x-12 translate-y-8 animate-spin-reverse-slow">
-              <circle cx="50" cy="50" r="30" stroke="#C5A059" strokeWidth="0.5" fill="none" strokeDasharray="2 2" />
-              {[...Array(20)].map((_, i) => (
-                <rect key={i} x="49.5" y="15" width="1" height="5" fill="#C5A059" transform={`rotate(${i * 18} 50 50)`} />
-              ))}
-            </svg>
+          {/* Outer Polished Bezel */}
+          <div className="absolute inset-0 rounded-full border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.5)] bg-gradient-to-br from-white/5 to-transparent p-1">
+            <div className="w-full h-full rounded-full border border-[#C5A059]/20" />
           </div>
 
-          {/* Hour Indices (Applied to Glass) */}
-          {[...Array(12)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-0.5 bg-gradient-to-b from-white/40 to-transparent"
-              style={{
-                height: i % 3 === 0 ? '16px' : '8px',
-                transform: `rotate(${i * 30}deg) translateY(-120px)`,
-                opacity: progress > (i * 8) ? 1 : 0.1,
-                transition: 'opacity 0.5s ease'
+          {/* The Dial Face */}
+          <div className="absolute inset-4 rounded-full bg-[#1F1E1D] shadow-inner flex items-center justify-center overflow-hidden">
+             {/* Radial Sunburst Texture */}
+             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_transparent_0%,_#000_100%)]" />
+             
+             {/* AEVO Center Logo */}
+             <div className="z-10 text-center select-none pointer-events-none mb-20">
+                <h2 className="text-white text-3xl md:text-4xl font-serif tracking-[0.4em] uppercase italic opacity-80">
+                  AEVO
+                </h2>
+                <div className="w-8 h-px bg-[#C5A059] mx-auto mt-2 opacity-40" />
+             </div>
+
+             {/* Minimalist Hour Markers */}
+             {[...Array(12)].map((_, i) => (
+               <div
+                 key={i}
+                 className="absolute w-0.5 bg-gradient-to-b from-[#C5A059] to-transparent origin-bottom"
+                 style={{
+                   height: i % 3 === 0 ? '20px' : '10px',
+                   width: i % 3 === 0 ? '2px' : '1px',
+                   bottom: '50%',
+                   left: '50%',
+                   transform: `translateX(-50%) rotate(${i * 30}deg) translateY(-135px)`,
+                   opacity: 0.6
+                 }}
+               />
+             ))}
+          </div>
+
+          {/* Precision Hands - Anchored to Exact Center */}
+          <div className="absolute inset-0 pointer-events-none">
+            
+            {/* Hour Hand */}
+            <div 
+              className="absolute left-1/2 bottom-1/2 w-1.5 h-[22%] bg-white/90 rounded-full origin-bottom shadow-lg"
+              style={{ 
+                transform: `translateX(-50%) rotate(${120 + (progress * 0.1)}deg)`,
+                transition: 'transform 1s cubic-bezier(0.16, 1, 0.3, 1)'
               }}
             />
-          ))}
+            
+            {/* Minute Hand */}
+            <div 
+              className="absolute left-1/2 bottom-1/2 w-1 h-[32%] bg-white/40 rounded-full origin-bottom"
+              style={{ 
+                transform: `translateX(-50%) rotate(${340 + (progress * 0.5)}deg)`,
+                transition: 'transform 1s cubic-bezier(0.16, 1, 0.3, 1)'
+              }}
+            />
+            
+            {/* Second Hand - High-Frequency Mechanical Sweep */}
+            <div 
+              className="absolute left-1/2 bottom-1/2 w-[1.5px] h-[38%] bg-[#C5A059] origin-bottom shadow-[0_0_15px_rgba(197,160,89,0.3)]"
+              style={{ 
+                transform: `translateX(-50%) rotate(${progress * 6}deg)`,
+                // This transition simulates a high-beat mechanical movement
+                transition: 'transform 0.125s cubic-bezier(0.4, 1.2, 0.6, 1)',
+              }}
+            >
+              {/* Counter-weight */}
+              <div className="absolute bottom-[-10px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 border border-[#C5A059] rounded-full bg-[#1F1E1D]" />
+            </div>
+            
+            {/* Cannon Pinion (Center Hub) */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#1A1918] border-2 border-[#C5A059] z-30 shadow-2xl flex items-center justify-center">
+              <div className="w-1.5 h-1.5 bg-[#C5A059] rounded-full shadow-[0_0_10px_#C5A059]" />
+            </div>
+          </div>
 
-          {/* Circular Progress Ring (Complication) */}
-          <svg className="absolute inset-0 w-full h-full -rotate-90 scale-95">
+          {/* Progress Circular Accent */}
+          <svg className="absolute inset-0 w-full h-full -rotate-90 scale-[1.05]">
             <circle
-              cx="144"
-              cy="144"
-              r="130"
-              stroke="rgba(197, 160, 89, 0.1)"
+              cx="50%"
+              cy="50%"
+              r="48%"
+              stroke="rgba(197, 160, 89, 0.05)"
               strokeWidth="1"
               fill="none"
             />
             <circle
-              cx="144"
-              cy="144"
-              r="130"
+              cx="50%"
+              cy="50%"
+              r="48%"
               stroke="#C5A059"
-              strokeWidth="2"
+              strokeWidth="1.5"
               fill="none"
-              strokeDasharray="816.8"
-              strokeDashoffset={816.8 - (816.8 * progress) / 100}
-              strokeLinecap="round"
-              className="transition-all duration-1000 ease-out"
+              strokeDasharray="100%"
+              strokeDashoffset={`${100 - progress}%`}
+              pathLength="100"
+              className="transition-all duration-300 ease-linear"
             />
           </svg>
-
-          {/* Clock Hands */}
-          {/* Hour Hand (Breguet Style) */}
-          <div 
-            className="absolute w-2 h-20 bg-gradient-to-t from-white/20 via-white/80 to-white/20 rounded-full origin-bottom"
-            style={{ 
-              transform: `translateY(-40px) rotate(${progress * 0.3}deg)`,
-              bottom: '50%',
-              boxShadow: '0 0 15px rgba(255,255,255,0.1)'
-            }}
-          />
-          {/* Minute Hand */}
-          <div 
-            className="absolute w-1 h-32 bg-gradient-to-t from-white/10 via-white/40 to-white/10 rounded-full origin-bottom"
-            style={{ 
-              transform: `translateY(-64px) rotate(${progress * 3.6}deg)`,
-              bottom: '50%'
-            }}
-          />
-          {/* Second Hand (The Needle) */}
-          <div 
-            className="absolute w-[1.5px] h-36 bg-[#C5A059] origin-bottom"
-            style={{ 
-              transform: `translateY(-72px) rotate(${progress * 43.2}deg)`,
-              bottom: '50%',
-              transition: 'transform 0.15s cubic-bezier(0.4, 2.08, 0.55, 0.44)',
-              boxShadow: '0 0 20px rgba(197, 160, 89, 0.4)'
-            }}
-          >
-             <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 border border-[#C5A059] rounded-full bg-[#1A1918]" />
-          </div>
-          
-          {/* Jewel Center Hub */}
-          <div className="absolute w-5 h-5 rounded-full bg-[#2C2A28] border-2 border-[#C5A059] flex items-center justify-center z-20 shadow-2xl">
-            <div className="w-1.5 h-1.5 bg-red-500/80 rounded-full blur-[1px]" /> {/* The Ruby Pivot */}
-          </div>
         </div>
 
-        {/* Loading Narrative */}
-        <div className="text-center relative">
+        {/* Narrative Information */}
+        <div className="mt-16 text-center space-y-6">
           <div className="overflow-hidden">
-            <h1 
-              className="text-white text-xs font-bold uppercase tracking-[1.5em] mb-4 transition-all duration-1000"
-              style={{ 
-                letterSpacing: `${0.8 + (progress / 100) * 1.5}em`,
-                opacity: 0.5 + (progress / 200)
-              }}
-            >
-              Establishing Precision
-            </h1>
+            <h3 className="text-white text-[10px] font-bold uppercase tracking-[1em] opacity-40 animate-pulse">
+              Authenticating Mechanism
+            </h3>
           </div>
           
           <div className="flex flex-col items-center">
-             <div className="text-[10px] font-serif italic text-[#C5A059] opacity-40 mb-6">
-               Chronometer Grade Calibration
+             <div className="flex items-center space-x-4 mb-2">
+                <div className="h-px w-6 bg-[#C5A059]/30" />
+                <span className="text-[#C5A059] text-[11px] font-serif italic tracking-widest uppercase">
+                  CALIBRATION {Math.round(progress)}%
+                </span>
+                <div className="h-px w-6 bg-[#C5A059]/30" />
              </div>
-             
-             {/* Micro-Progress Bar */}
-             <div className="w-48 h-[1px] bg-white/5 relative">
-               <div 
-                 className="absolute inset-0 bg-gradient-to-r from-transparent via-[#C5A059] to-transparent transition-all duration-700"
-                 style={{ width: `${progress}%` }}
-               />
-             </div>
+             <p className="text-white/20 text-[8px] uppercase tracking-[0.4em] font-medium">
+               Geneva • Zurich • London
+             </p>
           </div>
         </div>
       </div>
 
-      {/* Boutique Location Footer */}
-      <div className="absolute bottom-16 w-full flex justify-center space-x-12 opacity-20 text-[8px] uppercase tracking-[0.4em] font-medium text-white">
-        <span>Geneva</span>
-        <span className="text-[#C5A059]">|</span>
-        <span>Zurich</span>
-        <span className="text-[#C5A059]">|</span>
-        <span>London</span>
-      </div>
-
       <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+        @keyframes subtle-pulse {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.6; }
         }
-        @keyframes spin-reverse-slow {
-          from { transform: rotate(360deg); }
-          to { transform: rotate(0deg); }
-        }
-        .animate-spin-slow {
-          animation: spin-slow 15s linear infinite;
-        }
-        .animate-spin-reverse-slow {
-          animation: spin-reverse-slow 10s linear infinite;
+        .animate-pulse {
+          animation: subtle-pulse 2s ease-in-out infinite;
         }
       `}} />
     </div>
