@@ -233,33 +233,12 @@ const ProductDetail: React.FC = () => {
                     </span>
                   </div>
                </div>
-
-               {/* Primary Action Buttons */}
-               <div className="pt-4 space-y-4 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-                 <div className="flex flex-col gap-4">
-                   <button 
-                      onClick={handleBuyNow}
-                      disabled={product.stock === 0}
-                      className={`w-full py-8 rounded-[2rem] uppercase text-[11px] font-bold tracking-[0.6em] transition-all duration-700 flex items-center justify-center space-x-6 shadow-2xl group ${
-                        product.stock === 0 
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 shadow-none' 
-                          : 'bg-[#2C2A28] text-white hover:bg-[#C5A059]'
-                      }`}
-                   >
-                     <ShoppingBag className="w-6 h-6 transition-transform duration-700 group-hover:scale-125" />
-                     <span>{product.stock === 0 ? 'Waitlist for Re-release' : 'Acquire Piece Now'}</span>
-                   </button>
-                 </div>
-                 <p className="text-center mt-6 text-[9px] uppercase tracking-[0.3em] text-gray-400 font-bold">
-                   Authenticated ownership through private ledger
-                 </p>
-               </div>
             </div>
           </div>
         </div>
 
         {/* Key Features Section - Excellence in Engineering */}
-        <section className="mb-40 animate-fadeInUp">
+        <section className="mb-20 animate-fadeInUp">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-[#F5F1E9] border border-[#F5F1E9] rounded-[3rem] overflow-hidden shadow-2xl">
             {keyFeatures.map((feature, idx) => (
               <div key={idx} className="bg-white p-12 transition-all duration-700 hover:bg-[#FDFBF7] group">
@@ -272,6 +251,27 @@ const ProductDetail: React.FC = () => {
             ))}
           </div>
         </section>
+
+        {/* Action Button - Moved below key features */}
+        <div className="mb-40 flex flex-col items-center animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+          <div className="w-full max-w-2xl bg-white p-10 rounded-[3rem] shadow-2xl border border-[#F5F1E9]">
+             <button 
+                onClick={handleBuyNow}
+                disabled={product.stock === 0}
+                className={`w-full py-8 rounded-[2rem] uppercase text-[12px] font-bold tracking-[0.6em] transition-all duration-700 flex items-center justify-center space-x-6 shadow-2xl group ${
+                  product.stock === 0 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 shadow-none' 
+                    : 'bg-[#2C2A28] text-white hover:bg-[#C5A059]'
+                }`}
+             >
+               <ShoppingBag className="w-6 h-6 transition-transform duration-700 group-hover:scale-125" />
+               <span>{product.stock === 0 ? 'Waitlist for Re-release' : 'Acquire Piece Now'}</span>
+             </button>
+             <p className="text-center mt-8 text-[9px] uppercase tracking-[0.3em] text-gray-400 font-bold">
+               Authenticated ownership with physical & digital certificate of origin
+             </p>
+          </div>
+        </div>
 
         {/* Heritage Section */}
         <section className="py-40 border-y border-[#F5F1E9] text-center mb-40 animate-fadeInUp">
