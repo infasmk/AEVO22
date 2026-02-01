@@ -8,7 +8,6 @@ const Header: React.FC = () => {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  // Accessing wishlist state to show indicators
   const { wishlist } = useStore();
 
   useEffect(() => {
@@ -17,7 +16,6 @@ const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Prevent scroll when menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -46,14 +44,13 @@ const Header: React.FC = () => {
           <Link to="/about" className={`transition-colors ${location.pathname === '/about' ? 'text-[#C5A059]' : 'hover:text-[#C5A059]'}`}>Heritage</Link>
         </nav>
 
-        {/* Logo - Centered absolute on mobile/tablet, flex on desktop */}
+        {/* Logo */}
         <Link to="/" className="text-4xl font-serif tracking-tighter absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 transition-transform hover:scale-105 duration-500">
           AEVO
         </Link>
 
         {/* Actions - Right Side */}
         <div className="flex items-center space-x-8">
-          {/* Added Wishlist shortcut with dynamic indicator */}
           <Link to="/wishlist" className="p-2 hover:text-[#C5A059] transition-all relative group">
             <Heart className={`w-5 h-5 ${wishlist.length > 0 ? 'text-[#C5A059]' : ''}`} />
             {wishlist.length > 0 && (
@@ -64,13 +61,15 @@ const Header: React.FC = () => {
             <Search className="w-5 h-5" />
           </button>
           
-          <div className="hidden md:flex items-center space-x-4">
-             <span className="text-[9px] uppercase tracking-[0.3em] font-bold text-[#2C2A28]">Concierge Access</span>
+          <div className="hidden md:flex items-center space-x-4 border-l border-black/5 pl-8">
+             <Link to="/admin" className="text-[9px] uppercase tracking-[0.3em] font-black text-[#2C2A28] hover:text-[#C5A059] transition-colors">
+               Atelier Access
+             </Link>
           </div>
         </div>
       </div>
 
-      {/* Enhanced Mobile Menu Overlay */}
+      {/* Mobile Menu */}
       <div 
         className={`fixed inset-0 z-[60] bg-[#FDFBF7] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${
           mobileMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 invisible pointer-events-none'
@@ -86,7 +85,7 @@ const Header: React.FC = () => {
           </button>
         </div>
         
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full overflow-y-auto">
           <nav className="flex flex-col p-12 space-y-8">
             {navLinks.map((link, index) => {
               const isActive = location.pathname === link.path;
@@ -105,17 +104,16 @@ const Header: React.FC = () => {
                 </Link>
               );
             })}
-            {/* Added Wishlist to Mobile Menu for accessibility */}
             <Link 
-              to="/wishlist" 
+              to="/admin" 
               onClick={() => setMobileMenuOpen(false)}
-              className={`text-5xl md:text-6xl font-serif italic text-[#2C2A28] transition-all duration-700 hover:pl-6 hover:text-[#C5A059] flex items-center group ${
+              className={`text-5xl md:text-6xl font-serif italic text-[#C5A059] transition-all duration-700 hover:pl-6 flex items-center group ${
                 mobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-              } ${location.pathname === '/wishlist' ? 'text-[#C5A059] pl-6' : ''}`}
+              }`}
               style={{ transitionDelay: `${navLinks.length * 100}ms` }}
             >
-              <span className={`w-0 h-px bg-[#C5A059] transition-all duration-700 mr-0 group-hover:w-12 group-hover:mr-6 ${location.pathname === '/wishlist' ? 'w-12 mr-6' : ''}`} />
-              The Vault
+              <span className="w-0 h-px bg-[#C5A059] transition-all duration-700 mr-0 group-hover:w-12 group-hover:mr-6" />
+              Atelier Portal
             </Link>
           </nav>
           

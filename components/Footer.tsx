@@ -31,16 +31,17 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-widest mb-6">Experience</h3>
             <ul className="space-y-4 text-gray-500">
-              {['Contact Us', 'Our Story', 'Boutiques', 'Careers', 'Gift Cards'].map(i => (
+              {['Contact Us', 'Our Story', 'Boutiques', 'Careers'].map(i => (
                 <li key={i}><Link to="#" className="hover:text-[#C5A059] transition-colors">{i}</Link></li>
               ))}
+              <li><Link to="/admin" className="text-[#C5A059] font-bold hover:underline">Atelier Portal (Admin)</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-widest mb-6">The AEVO Letter</h3>
             <p className="text-gray-500 text-sm mb-6">Join our exclusive circle for latest arrivals and private showcases.</p>
-            <form className="flex">
+            <form className="flex" onSubmit={(e) => e.preventDefault()}>
               <input 
                 type="email" 
                 placeholder="EMAIL ADDRESS" 
