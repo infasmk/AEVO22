@@ -94,16 +94,16 @@ const ProductDetail: React.FC = () => {
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 xl:gap-32 mb-40">
-          {/* Gallery Section */}
+          {/* Gallery Section - Full Bleed Update */}
           <div className="space-y-10 lg:sticky lg:top-32 h-fit">
-            <div className="aspect-[4/5] bg-white rounded-[3rem] overflow-hidden relative group shadow-2xl border border-[#F5F1E9] flex items-center justify-center">
+            <div className="aspect-[4/5] bg-white rounded-[3rem] overflow-hidden relative group shadow-2xl border border-[#F5F1E9]">
               <img 
                 src={product.images[activeImage]} 
                 alt={product.name} 
-                className="max-w-[90%] max-h-[90%] object-contain transition-transform duration-[3000ms] ease-out group-hover:scale-110" 
+                className="w-full h-full object-cover transition-transform duration-[3000ms] ease-out group-hover:scale-110" 
               />
               
-              <div className="absolute inset-0 flex items-center justify-between px-8 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+              <div className="absolute inset-0 flex items-center justify-between px-8 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-black/5">
                 <button 
                   onClick={() => setActiveImage(prev => (prev - 1 + product.images.length) % product.images.length)} 
                   className="p-5 bg-white/95 backdrop-blur-2xl rounded-full shadow-2xl hover:bg-[#2C2A28] hover:text-white transition-all transform active:scale-90"
@@ -124,13 +124,13 @@ const ProductDetail: React.FC = () => {
                 <button 
                   key={i} 
                   onClick={() => setActiveImage(i)}
-                  className={`w-24 h-28 overflow-hidden rounded-2xl border-2 transition-all p-3 duration-700 ${
+                  className={`w-20 h-24 overflow-hidden rounded-2xl border-2 transition-all duration-700 ${
                     i === activeImage 
                     ? 'border-[#C5A059] bg-white shadow-2xl scale-110 translate-y-[-4px]' 
-                    : 'border-transparent opacity-30 hover:opacity-100 bg-white/50'
+                    : 'border-transparent opacity-30 hover:opacity-100'
                   }`}
                 >
-                  <img src={img} alt={product.name} className="w-full h-full object-contain" />
+                  <img src={img} alt={product.name} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -264,7 +264,7 @@ const ProductDetail: React.FC = () => {
               </div>
               <Link to="/shop" className="text-[10px] font-bold uppercase tracking-[0.4em] border-b border-[#2C2A28] pb-2 hover:text-[#C5A059] hover:border-[#C5A059] transition-all">Full Collection</Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
               {relatedProducts.map(p => <ProductCard key={p.id} product={p} />)}
             </div>
           </section>
