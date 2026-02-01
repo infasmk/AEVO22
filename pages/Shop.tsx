@@ -22,7 +22,6 @@ const Shop: React.FC = () => {
     switch (sortBy) {
       case 'price-low': result = [...result].sort((a, b) => a.price - b.price); break;
       case 'price-high': result = [...result].sort((a, b) => b.price - a.price); break;
-      // Fix: Use the correct tag check for best sellers instead of non-existent isBestSeller property
       case 'best-selling': result = [...result].filter(p => p.tag === 'Best Seller'); break;
       default: break;
     }
@@ -31,11 +30,11 @@ const Shop: React.FC = () => {
 
   return (
     <div className="pt-32 pb-20 bg-white">
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-4 md:px-6">
         {/* Header */}
         <div className="text-center mb-20">
           <h1 className="text-5xl font-serif mb-4">The Collection</h1>
-          <p className="text-gray-500 max-w-xl mx-auto">Explore our curated selection of fine horological instruments, from wall-mounted masterpieces to intimate wrist companions.</p>
+          <p className="text-gray-500 max-w-xl mx-auto italic font-light">Explore our curated selection of fine horological instruments, from wall-mounted masterpieces to intimate wrist companions.</p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-12">
@@ -79,24 +78,24 @@ const Shop: React.FC = () => {
               </select>
             </div>
 
-            <div className="p-6 bg-[#F5F1E9]">
+            <div className="p-8 bg-[#F5F1E9] rounded-3xl">
               <h4 className="font-serif text-lg mb-4">Need Advice?</h4>
-              <p className="text-xs text-gray-500 leading-relaxed mb-6">Our horologists are available for private consultations.</p>
-              <button className="w-full bg-black text-white py-3 text-[10px] uppercase font-bold tracking-widest hover:bg-[#C5A059] transition-colors">Book Consult</button>
+              <p className="text-[10px] text-gray-500 leading-relaxed mb-6 uppercase tracking-widest font-bold">Our horologists are available for private consultations.</p>
+              <button className="w-full bg-black text-white py-4 rounded-full text-[9px] uppercase font-bold tracking-widest hover:bg-[#C5A059] transition-colors">Book Consult</button>
             </div>
           </aside>
 
-          {/* Product Grid */}
+          {/* Product Grid - Updated for 2 columns on mobile */}
           <div className="flex-1">
-            <div className="flex justify-between items-center mb-10 text-[10px] uppercase tracking-widest text-gray-400 font-semibold">
+            <div className="flex justify-between items-center mb-10 text-[9px] uppercase tracking-widest text-gray-400 font-bold">
               <span>Showing {filteredProducts.length} Results</span>
-              <div className="hidden md:flex space-x-4">
-                <button className="text-black">Grid View</button>
-                <button className="hover:text-black">List View</button>
+              <div className="hidden md:flex space-x-6">
+                <button className="text-black border-b border-black pb-1">Grid View</button>
+                <button className="hover:text-black transition-colors">List View</button>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+            <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-x-8 md:gap-y-16">
               {filteredProducts.map(product => (
                 <ProductCard key={product.id} product={product} />
               ))}

@@ -65,14 +65,14 @@ const Home: React.FC = () => {
 
       {/* Filter Tabs */}
       <section className="pt-24 pb-12">
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col md:flex-row items-center justify-between border-b border-[#F5F1E9] pb-8">
-            <div className="flex space-x-12 mb-8 md:mb-0 overflow-x-auto no-scrollbar pb-2">
+            <div className="flex space-x-8 md:space-x-12 mb-8 md:mb-0 overflow-x-auto no-scrollbar pb-2 w-full md:w-auto">
               {tabs.map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`text-[10px] uppercase font-bold tracking-[0.3em] whitespace-nowrap transition-all duration-300 relative pb-4 
+                  className={`text-[9px] md:text-[10px] uppercase font-bold tracking-[0.3em] whitespace-nowrap transition-all duration-300 relative pb-4 
                     ${activeTab === tab ? 'text-black' : 'text-gray-400 hover:text-black'}`}
                 >
                   {tab}
@@ -80,17 +80,17 @@ const Home: React.FC = () => {
                 </button>
               ))}
             </div>
-            <div className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">
+            <div className="text-[9px] uppercase tracking-widest text-gray-400 font-bold">
               Found {filteredProducts.length} Premium Pieces
             </div>
           </div>
         </div>
       </section>
 
-      {/* Product Grid */}
+      {/* Product Grid - Updated to 2 columns on mobile/tablet */}
       <section className="pb-32">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-10">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-10">
             {filteredProducts.map(product => (
               <ProductCard key={product.id} product={product} />
             ))}
