@@ -22,32 +22,32 @@ const LoadingScreen: React.FC = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[1000] bg-[#FCFCFA] flex flex-col items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 z-[1000] bg-[#F7F3F0] flex flex-col items-center justify-center overflow-hidden">
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#B88E4B] opacity-[0.05] blur-[120px] rounded-full" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#8C7861] opacity-[0.05] blur-[120px] rounded-full" />
       </div>
 
       <div className="relative flex flex-col items-center justify-center">
         <div className="relative w-72 h-72 md:w-80 md:h-80 flex items-center justify-center">
           
-          <div className="absolute inset-0 rounded-full border border-black/5 bg-gradient-to-br from-white to-[#FDFBF7] p-1 shadow-sm">
-            <div className="w-full h-full rounded-full border border-[#B88E4B]/10" />
+          <div className="absolute inset-0 rounded-full border border-black/5 bg-gradient-to-br from-white to-[#E8E2D8] p-1 shadow-sm">
+            <div className="w-full h-full rounded-full border border-[#8C7861]/10" />
           </div>
 
           <div className="absolute inset-4 rounded-full bg-white shadow-inner flex items-center justify-center overflow-hidden">
-             <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_center,_#B88E4B_0%,_transparent_100%)]" />
+             <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_center,_#8C7861_0%,_transparent_100%)]" />
              
              <div className="z-10 text-center select-none pointer-events-none mb-16">
                 <h2 className="text-black/80 text-2xl md:text-3xl font-serif tracking-[0.3em] uppercase italic">
                   AEVO
                 </h2>
-                <div className="w-6 h-px bg-[#B88E4B]/40 mx-auto mt-2" />
+                <div className="w-6 h-px bg-[#8C7861]/40 mx-auto mt-2" />
              </div>
 
              {[...Array(12)].map((_, i) => (
                <div
                  key={i}
-                 className="absolute w-px bg-[#B88E4B]/30 origin-bottom"
+                 className="absolute w-px bg-[#8C7861]/30 origin-bottom"
                  style={{
                    height: i % 3 === 0 ? '12px' : '6px',
                    bottom: '50%',
@@ -68,16 +68,16 @@ const LoadingScreen: React.FC = () => {
               style={{ transform: `translateX(-50%) rotate(${340 + (progress * 0.5)}deg)` }}
             />
             <div 
-              className="absolute left-1/2 bottom-1/2 w-[1.5px] h-[38%] bg-[#B88E4B] origin-bottom"
+              className="absolute left-1/2 bottom-1/2 w-[1.5px] h-[38%] bg-[#8C7861] origin-bottom"
               style={{ transform: `translateX(-50%) rotate(${progress * 6}deg)` }}
             />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white border border-[#B88E4B]/40 z-30 shadow-sm" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white border border-[#8C7861]/40 z-30 shadow-sm" />
           </div>
 
           <svg className="absolute inset-0 w-full h-full -rotate-90 scale-[1.05]">
-            <circle cx="50%" cy="50%" r="48%" stroke="rgba(184, 142, 75, 0.05)" strokeWidth="1" fill="none" />
+            <circle cx="50%" cy="50%" r="48%" stroke="rgba(140, 120, 97, 0.05)" strokeWidth="1" fill="none" />
             <circle
-              cx="50%" cy="50%" r="48%" stroke="#B88E4B" strokeWidth="1" fill="none"
+              cx="50%" cy="50%" r="48%" stroke="#8C7861" strokeWidth="1" fill="none"
               strokeDasharray="100%" strokeDashoffset={`${100 - progress}%`} pathLength="100"
               className="transition-all duration-300 ease-linear"
             />
@@ -86,11 +86,11 @@ const LoadingScreen: React.FC = () => {
 
         <div className="mt-12 text-center space-y-4">
           <h3 className="text-black/30 text-[8px] font-black uppercase tracking-[0.8em] animate-pulse">
-            Precision Alignment
+            Mechanical Synthesis
           </h3>
           <div className="flex items-center justify-center space-x-3">
             <div className="h-px w-4 bg-black/10" />
-            <span className="text-[#B88E4B] text-[9px] font-bold tracking-[0.2em]">CALIBRATING {Math.round(progress)}%</span>
+            <span className="text-[#8C7861] text-[9px] font-bold tracking-[0.2em]">CALIBRATING {Math.round(progress)}%</span>
             <div className="h-px w-4 bg-black/10" />
           </div>
         </div>
