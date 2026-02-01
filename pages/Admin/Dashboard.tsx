@@ -2,11 +2,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useStore } from '../../store';
-import { ShoppingBag, UserIcon, Star, ChevronRight } from '../../components/Icons';
+import { ShoppingBag, UserIcon, Star, ChevronRight, TrendingUp } from '../../components/Icons';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 const AdminDashboard: React.FC = () => {
-  const { orders, products } = useStore();
+  const { orders, products, connectionStatus } = useStore();
 
   const totalSales = orders.reduce((acc, o) => acc + o.total_amount, 0);
   const totalOrders = orders.length;
@@ -22,60 +22,76 @@ const AdminDashboard: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-12 animate-fadeIn">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+    <div className="space-y-8 md:space-y-12 animate-fadeIn pb-20">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-black/[0.03] pb-8">
         <div>
-          <h1 className="text-3xl font-serif mb-2 italic">Atelier Insights</h1>
-          <p className="text-black/30 text-[9px] uppercase tracking-[0.6em] font-black">Performance Analytics</p>
+          <div className="flex items-center space-x-3 mb-2">
+            <h1 className="text-3xl md:text-4xl font-serif text-black/90 italic">Atelier Insights</h1>
+            <div className={`px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest border ${
+              connectionStatus === 'online' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-100'
+            }`}>
+              {connectionStatus}
+            </div>
+          </div>
+          <p className="text-[#A68E74] text-[9px] uppercase tracking-[0.5em] font-black">Global Performance Registry</p>
         </div>
-        <div className="flex space-x-4">
-          <Link to="/admin/products" className="text-black/40 px-6 py-3 rounded-full text-[9px] font-black uppercase tracking-widest border border-black/5 hover:bg-black/5 transition-all">Enroll Product</Link>
-          <button className="bg-black text-white px-8 py-3 rounded-full text-[9px] font-black uppercase tracking-widest shadow-xl hover:scale-105 transition-all">Download Report</button>
+        <div className="flex w-full md:w-auto space-x-4">
+          <Link to="/admin/products" className="flex-1 md:flex-none text-center bg-white border border-black/10 px-8 py-4 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-black/[0.02] transition-all">Vault Access</Link>
+          <button className="flex-1 md:flex-none bg-black text-white px-10 py-4 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-2xl hover:scale-105 transition-all">Export Ledger</button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {[
-          { label: 'Portfolio Val', val: `₹${totalSales.toLocaleString('en-IN')}`, icon: <Star />, color: 'text-black' },
-          { label: 'Commissions', val: totalOrders, icon: <ShoppingBag />, color: 'text-[#A68E74]' },
-          { label: 'Avg Ticket', val: `₹${totalOrders > 0 ? (totalSales / totalOrders).toLocaleString('en-IN', { maximumFractionDigits: 0 }) : 0}`, icon: <Star />, color: 'text-black' },
-          { label: 'Vault Count', val: totalProducts, icon: <UserIcon />, color: 'text-[#A68E74]' },
+          { label: 'Asset Value', val: `₹${totalSales.toLocaleString('en-IN')}`, icon: <TrendingUp className="w-4 h-4" />, color: 'text-[#A68E74]' },
+          { label: 'Commissions', val: totalOrders, icon: <ShoppingBag className="w-4 h-4" />, color: 'text-black/80' },
+          { label: 'Average Ticket', val: `₹${totalOrders > 0 ? (totalSales / totalOrders).toLocaleString('en-IN', { maximumFractionDigits: 0 }) : 0}`, icon: <Star className="w-4 h-4" />, color: 'text-[#A68E74]' },
+          { label: 'Vault Count', val: totalProducts, icon: <UserIcon className="w-4 h-4" />, color: 'text-black/80' },
         ].map((stat, i) => (
-          <div key={i} className="bg-white p-8 rounded-[2rem] border border-black/[0.04] shadow-sm hover:shadow-md transition-shadow">
+          <div key={i} className="bg-white p-6 md:p-8 rounded-[2rem] border border-black/[0.04] shadow-sm hover:shadow-lg transition-all">
             <div className="flex justify-between items-start mb-6">
-              <span className="text-[7px] uppercase tracking-[0.3em] text-black/20 font-black">{stat.label}</span>
-              <div className={`${stat.color} opacity-20`}>{stat.icon}</div>
+              <span className="text-[8px] uppercase tracking-[0.3em] text-black/40 font-black">{stat.label}</span>
+              <div className={`${stat.color} opacity-40`}>{stat.icon}</div>
             </div>
-            <p className="text-xl md:text-2xl font-light tracking-tighter text-black/80">{stat.val}</p>
+            <p className="text-xl md:text-2xl font-serif text-black/90 italic tracking-tighter">{stat.val}</p>
           </div>
         ))}
       </div>
 
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white p-10 rounded-[2.5rem] border border-black/[0.04] shadow-sm">
-          <h3 className="text-[8px] font-black uppercase tracking-[0.4em] text-black/20 mb-12">Capital Flow Projection</h3>
+        <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-black/[0.04] shadow-sm">
+          <div className="flex justify-between items-center mb-12">
+             <h3 className="text-[9px] font-black uppercase tracking-[0.5em] text-black/30">Valuation Trajectory</h3>
+             <span className="text-[8px] text-[#A68E74] font-bold uppercase tracking-widest bg-[#A68E74]/5 px-3 py-1 rounded-full">+12.4% vs L.M.</span>
+          </div>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.03)" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'rgba(0,0,0,0.2)' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'rgba(0,0,0,0.2)' }} />
-                <Tooltip cursor={{ fill: 'rgba(0,0,0,0.01)' }} contentStyle={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '1rem', fontSize: '10px' }} />
-                <Bar dataKey="sales" fill="#A68E74" radius={[6, 6, 0, 0]} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'rgba(0,0,0,0.4)', fontWeight: 700 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'rgba(0,0,0,0.4)', fontWeight: 700 }} />
+                <Tooltip cursor={{ fill: 'rgba(0,0,0,0.01)' }} contentStyle={{ backgroundColor: '#fff', border: 'none', borderRadius: '1rem', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', fontSize: '10px' }} />
+                <Bar dataKey="sales" fill="#A68E74" radius={[8, 8, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
-        <div className="bg-white p-10 rounded-[2.5rem] border border-black/[0.04] shadow-sm">
-          <h3 className="text-[8px] font-black uppercase tracking-[0.4em] text-black/20 mb-12">Acquisition Velocity</h3>
+
+        <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-black/[0.04] shadow-sm">
+           <div className="flex justify-between items-center mb-12">
+             <h3 className="text-[9px] font-black uppercase tracking-[0.5em] text-black/30">Acquisition Velocity</h3>
+             <span className="text-[8px] text-black/40 font-bold uppercase tracking-widest bg-black/5 px-3 py-1 rounded-full">Real-time Stream</span>
+          </div>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={data}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.03)" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'rgba(0,0,0,0.2)' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'rgba(0,0,0,0.2)' }} />
-                <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '1rem', fontSize: '10px' }} />
-                <Line type="monotone" dataKey="sales" stroke="#000" strokeWidth={1.5} dot={{ fill: '#A68E74', strokeWidth: 0, r: 3 }} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'rgba(0,0,0,0.4)', fontWeight: 700 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'rgba(0,0,0,0.4)', fontWeight: 700 }} />
+                <Tooltip contentStyle={{ backgroundColor: '#fff', border: 'none', borderRadius: '1rem', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', fontSize: '10px' }} />
+                <Line type="monotone" dataKey="sales" stroke="#000" strokeWidth={2.5} dot={{ fill: '#A68E74', strokeWidth: 0, r: 4 }} activeDot={{ r: 6, strokeWidth: 0 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
