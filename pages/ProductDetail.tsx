@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { Star, Share, ChevronLeft, ShoppingBag, Heart, Compass, Feather, Shield, Diamond } from '../components/Icons';
+import SEO from '../components/SEO';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,8 +21,40 @@ const ProductDetail: React.FC = () => {
     return icons[idx % icons.length] as React.ReactElement<{ className?: string }>;
   };
 
+  const productSchema = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": product.name,
+    "image": product.images,
+    "description": product.description,
+    "sku": product.id,
+    "brand": {
+      "@type": "Brand",
+      "name": "AEVO"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": window.location.href,
+      "priceCurrency": "INR",
+      "price": product.price,
+      "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "itemCondition": "https://schema.org/NewCondition"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": product.rating,
+      "reviewCount": product.reviews_count
+    }
+  };
+
   return (
     <div className="pt-24 pb-32 bg-[#FCFCFA]">
+      <SEO 
+        title={product.name} 
+        description={product.description.slice(0, 155) + "..."} 
+        schema={productSchema}
+      />
+
       <div className="container mx-auto px-6 max-w-7xl">
         <div className="flex items-center justify-between mb-12">
            <button onClick={() => navigate(-1)} className="text-black/30 hover:text-black flex items-center space-x-2 text-[10px] uppercase tracking-widest">
@@ -29,10 +62,14 @@ const ProductDetail: React.FC = () => {
              <span>Back</span>
            </button>
            <div className="flex space-x-6">
-              <button onClick={() => toggleWishlist(product.id)} className={`transition-colors ${isWishlisted ? 'text-[#8C7861]' : 'text-black/20'}`}>
+              <button 
+                onClick={() => toggleWishlist(product.id)} 
+                className={`transition-colors ${isWishlisted ? 'text-[#8C7861]' : 'text-black/20'}`}
+                aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+              >
                 <Heart fill={isWishlisted ? 'currentColor' : 'none'} className="w-5 h-5" />
               </button>
-              <button onClick={() => {}} className="text-black/20">
+              <button onClick={() => {}} className="text-black/20" aria-label="Share product">
                 <Share className="w-5 h-5" />
               </button>
            </div>
@@ -41,7 +78,7 @@ const ProductDetail: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
           <div className="space-y-6">
             <div className="aspect-[4/5] bg-[#FDFBF7] rounded-[2.5rem] overflow-hidden border border-black/5 relative group">
-              <img src={product.images[activeImage]} className="w-full h-full object-cover transition-transform duration-[3s] group-hover:scale-110 mix-blend-multiply opacity-90" />
+              <img src={product.images[activeImage]} alt={`${product.name} - View ${activeImage + 1}`} className="w-full h-full object-cover transition-transform duration-[3s] group-hover:scale-110 mix-blend-multiply opacity-90" />
               <div className="absolute bottom-6 right-6 bg-white/60 backdrop-blur-md px-4 py-2 rounded-full text-[9px] text-black/40 tracking-widest uppercase shadow-sm">
                 {activeImage + 1} / {product.images.length}
               </div>
@@ -52,8 +89,9 @@ const ProductDetail: React.FC = () => {
                   key={i} 
                   onClick={() => setActiveImage(i)}
                   className={`w-20 h-24 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${activeImage === i ? 'border-[#8C7861] opacity-100 shadow-lg' : 'border-transparent opacity-40 hover:opacity-100'}`}
+                  aria-label={`Switch to image ${i + 1}`}
                 >
-                  <img src={img} className="w-full h-full object-cover mix-blend-multiply" />
+                  <img src={img} alt={`${product.name} thumbnail ${i + 1}`} className="w-full h-full object-cover mix-blend-multiply" />
                 </button>
               ))}
             </div>
@@ -98,14 +136,14 @@ const ProductDetail: React.FC = () => {
         {/* Anatomy of Excellence Section */}
         {product.key_features && product.key_features.length > 0 && (
           <div className="mt-40 pt-32 border-t border-black/5 text-center">
-            <span className="text-[#8C7861] uppercase text-[10px] font-black tracking-[0.8em] mb-12 block">Anatomy of Excellence</span>
+            <h2 className="text-[#8C7861] uppercase text-[10px] font-black tracking-[0.8em] mb-12 block">Anatomy of Excellence</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 text-left">
                 {product.key_features.map((item, idx) => (
                   <div key={idx} className="p-12 bg-white rounded-[3rem] border border-black/5 space-y-6 group hover:border-[#8C7861]/30 transition-all shadow-sm">
                     <div className="w-16 h-16 bg-[#FDFBF7] rounded-2xl flex items-center justify-center text-[#8C7861] group-hover:scale-110 transition-transform">
                       {React.cloneElement(getIcon(idx), { className: 'w-8 h-8' })}
                     </div>
-                    <h4 className="text-black/80 text-2xl font-serif italic">{item.title}</h4>
+                    <h3 className="text-black/80 text-2xl font-serif italic">{item.title}</h3>
                     <p className="text-black/40 text-sm italic font-light leading-relaxed">{item.description}</p>
                   </div>
                 ))}

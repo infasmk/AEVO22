@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useStore } from '../store';
 import ProductCard from '../components/ProductCard';
+import SEO from '../components/SEO';
 
 const Shop: React.FC = () => {
   const { products } = useStore();
@@ -29,6 +30,10 @@ const Shop: React.FC = () => {
 
   return (
     <div className="pt-32 pb-32 bg-[#FCFCFA]">
+      <SEO 
+        title="The Collection | Shop Luxury Clocks" 
+        description="Browse the AEVO registry of luxury clocks, featuring smart connectivity, minimalist wall designs, and high-end artisanal timepieces." 
+      />
       <div className="container mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-20 md:mb-32">
@@ -42,7 +47,7 @@ const Shop: React.FC = () => {
           {/* Sidebar Filters */}
           <aside className="w-full lg:w-64 space-y-12">
             <div className="space-y-6">
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#8C7861] border-b border-black/5 pb-4">Collections</h3>
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#8C7861] border-b border-black/5 pb-4">Collections</h2>
               <ul className="space-y-4">
                 <li>
                   <button 
@@ -66,11 +71,12 @@ const Shop: React.FC = () => {
             </div>
 
             <div className="space-y-6">
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#8C7861] border-b border-black/5 pb-4">Sort Protocol</h3>
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#8C7861] border-b border-black/5 pb-4">Sort Protocol</h2>
               <select 
                 value={sortBy} 
                 onChange={(e) => setSortBy(e.target.value)}
                 className="w-full bg-white text-black/60 text-[10px] uppercase tracking-widest border border-black/10 rounded-lg p-3 focus:outline-none focus:border-[#8C7861]"
+                aria-label="Sort products"
               >
                 <option value="latest">Latest Acquisitions</option>
                 <option value="price-low">Price: Ascending</option>
@@ -80,7 +86,7 @@ const Shop: React.FC = () => {
             </div>
 
             <div className="p-8 bg-[#FDFBF7] rounded-3xl border border-black/5 space-y-4">
-              <h4 className="font-serif text-black/80 text-lg">Concierge</h4>
+              <h3 className="font-serif text-black/80 text-lg">Concierge</h3>
               <p className="text-[10px] text-black/30 uppercase tracking-widest leading-relaxed">Private viewing requests for the Luxury Series are handled via our artisans in Geneva.</p>
               <button className="w-full bg-black text-white py-4 rounded-full text-[9px] uppercase font-black tracking-widest hover:scale-105 transition-transform">Book Viewing</button>
             </div>
@@ -101,7 +107,7 @@ const Shop: React.FC = () => {
             
             {filteredProducts.length === 0 && (
               <div className="text-center py-40 border border-dashed border-black/10 rounded-[3rem]">
-                <h3 className="text-2xl font-serif text-black/60 mb-4">Archive Empty</h3>
+                <h2 className="text-2xl font-serif text-black/60 mb-4">Archive Empty</h2>
                 <p className="text-black/30 text-sm italic mb-8">Adjust your filtration criteria to reveal more instruments.</p>
                 <button onClick={() => {setSearchParams({}); setSortBy('latest');}} className="text-[#8C7861] text-[9px] uppercase font-bold tracking-[0.4em] border-b border-[#8C7861] pb-2">Reset Protocols</button>
               </div>

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import ProductCard from '../components/ProductCard';
+import SEO from '../components/SEO';
 import { ProductTag } from '../types';
 
 const Home: React.FC = () => {
@@ -27,6 +28,20 @@ const Home: React.FC = () => {
 
   const tabs: (ProductTag | 'All')[] = ['All', 'Latest', 'Best Seller', 'Offer'];
 
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "AEVO Atelier",
+    "url": "https://aevo.luxury",
+    "logo": "https://aevo.luxury/logo.png",
+    "description": "Artisanal Geneva-born atelier crafting luxury clocks and instruments of time.",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+41-22-000-0000",
+      "contactType": "customer service"
+    }
+  };
+
   if (isLoading && products.length === 0) {
     return (
       <div className="min-h-screen bg-[#FCFCFA] flex items-center justify-center">
@@ -37,6 +52,12 @@ const Home: React.FC = () => {
 
   return (
     <main className="min-h-screen bg-[#FCFCFA]">
+      <SEO 
+        title="Artisanal Timepieces & Luxury Clocks" 
+        description="AEVO Atelier offers a curated collection of artisanal timepieces, Geneva-born engineering, and minimalist luxury wall clocks."
+        schema={organizationSchema}
+      />
+
       {/* Hero Showcase */}
       <section className="relative h-[85vh] w-full overflow-hidden bg-[#FAF8F6]">
         {banners.length > 0 ? banners.map((banner, index) => (
@@ -75,6 +96,7 @@ const Home: React.FC = () => {
                 key={i} 
                 onClick={() => setActiveBanner(i)}
                 className={`h-0.5 transition-all duration-700 ${i === activeBanner ? 'w-10 bg-[#A68E74]' : 'w-4 bg-black/10'}`}
+                aria-label={`Go to slide ${i + 1}`}
               />
             ))}
           </div>
@@ -85,6 +107,7 @@ const Home: React.FC = () => {
       <section className="py-20 md:py-32">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center justify-between mb-16 space-y-8 md:space-y-0">
+            <h2 className="text-2xl font-serif text-black/80">Curated Registry</h2>
             <div className="flex space-x-8 md:space-x-12 overflow-x-auto no-scrollbar w-full md:w-auto pb-4 md:pb-0">
               {tabs.map(tab => (
                 <button
