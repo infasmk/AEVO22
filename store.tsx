@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Product, Banner, Order, Category } from './types';
 import { supabase } from './supabase';
 import { INITIAL_PRODUCTS, INITIAL_BANNERS, MOCK_ORDERS } from './constants';
@@ -11,56 +11,35 @@ interface AppState {
   categories: Category[];
   wishlist: string[];
   isLoading: boolean;
+  connectionStatus: 'online' | 'offline' | 'connecting';
   
   fetchData: () => Promise<void>;
-  upsertProduct: (p: Product) => Promise<void>;
-  deleteProduct: (id: string) => Promise<void>;
-  upsertBanner: (b: Banner) => Promise<void>;
-  deleteBanner: (id: string) => Promise<void>;
-  upsertCategory: (c: Category) => Promise<void>;
-  deleteCategory: (id: string) => Promise<void>;
-  updateOrderStatus: (id: string, status: Order['status']) => Promise<void>;
+  upsertProduct: (p: Product) => Promise<boolean>;
+  deleteProduct: (id: string) => Promise<boolean>;
+  upsertBanner: (b: Banner) => Promise<boolean>;
+  deleteBanner: (id: string) => Promise<boolean>;
+  upsertCategory: (c: Category) => Promise<boolean>;
+  deleteCategory: (id: string) => Promise<boolean>;
+  updateOrderStatus: (id: string, status: Order['status']) => Promise<boolean>;
   toggleWishlist: (id: string) => void;
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'aevo_vault_v2';
+const LOCAL_STORAGE_KEY = 'aevo_vault_v3';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [products, setProducts] = useState<Product[]>(() => {
-    const cached = localStorage.getItem(`${LOCAL_STORAGE_KEY}_products`);
-    return cached ? JSON.parse(cached) : INITIAL_PRODUCTS;
-  });
-  const [banners, setBanners] = useState<Banner[]>(() => {
-    const cached = localStorage.getItem(`${LOCAL_STORAGE_KEY}_banners`);
-    return cached ? JSON.parse(cached) : INITIAL_BANNERS;
-  });
-  const [orders, setOrders] = useState<Order[]>(() => {
-    const cached = localStorage.getItem(`${LOCAL_STORAGE_KEY}_orders`);
-    return cached ? JSON.parse(cached) : MOCK_ORDERS;
-  });
-  const [categories, setCategories] = useState<Category[]>(() => {
-    const cached = localStorage.getItem(`${LOCAL_STORAGE_KEY}_categories`);
-    return cached ? JSON.parse(cached) : [
-      { id: '1', name: 'Luxury Series' },
-      { id: '2', name: 'Wall Clocks' },
-      { id: '3', name: 'Men' },
-      { id: '4', name: 'Women' },
-      { id: '5', name: 'Smart Clocks' }
-    ];
-  });
-  
+  const [products, setProducts] = useState<Product[]>([]);
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'connecting'>('connecting');
 
-  // Persistence hooks
-  useEffect(() => localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(products)), [products]);
-  useEffect(() => localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(banners)), [banners]);
-  useEffect(() => localStorage.setItem(`${LOCAL_STORAGE_KEY}_orders`, JSON.stringify(orders)), [orders]);
-  useEffect(() => localStorage.setItem(`${LOCAL_STORAGE_KEY}_categories`, JSON.stringify(categories)), [categories]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setConnectionStatus('connecting');
     try {
       const [pRes, bRes, oRes, cRes] = await Promise.all([
         supabase.from('products').select('*').order('created_at', { ascending: false }),
@@ -69,64 +48,113 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabase.from('categories').select('*').order('name', { ascending: true })
       ]);
 
-      if (pRes.data && pRes.data.length > 0) setProducts(pRes.data);
-      if (bRes.data && bRes.data.length > 0) setBanners(bRes.data);
-      if (oRes.data && oRes.data.length > 0) setOrders(oRes.data);
-      if (cRes.data && cRes.data.length > 0) setCategories(cRes.data);
+      if (pRes.error) throw pRes.error;
+
+      setProducts(pRes.data && pRes.data.length > 0 ? pRes.data : INITIAL_PRODUCTS);
+      setBanners(bRes.data && bRes.data.length > 0 ? bRes.data : INITIAL_BANNERS);
+      setOrders(oRes.data && oRes.data.length > 0 ? oRes.data : MOCK_ORDERS);
+      setCategories(cRes.data && cRes.data.length > 0 ? cRes.data : [
+        { id: '1', name: 'Luxury Series' },
+        { id: '2', name: 'Wall Clocks' },
+        { id: '3', name: 'Men' },
+        { id: '4', name: 'Women' }
+      ]);
+      setConnectionStatus('online');
     } catch (err) {
-      console.warn("AEVO: Database sync unavailable, using local vault.");
+      console.warn("AEVO: Vault sync unavailable, using local cache fallback.", err);
+      setConnectionStatus('offline');
+      // Fallback to local storage if DB fails
+      const cachedProducts = localStorage.getItem(`${LOCAL_STORAGE_KEY}_products`);
+      if (cachedProducts) setProducts(JSON.parse(cachedProducts));
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
+
+  // Sync state to local storage for offline endurance
+  useEffect(() => {
+    if (products.length > 0) localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(products));
+    if (banners.length > 0) localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(banners));
+    if (categories.length > 0) localStorage.setItem(`${LOCAL_STORAGE_KEY}_categories`, JSON.stringify(categories));
+  }, [products, banners, categories]);
 
   const upsertProduct = async (p: Product) => {
-    setProducts(prev => {
-      const exists = prev.find(item => item.id === p.id);
-      if (exists) return prev.map(item => item.id === p.id ? p : item);
-      return [p, ...prev];
-    });
-    try { await supabase.from('products').upsert(p); } catch (e) {}
+    const { error } = await supabase.from('products').upsert(p);
+    if (!error) {
+      setProducts(prev => {
+        const exists = prev.find(item => item.id === p.id);
+        if (exists) return prev.map(item => item.id === p.id ? p : item);
+        return [p, ...prev];
+      });
+      return true;
+    }
+    return false;
   };
 
   const deleteProduct = async (id: string) => {
-    setProducts(prev => prev.filter(p => p.id !== id));
-    try { await supabase.from('products').delete().eq('id', id); } catch (e) {}
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    if (!error) {
+      setProducts(prev => prev.filter(p => p.id !== id));
+      return true;
+    }
+    return false;
   };
 
   const upsertBanner = async (b: Banner) => {
-    setBanners(prev => {
-      const exists = prev.find(item => item.id === b.id);
-      if (exists) return prev.map(item => item.id === b.id ? b : item);
-      return [...prev, b];
-    });
-    try { await supabase.from('banners').upsert(b); } catch (e) {}
+    const { error } = await supabase.from('banners').upsert(b);
+    if (!error) {
+      setBanners(prev => {
+        const exists = prev.find(item => item.id === b.id);
+        if (exists) return prev.map(item => item.id === b.id ? b : item);
+        return [...prev, b];
+      });
+      return true;
+    }
+    return false;
   };
 
   const deleteBanner = async (id: string) => {
-    setBanners(prev => prev.filter(b => b.id !== id));
-    try { await supabase.from('banners').delete().eq('id', id); } catch (e) {}
+    const { error } = await supabase.from('banners').delete().eq('id', id);
+    if (!error) {
+      setBanners(prev => prev.filter(b => b.id !== id));
+      return true;
+    }
+    return false;
   };
 
   const upsertCategory = async (c: Category) => {
-    setCategories(prev => {
-      const exists = prev.find(item => item.id === c.id);
-      if (exists) return prev.map(item => item.id === c.id ? c : item);
-      return [...prev, c];
-    });
-    try { await supabase.from('categories').upsert(c); } catch (e) {}
+    const { error } = await supabase.from('categories').upsert(c);
+    if (!error) {
+      setCategories(prev => {
+        const exists = prev.find(item => item.id === c.id);
+        if (exists) return prev.map(item => item.id === c.id ? c : item);
+        return [...prev, c];
+      });
+      return true;
+    }
+    return false;
   };
 
   const deleteCategory = async (id: string) => {
-    setCategories(prev => prev.filter(c => c.id !== id));
-    try { await supabase.from('categories').delete().eq('id', id); } catch (e) {}
+    const { error } = await supabase.from('categories').delete().eq('id', id);
+    if (!error) {
+      setCategories(prev => prev.filter(c => c.id !== id));
+      return true;
+    }
+    return false;
   };
 
   const updateOrderStatus = async (id: string, status: Order['status']) => {
-    setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
-    try { await supabase.from('orders').update({ status }).eq('id', id); } catch (e) {}
+    const { error } = await supabase.from('orders').update({ status }).eq('id', id);
+    if (!error) {
+      setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
+      return true;
+    }
+    return false;
   };
 
   const toggleWishlist = (id: string) => {
@@ -135,7 +163,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <AppContext.Provider value={{
-      products, banners, orders, wishlist, isLoading, categories,
+      products, banners, orders, wishlist, isLoading, categories, connectionStatus,
       fetchData, upsertProduct, deleteProduct, upsertBanner, deleteBanner, 
       upsertCategory, deleteCategory, updateOrderStatus, toggleWishlist
     }}>

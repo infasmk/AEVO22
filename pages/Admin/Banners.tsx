@@ -3,11 +3,15 @@ import React, { useState } from 'react';
 import { useStore } from '../../store';
 import { Banner } from '../../types';
 import { X, Search } from '../../components/Icons';
+import ConfirmDialog from '../../components/ConfirmDialog';
+import Toast from '../../components/Toast';
 
 const AdminBanners: React.FC = () => {
   const { banners, upsertBanner, deleteBanner } = useStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
+  const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+  const [confirm, setConfirm] = useState<{ title: string, message: string, onConfirm: () => void } | null>(null);
 
   const [formData, setFormData] = useState<Partial<Banner>>({
     title: '',
@@ -30,15 +34,33 @@ const AdminBanners: React.FC = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Construct a complete Banner object ensuring the required 'id' is present.
-    // Use existing ID if editing, otherwise generate a new one.
     const finalBanner = {
       ...formData,
       id: editingBanner ? editingBanner.id : Math.random().toString(36).substr(2, 9)
     } as Banner;
     
-    await upsertBanner(finalBanner);
-    setIsModalOpen(false);
+    const success = await upsertBanner(finalBanner);
+    if (success) {
+      setToast({ message: editingBanner ? "Hero Asset Refined" : "New Hero Asset Launched", type: 'success' });
+      setIsModalOpen(false);
+    } else {
+      setToast({ message: "Sync Protocol Failed", type: 'error' });
+    }
+  };
+
+  const triggerDelete = (id: string, title: string) => {
+    setConfirm({
+      title: "Archive Hero Asset",
+      message: `Are you certain you wish to remove "${title}" from the cinematic showcase? This asset will be purged from the registry.`,
+      onConfirm: async () => {
+        const success = await deleteBanner(id);
+        if (success) {
+          setToast({ message: "Asset Purged Successfully", type: 'success' });
+        } else {
+          setToast({ message: "Purge Request Failed", type: 'error' });
+        }
+      }
+    });
   };
 
   return (
@@ -52,7 +74,7 @@ const AdminBanners: React.FC = () => {
           onClick={() => openModal()}
           className="bg-[#C5A059] text-white px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-2xl hover:scale-105 transition-all"
         >
-          Add Hero Banner
+          Enroll Hero Asset
         </button>
       </div>
 
@@ -71,7 +93,7 @@ const AdminBanners: React.FC = () => {
               
               <div className="flex space-x-4">
                 <button onClick={() => openModal(banner)} className="text-[9px] uppercase tracking-widest font-bold border-b border-[#C5A059] pb-1 hover:text-[#C5A059] transition-all">Edit Asset</button>
-                <button onClick={() => deleteBanner(banner.id)} className="text-[9px] uppercase tracking-widest font-bold border-b border-red-500/30 pb-1 text-red-400 hover:text-red-500 transition-all">Archive</button>
+                <button onClick={() => triggerDelete(banner.id, banner.title)} className="text-[9px] uppercase tracking-widest font-bold border-b border-red-500/30 pb-1 text-red-400 hover:text-red-500 transition-all">Archive</button>
               </div>
             </div>
           </div>
@@ -116,13 +138,24 @@ const AdminBanners: React.FC = () => {
                 </div>
               </div>
               <div className="pt-8 border-t border-white/5 flex justify-end space-x-6">
-                 <button type="button" onClick={() => setIsModalOpen(false)} className="text-[10px] uppercase tracking-widest font-bold opacity-40">Cancel</button>
-                 <button type="submit" className="bg-[#C5A059] text-white px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest">Publish Changes</button>
+                 <button type="button" onClick={() => setIsModalOpen(false)} className="text-[10px] uppercase tracking-widest font-bold opacity-40">Discard</button>
+                 <button type="submit" className="bg-[#C5A059] text-white px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest">Enroll Asset</button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {confirm && (
+        <ConfirmDialog
+          isOpen={!!confirm}
+          title={confirm.title}
+          message={confirm.message}
+          onConfirm={confirm.onConfirm}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };

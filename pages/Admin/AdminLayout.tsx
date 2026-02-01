@@ -1,11 +1,13 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
+import { useStore } from '../../store';
 import { ShoppingBag, Star, UserIcon, Shield, Menu, X } from '../../components/Icons';
 
 const AdminLayout: React.FC = () => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { connectionStatus } = useStore();
 
   const links = [
     { name: 'Dashboard', path: '/admin', icon: <Star className="w-4 h-4" /> },
@@ -46,8 +48,22 @@ const AdminLayout: React.FC = () => {
           ))}
         </nav>
 
-        <div className="p-10 border-t border-white/5">
-           <Link to="/" className="text-white/20 text-[8px] uppercase tracking-[0.4em] font-black hover:text-[#C5A059] transition-colors">Return to Site</Link>
+        {/* Connection Status Indicator */}
+        <div className="p-10 border-t border-white/5 space-y-6">
+           <div className="flex items-center space-x-3">
+              <div className="relative flex h-2 w-2">
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                  connectionStatus === 'online' ? 'bg-emerald-400' : connectionStatus === 'connecting' ? 'bg-amber-400' : 'bg-red-400'
+                }`}></span>
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${
+                  connectionStatus === 'online' ? 'bg-emerald-500' : connectionStatus === 'connecting' ? 'bg-amber-500' : 'bg-red-500'
+                }`}></span>
+              </div>
+              <span className="text-[8px] uppercase tracking-widest font-black text-white/30">
+                {connectionStatus === 'online' ? 'Vault Linked' : connectionStatus === 'connecting' ? 'Syncing Vault' : 'Vault Offline'}
+              </span>
+           </div>
+           <Link to="/" className="text-white/20 text-[8px] uppercase tracking-[0.4em] font-black hover:text-[#C5A059] transition-colors block">Return to Site</Link>
         </div>
       </aside>
 
