@@ -61,6 +61,10 @@ const ProductDetail: React.FC = () => {
   };
 
   const handleBuyNow = () => {
+    if (product.stock === 0) {
+      alert("This piece is currently held in our archives (Sold Out). Please contact our concierge to be notified of future releases.");
+      return;
+    }
     alert(`Acquisition request received for the ${product.name}. Our White-Glove service team will contact you within 24 hours to arrange secure delivery and payment.`);
   };
 
@@ -68,6 +72,14 @@ const ProductDetail: React.FC = () => {
     const strapPrice = strapOptions.find(s => s.name === selectedStrap)?.price || 0;
     return product.price + strapPrice;
   };
+
+  const getStockStatus = () => {
+    if (product.stock === 0) return { label: 'Piece Archived (Sold Out)', color: 'text-red-500', sub: 'Waitlist Open', dot: 'bg-red-500' };
+    if (product.stock <= 5) return { label: 'Limited Scarcity', color: 'text-[#C5A059]', sub: `Only ${product.stock} pieces remaining`, dot: 'bg-[#C5A059]' };
+    return { label: 'In the Vault (In Stock)', color: 'text-emerald-600', sub: 'Ready for immediate dispatch', dot: 'bg-emerald-600' };
+  };
+
+  const stockStatus = getStockStatus();
 
   return (
     <div className="pt-32 pb-20 bg-[#FDFBF7]">
@@ -180,6 +192,15 @@ const ProductDetail: React.FC = () => {
                  </div>
                </div>
 
+               {/* Stock & Scarcity Indicator */}
+               <div className="flex items-center space-x-6 py-4 px-8 bg-white border border-[#F5F1E9] rounded-3xl shadow-sm animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+                 <div className={`w-3 h-3 rounded-full ${stockStatus.dot} animate-pulse shadow-lg`} />
+                 <div>
+                   <p className={`text-[10px] font-bold uppercase tracking-[0.3em] ${stockStatus.color}`}>{stockStatus.label}</p>
+                   <p className="text-[9px] text-gray-400 uppercase tracking-[0.2em] font-medium">{stockStatus.sub}</p>
+                 </div>
+               </div>
+
                {/* Investment Summary */}
                <div className={`p-8 bg-white border border-[#F5F1E9] rounded-[2.5rem] transition-all duration-500 ${isConfiguring ? 'scale-[1.02] shadow-xl' : 'shadow-sm'}`}>
                   <div className="flex justify-between items-baseline">
@@ -195,10 +216,15 @@ const ProductDetail: React.FC = () => {
                  <div className="flex flex-col gap-4">
                    <button 
                       onClick={handleBuyNow}
-                      className="w-full py-8 rounded-[2rem] uppercase text-[11px] font-bold tracking-[0.6em] transition-all duration-700 flex items-center justify-center space-x-6 shadow-2xl bg-[#2C2A28] text-white hover:bg-[#C5A059] group"
+                      disabled={product.stock === 0}
+                      className={`w-full py-8 rounded-[2rem] uppercase text-[11px] font-bold tracking-[0.6em] transition-all duration-700 flex items-center justify-center space-x-6 shadow-2xl group ${
+                        product.stock === 0 
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 shadow-none' 
+                          : 'bg-[#2C2A28] text-white hover:bg-[#C5A059]'
+                      }`}
                    >
                      <ShoppingBag className="w-6 h-6 transition-transform duration-700 group-hover:scale-125" />
-                     <span>Acquire Piece Now</span>
+                     <span>{product.stock === 0 ? 'Waitlist for Re-release' : 'Acquire Piece Now'}</span>
                    </button>
                  </div>
                  <p className="text-center mt-6 text-[9px] uppercase tracking-[0.3em] text-gray-400 font-bold">
