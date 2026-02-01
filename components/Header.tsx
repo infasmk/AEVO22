@@ -74,7 +74,7 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Enhanced Mobile Menu Overlay */}
+      {/* Enhanced Mobile Menu Overlay - Added invisible and pointer-events-none to fix click interference */}
       <div 
         className={`fixed inset-0 z-[60] bg-[#FDFBF7] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${
           mobileMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 invisible pointer-events-none'

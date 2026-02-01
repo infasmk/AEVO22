@@ -275,7 +275,7 @@ const ProductDetail: React.FC = () => {
           </div>
         </section>
 
-        {/* ENHANCED: Acquire Piece Section - Rectangle Button Updated */}
+        {/* ENHANCED: Acquire Piece Section - Updated to sharp rectangle layout */}
         <section className="mb-40 animate-fadeInUp">
           <div className="relative overflow-hidden bg-[#1A1918] rounded-[4rem] shadow-[0_100px_150px_-40px_rgba(0,0,0,0.6)] group">
             {/* Visual Flair Elements */}
@@ -335,6 +335,7 @@ const ProductDetail: React.FC = () => {
                   </div>
 
                   <div className="relative group/btn w-full">
+                    {/* BUTTON UPDATED: rounded-none for sharp rectangle aesthetic */}
                     <button 
                       onClick={handleBuyNow}
                       disabled={product.stock === 0}
@@ -347,7 +348,7 @@ const ProductDetail: React.FC = () => {
                       <ShoppingBag className="w-7 h-7 transition-transform duration-700 group-hover/btn:scale-125" />
                       <span>{product.stock === 0 ? 'Waitlist Open' : 'Secure This Piece'}</span>
                     </button>
-                    {/* Shadow pulse effect */}
+                    {/* Shadow pulse effect - updated to rounded-none */}
                     <div className="absolute inset-0 bg-[#C5A059] rounded-none blur-[40px] opacity-0 group-hover/btn:opacity-20 transition-opacity duration-700" />
                   </div>
 

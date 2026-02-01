@@ -41,10 +41,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Floating Tag */}
-      <div className="absolute top-8 left-8 z-20 transition-all duration-1000 ease-out opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0">
+      {/* Floating Tag - Removed opacity-0/hover-only classes to make tag always visible */}
+      <div className="absolute top-8 left-8 z-20">
         {product.tag !== 'None' && (
-          <span className="bg-white/95 backdrop-blur-xl text-[#2C2A28] text-[8px] px-5 py-2.5 uppercase tracking-[0.3em] font-extrabold rounded-full shadow-2xl border border-black/5 block">
+          <span className="bg-white/95 backdrop-blur-xl text-[#2C2A28] text-[8px] px-5 py-2.5 uppercase tracking-[0.3em] font-extrabold rounded-full shadow-2xl border border-black/5 block transition-all duration-700 group-hover:scale-110">
             {product.tag}
           </span>
         )}
