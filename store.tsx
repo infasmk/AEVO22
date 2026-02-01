@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { Product, Banner, Order, Category } from './types';
 import { supabase } from './supabase';
 import { INITIAL_PRODUCTS, INITIAL_BANNERS, MOCK_ORDERS } from './constants';
@@ -26,7 +26,7 @@ interface AppState {
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'aevo_vault_v4';
+const LOCAL_STORAGE_KEY = 'aevo_vault_v5';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -36,8 +36,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'connecting'>('connecting');
+  
+  // Track if we have performed a local write to prevent fetchData from overwriting fresh state
+  const lastWriteTime = useRef<number>(0);
 
   const fetchData = useCallback(async () => {
+    // If we just wrote data locally in the last 2 seconds, don't overwrite with (potentially stale) server data
+    if (Date.now() - lastWriteTime.current < 2000) return;
+
     setIsLoading(true);
     setConnectionStatus('connecting');
     try {
@@ -66,13 +72,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCategories(finalCategories);
       setConnectionStatus('online');
 
-      // Update local storage for immediate future refreshes
+      // Update local storage
       localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(finalProducts));
       localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(finalBanners));
       localStorage.setItem(`${LOCAL_STORAGE_KEY}_categories`, JSON.stringify(finalCategories));
 
     } catch (err) {
-      console.warn("AEVO: Vault sync delayed, relying on local archive.", err);
+      console.warn("AEVO: Vault sync delayed. Using local archive.", err);
       setConnectionStatus('offline');
       
       const cachedProducts = localStorage.getItem(`${LOCAL_STORAGE_KEY}_products`);
@@ -95,41 +101,58 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [fetchData]);
 
   const upsertProduct = async (p: Product) => {
-    // 1. Update UI Instantly (Optimistic Update)
+    lastWriteTime.current = Date.now();
+    
+    // 1. Optimistic UI Update (Immediate response on all pages)
     setProducts(prev => {
       const exists = prev.find(item => item.id === p.id);
-      let newProducts;
-      if (exists) newProducts = prev.map(item => item.id === p.id ? p : item);
-      else newProducts = [p, ...prev];
+      const newProducts = exists 
+        ? prev.map(item => item.id === p.id ? p : item)
+        : [p, ...prev];
       localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(newProducts));
       return newProducts;
     });
 
-    // 2. Persist to DB
-    const { error } = await supabase.from('products').upsert(p);
-    if (error) {
-      console.error("Supabase sync failed, item stored in local archive only.", error);
+    // 2. Background Persistence
+    try {
+      const { error } = await supabase.from('products').upsert(p);
+      if (error) {
+        console.error("Supabase Error [Product Upsert]:", error.message, error.details);
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error("Critical Connection Error:", err);
       return false;
     }
-    return true;
   };
 
   const deleteProduct = async (id: string) => {
+    lastWriteTime.current = Date.now();
+    
     setProducts(prev => {
       const filtered = prev.filter(p => p.id !== id);
       localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(filtered));
       return filtered;
     });
-    const { error } = await supabase.from('products').delete().eq('id', id);
-    return !error;
+
+    try {
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) {
+        console.error("Supabase Error [Product Delete]:", error.message);
+        return false;
+      }
+      return true;
+    } catch (err) {
+      return false;
+    }
   };
 
   const upsertBanner = async (b: Banner) => {
+    lastWriteTime.current = Date.now();
     setBanners(prev => {
       const exists = prev.find(item => item.id === b.id);
-      let newBanners;
-      if (exists) newBanners = prev.map(item => item.id === b.id ? b : item);
-      else newBanners = [...prev, b];
+      const newBanners = exists ? prev.map(item => item.id === b.id ? b : item) : [...prev, b];
       localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(newBanners));
       return newBanners;
     });
@@ -138,6 +161,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteBanner = async (id: string) => {
+    lastWriteTime.current = Date.now();
     setBanners(prev => {
       const filtered = prev.filter(b => b.id !== id);
       localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(filtered));
@@ -148,19 +172,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const upsertCategory = async (c: Category) => {
+    lastWriteTime.current = Date.now();
     setCategories(prev => {
       const exists = prev.find(item => item.id === c.id);
-      let newCats;
-      if (exists) newCats = prev.map(item => item.id === c.id ? c : item);
-      else newCats = [...prev, c];
+      const newCats = exists ? prev.map(item => item.id === c.id ? c : item) : [...prev, c];
       localStorage.setItem(`${LOCAL_STORAGE_KEY}_categories`, JSON.stringify(newCats));
       return newCats;
     });
     const { error } = await supabase.from('categories').upsert(c);
+    if (error) console.error("Supabase Error [Category Upsert]:", error.message);
     return !error;
   };
 
   const deleteCategory = async (id: string) => {
+    lastWriteTime.current = Date.now();
     setCategories(prev => {
       const filtered = prev.filter(c => c.id !== id);
       localStorage.setItem(`${LOCAL_STORAGE_KEY}_categories`, JSON.stringify(filtered));
@@ -180,7 +205,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const toggleWishlist = (id: string) => {
-    setWishlist(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
+    setWishlist(prev => {
+      const updated = prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id];
+      localStorage.setItem(`${LOCAL_STORAGE_KEY}_wishlist`, JSON.stringify(updated));
+      return updated;
+    });
   };
 
   return (

@@ -42,6 +42,7 @@ const Home: React.FC = () => {
     }
   };
 
+  // Only show spin loader if we have NO products at all
   if (isLoading && products.length === 0) {
     return (
       <div className="min-h-screen bg-[#FCFCFA] flex items-center justify-center">
@@ -86,7 +87,11 @@ const Home: React.FC = () => {
               </button>
             </div>
           </div>
-        )) : null}
+        )) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-[#FDFBF7]">
+            <span className="font-serif italic text-black/20 text-xl">Atelier Gallery Loading...</span>
+          </div>
+        )}
         
         {/* Indicators */}
         {banners.length > 1 && (
@@ -103,7 +108,7 @@ const Home: React.FC = () => {
         )}
       </section>
 
-      {/* Grid Showcase - 2 Column Strictly */}
+      {/* Grid Showcase */}
       <section className="py-20 md:py-32">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center justify-between mb-16 space-y-8 md:space-y-0">
@@ -123,12 +128,17 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          {/* Locked 2-column for mobile "post" aesthetic */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-10">
             {filteredProducts.map((product, idx) => (
               <ProductCard key={product.id} product={product} index={idx} />
             ))}
           </div>
+
+          {filteredProducts.length === 0 && !isLoading && (
+            <div className="py-20 text-center">
+              <p className="text-black/20 font-serif italic text-lg">No pieces currently listed in this category.</p>
+            </div>
+          )}
         </div>
       </section>
       
