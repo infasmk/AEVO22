@@ -19,8 +19,9 @@ const Wishlist: React.FC = () => {
 
         {wishlistedProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
-            {wishlistedProducts.map(product => (
-              <ProductCard key={product.id} product={product} />
+            {/* Fix: Added missing required index prop */}
+            {wishlistedProducts.map((product, idx) => (
+              <ProductCard key={product.id} product={product} index={idx} />
             ))}
           </div>
         ) : (

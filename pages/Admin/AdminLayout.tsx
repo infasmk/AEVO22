@@ -17,29 +17,29 @@ const AdminLayout: React.FC = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#0F0F0F] text-white">
+    <div className="flex min-h-screen bg-[#FCFCFA] text-black">
       {/* Mobile Top Bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-[#1A1918] border-b border-white/5 z-[110] flex items-center justify-between px-6">
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-black/5 z-[110] flex items-center justify-between px-6">
          <span className="font-serif text-xl tracking-tighter">AEVO Atelier</span>
-         <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 text-[#C5A059]">
+         <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 text-[#B88E4B]">
            {sidebarOpen ? <X /> : <Menu />}
          </button>
       </div>
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 w-72 bg-[#1A1918] border-r border-white/5 flex flex-col z-[100] transition-transform duration-500 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="p-10 border-b border-white/5 hidden lg:block">
-          <Link to="/" className="text-2xl font-serif text-white tracking-tighter">AEVO <span className="text-[9px] uppercase tracking-widest text-[#C5A059] ml-2 font-black">Atelier</span></Link>
+      <aside className={`fixed inset-y-0 left-0 w-64 bg-white border-r border-black/5 flex flex-col z-[100] transition-transform duration-500 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="p-8 border-b border-black/5 hidden lg:block">
+          <Link to="/" className="text-xl font-serif text-black tracking-tighter">AEVO <span className="text-[7px] uppercase tracking-widest text-[#B88E4B] ml-2 font-black">Atelier</span></Link>
         </div>
         
-        <nav className="flex-1 p-8 lg:pt-10 pt-24 space-y-3">
+        <nav className="flex-1 p-6 lg:pt-8 pt-20 space-y-2">
           {links.map(link => (
             <Link
               key={link.path}
               to={link.path}
               onClick={() => setSidebarOpen(false)}
-              className={`flex items-center space-x-4 px-6 py-4 rounded-xl transition-all duration-300 text-[9px] uppercase tracking-[0.2em] font-black ${
-                location.pathname === link.path ? 'bg-[#C5A059] text-white shadow-xl shadow-[#C5A059]/20' : 'text-white/30 hover:text-white hover:bg-white/5'
+              className={`flex items-center space-x-4 px-5 py-3.5 rounded-xl transition-all duration-300 text-[8px] uppercase tracking-[0.2em] font-black ${
+                location.pathname === link.path ? 'bg-[#B88E4B] text-white shadow-lg' : 'text-black/30 hover:text-black hover:bg-black/5'
               }`}
             >
               {link.icon}
@@ -49,7 +49,7 @@ const AdminLayout: React.FC = () => {
         </nav>
 
         {/* Connection Status Indicator */}
-        <div className="p-10 border-t border-white/5 space-y-6">
+        <div className="p-8 border-t border-black/5 space-y-4">
            <div className="flex items-center space-x-3">
               <div className="relative flex h-2 w-2">
                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
@@ -59,17 +59,17 @@ const AdminLayout: React.FC = () => {
                   connectionStatus === 'online' ? 'bg-emerald-500' : connectionStatus === 'connecting' ? 'bg-amber-500' : 'bg-red-500'
                 }`}></span>
               </div>
-              <span className="text-[8px] uppercase tracking-widest font-black text-white/30">
+              <span className="text-[7px] uppercase tracking-widest font-black text-black/20">
                 {connectionStatus === 'online' ? 'Vault Linked' : connectionStatus === 'connecting' ? 'Syncing Vault' : 'Vault Offline'}
               </span>
            </div>
-           <Link to="/" className="text-white/20 text-[8px] uppercase tracking-[0.4em] font-black hover:text-[#C5A059] transition-colors block">Return to Site</Link>
+           <Link to="/" className="text-black/20 text-[7px] uppercase tracking-[0.4em] font-black hover:text-[#B88E4B] transition-colors block">Exit Atelier</Link>
         </div>
       </aside>
 
       {/* Main Panel */}
-      <main className="flex-1 lg:ml-72 pt-16 lg:pt-0 overflow-y-auto min-h-screen bg-[#0F0F0F]">
-        <div className="max-w-7xl mx-auto">
+      <main className="flex-1 lg:ml-64 pt-16 lg:pt-0 overflow-y-auto min-h-screen">
+        <div className="max-w-6xl mx-auto p-8 lg:p-12">
           <Outlet />
         </div>
       </main>

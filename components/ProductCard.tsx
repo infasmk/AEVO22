@@ -1,16 +1,30 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Product } from '../types';
 import { ShoppingBag } from './Icons';
 
 interface ProductCardProps {
   product: Product;
+  index: number;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
+
+  // Muted Pastel Palette
+  const pastels = [
+    'bg-[#F2F4F7]', // Silver Mist
+    'bg-[#FDF2F2]', // Rose Water
+    'bg-[#F0FDF4]', // Sage Mint
+    'bg-[#EFF6FF]', // Cloud Blue
+    'bg-[#FEFCE8]', // Pale Lemon
+    'bg-[#FAF5FF]', // Lavender Silk
+    'bg-[#FFF7ED]', // Peach Puff
+  ];
+
+  const cardColor = useMemo(() => pastels[index % pastels.length], [index]);
 
   const handleBuyNow = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -19,66 +33,65 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   const getStockStatus = () => {
-    if (product.stock === 0) return { label: 'Archived', color: 'text-red-500/80', dot: 'bg-red-500' };
-    if (product.stock <= 5) return { label: 'Scarcity', color: 'text-[#C5A059]', dot: 'bg-[#C5A059]' };
-    return { label: 'Available', color: 'text-emerald-500/80', dot: 'bg-emerald-500' };
+    if (product.stock === 0) return { label: 'Archived', color: 'text-gray-400', dot: 'bg-gray-400' };
+    if (product.stock <= 5) return { label: 'Limited', color: 'text-[#B88E4B]', dot: 'bg-[#B88E4B]' };
+    return { label: 'In Stock', color: 'text-emerald-500/80', dot: 'bg-emerald-500' };
   };
 
   const stockStatus = getStockStatus();
 
   return (
     <div 
-      className={`group relative rounded-[2rem] transition-all duration-[1000ms] bg-[#1A1918] border border-white/5 overflow-hidden ${
-        isHovered ? 'shadow-[0_40px_80px_-15px_rgba(0,0,0,0.5)] -translate-y-2 border-white/10' : 'shadow-none'
+      className={`group relative rounded-[1.5rem] transition-all duration-[800ms] ${cardColor} border border-black/5 overflow-hidden cursor-pointer ${
+        isHovered ? 'shadow-xl -translate-y-1' : 'shadow-none'
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => navigate(`/product/${product.id}`)}
     >
       {/* Floating Tag */}
-      <div className="absolute top-6 left-6 z-20">
-        {product.tag !== 'None' && (
-          <span className="bg-[#C5A059] text-white text-[7px] px-4 py-2 uppercase tracking-[0.3em] font-black rounded-full shadow-2xl">
+      {product.tag !== 'None' && (
+        <div className="absolute top-4 left-4 z-20">
+          <span className="bg-white/80 backdrop-blur-md text-black/60 text-[7px] px-3 py-1.5 uppercase tracking-[0.2em] font-bold rounded-full shadow-sm border border-black/5">
             {product.tag}
           </span>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Image Container */}
-      <div className="aspect-[4/5] overflow-hidden relative cursor-pointer">
+      <div className="aspect-[4/5] overflow-hidden relative">
         <img 
           src={product.images[0]} 
           alt={product.name}
           loading="lazy"
-          className={`w-full h-full object-cover transition-transform duration-[2000ms] ${isHovered ? 'scale-110' : 'scale-100'}`}
+          className={`w-full h-full object-cover transition-all duration-[1500ms] mix-blend-multiply opacity-90 ${isHovered ? 'scale-105 rotate-1' : 'scale-100'}`}
         />
-        <div className={`absolute inset-0 bg-black/20 transition-opacity duration-700 ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
         
-        {/* Quick View Button (Desktop) */}
-        <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 transition-all duration-500 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-           <button onClick={handleBuyNow} className="bg-white text-black px-8 py-3 rounded-full text-[9px] font-black uppercase tracking-widest whitespace-nowrap">
-             View Piece
+        {/* Quick Action (Desktop) */}
+        <div className={`absolute bottom-4 left-4 right-4 transition-all duration-500 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+           <button onClick={handleBuyNow} className="w-full bg-white text-black py-3 rounded-xl text-[9px] font-bold uppercase tracking-widest shadow-lg border border-black/5">
+             View Details
            </button>
         </div>
       </div>
 
       {/* Content Area */}
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-[8px] uppercase tracking-[0.4em] text-[#C5A059] font-bold">{product.category}</span>
-          <div className="flex items-center space-x-2">
+      <div className="p-5">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-[7px] uppercase tracking-[0.3em] text-[#B88E4B] font-black">{product.category}</span>
+          <div className="flex items-center space-x-1.5">
             <div className={`w-1 h-1 rounded-full ${stockStatus.dot}`} />
-            <span className={`text-[7px] uppercase tracking-widest font-black ${stockStatus.color}`}>{stockStatus.label}</span>
+            <span className={`text-[7px] uppercase tracking-widest font-bold ${stockStatus.color}`}>{stockStatus.label}</span>
           </div>
         </div>
 
-        <h3 className="font-serif text-xl text-white group-hover:text-[#C5A059] transition-colors mb-4 line-clamp-1">{product.name}</h3>
+        <h3 className="font-serif text-lg text-black/80 group-hover:text-[#B88E4B] transition-colors mb-2 line-clamp-1">{product.name}</h3>
         
-        <div className="flex justify-between items-center pt-4 border-t border-white/5">
-          <span className="text-lg font-light text-white/90">₹{product.price.toLocaleString('en-IN')}</span>
-          <button className="text-white/20 group-hover:text-[#C5A059] transition-colors">
-            <ShoppingBag className="w-4 h-4" />
-          </button>
+        <div className="flex justify-between items-center pt-3 border-t border-black/5">
+          <span className="text-base font-medium text-black/60">₹{product.price.toLocaleString('en-IN')}</span>
+          <div className="w-8 h-8 rounded-full bg-white/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <ShoppingBag className="w-3.5 h-3.5 text-black/40" />
+          </div>
         </div>
       </div>
     </div>
