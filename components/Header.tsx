@@ -77,7 +77,7 @@ const Header: React.FC = () => {
       {/* Enhanced Mobile Menu Overlay */}
       <div 
         className={`fixed inset-0 z-[60] bg-[#FDFBF7] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${
-          mobileMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+          mobileMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 invisible pointer-events-none'
         }`}
       >
         <div className="flex justify-between items-center p-8 border-b border-[#F5F1E9]">

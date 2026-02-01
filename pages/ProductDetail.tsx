@@ -275,7 +275,7 @@ const ProductDetail: React.FC = () => {
           </div>
         </section>
 
-        {/* ENHANCED: Acquire Piece Section */}
+        {/* ENHANCED: Acquire Piece Section - Rectangle Button Updated */}
         <section className="mb-40 animate-fadeInUp">
           <div className="relative overflow-hidden bg-[#1A1918] rounded-[4rem] shadow-[0_100px_150px_-40px_rgba(0,0,0,0.6)] group">
             {/* Visual Flair Elements */}
@@ -338,7 +338,7 @@ const ProductDetail: React.FC = () => {
                     <button 
                       onClick={handleBuyNow}
                       disabled={product.stock === 0}
-                      className={`w-full py-9 rounded-full uppercase text-[12px] font-black tracking-[0.8em] transition-all duration-700 flex items-center justify-center space-x-6 relative z-10 ${
+                      className={`w-full py-9 rounded-none uppercase text-[12px] font-black tracking-[0.8em] transition-all duration-700 flex items-center justify-center space-x-6 relative z-10 ${
                         product.stock === 0 
                           ? 'bg-white/5 text-white/20 cursor-not-allowed border border-white/10' 
                           : 'bg-[#C5A059] text-white hover:bg-white hover:text-black shadow-[0_20px_60px_-10px_rgba(197,160,89,0.4)]'
@@ -348,7 +348,7 @@ const ProductDetail: React.FC = () => {
                       <span>{product.stock === 0 ? 'Waitlist Open' : 'Secure This Piece'}</span>
                     </button>
                     {/* Shadow pulse effect */}
-                    <div className="absolute inset-0 bg-[#C5A059] rounded-full blur-[40px] opacity-0 group-hover/btn:opacity-20 transition-opacity duration-700" />
+                    <div className="absolute inset-0 bg-[#C5A059] rounded-none blur-[40px] opacity-0 group-hover/btn:opacity-20 transition-opacity duration-700" />
                   </div>
 
                   <div className="space-y-4">
