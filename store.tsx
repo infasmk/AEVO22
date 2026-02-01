@@ -6,14 +6,15 @@ import { INITIAL_PRODUCTS, INITIAL_BANNERS, MOCK_ORDERS } from './constants';
 interface AppState {
   products: Product[];
   banners: Banner[];
-  wishlist: string[];
-  // Added orders to the global state
   orders: Order[];
+  // Added wishlist to AppState to satisfy component requirements
+  wishlist: string[];
   addProduct: (product: Product) => void;
   updateProduct: (product: Product) => void;
   deleteProduct: (id: string) => void;
   updateBanners: (banners: Banner[]) => void;
-  toggleWishlist: (productId: string) => void;
+  // Added toggleWishlist for managing the collection
+  toggleWishlist: (id: string) => void;
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
@@ -21,27 +22,26 @@ const AppContext = createContext<AppState | undefined>(undefined);
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [banners, setBanners] = useState<Banner[]>(INITIAL_BANNERS);
-  const [wishlist, setWishlist] = useState<string[]>([]);
-  // Initialized orders with mock data from constants
   const [orders] = useState<Order[]>(MOCK_ORDERS);
+  // Initializing the wishlist state
+  const [wishlist, setWishlist] = useState<string[]>([]);
 
   const addProduct = (p: Product) => setProducts(prev => [p, ...prev]);
   const updateProduct = (p: Product) => setProducts(prev => prev.map(item => item.id === p.id ? p : item));
   const deleteProduct = (id: string) => setProducts(prev => prev.filter(item => item.id !== id));
   const updateBanners = (b: Banner[]) => setBanners(b);
-
-  const toggleWishlist = (productId: string) => {
-    setWishlist(prev => prev.includes(productId) 
-      ? prev.filter(id => id !== productId) 
-      : [...prev, productId]
+  
+  // Logic to add/remove items from the personal collection
+  const toggleWishlist = (id: string) => {
+    setWishlist(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
     );
   };
 
   return (
     <AppContext.Provider value={{
-      products, banners, wishlist, orders,
-      addProduct, updateProduct, deleteProduct, updateBanners,
-      toggleWishlist
+      products, banners, orders, wishlist,
+      addProduct, updateProduct, deleteProduct, updateBanners, toggleWishlist
     }}>
       {children}
     </AppContext.Provider>

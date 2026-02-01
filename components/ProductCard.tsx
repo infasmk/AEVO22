@@ -2,20 +2,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Product } from '../types';
-import { useStore } from '../store';
-import { Heart, ShoppingBag } from './Icons';
+import { ShoppingBag } from './Icons';
 
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { toggleWishlist, wishlist } = useStore();
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
 
-  const isWishlisted = wishlist.includes(product.id);
-  
   const bgColors = ['bg-[#FDFBF7]', 'bg-[#F5F1E9]', 'bg-[#F0EEEB]'];
   const bgColor = bgColors[parseInt(product.id) % bgColors.length];
 
@@ -41,7 +37,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Floating Tag - Removed opacity-0/hover-only classes to make tag always visible */}
+      {/* Floating Tag */}
       <div className="absolute top-8 left-8 z-20">
         {product.tag !== 'None' && (
           <span className="bg-white/95 backdrop-blur-xl text-[#2C2A28] text-[8px] px-5 py-2.5 uppercase tracking-[0.3em] font-extrabold rounded-full shadow-2xl border border-black/5 block transition-all duration-700 group-hover:scale-110">
@@ -49,17 +45,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </span>
         )}
       </div>
-
-      <button 
-        onClick={(e) => { e.preventDefault(); toggleWishlist(product.id); }}
-        className={`absolute top-6 right-6 z-20 p-4 rounded-full transition-all duration-700 border ${
-          isWishlisted 
-            ? 'bg-[#C5A059] text-white border-[#C5A059] shadow-2xl scale-110' 
-            : 'bg-white/80 backdrop-blur-md text-gray-400 border-transparent hover:text-black hover:border-black/5 hover:scale-110 shadow-sm'
-        }`}
-      >
-        <Heart fill={isWishlisted ? "currentColor" : "none"} className={`w-4 h-4 ${isWishlisted ? 'animate-pulse' : ''}`} />
-      </button>
 
       {/* Full-Bleed Image Container */}
       <div className="block aspect-[4/5] overflow-hidden relative w-full cursor-pointer" onClick={() => navigate(`/product/${product.id}`)}>

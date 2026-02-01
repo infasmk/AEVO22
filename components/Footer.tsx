@@ -22,7 +22,7 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-widest mb-6">Collections</h3>
             <ul className="space-y-4 text-gray-500">
-              {['Men', 'Women', 'Wall Clocks', 'Smart Series', 'Limited Edition'].map(c => (
+              {['Men', 'Women', 'Wall Clocks', 'Smart Series'].map(c => (
                 <li key={c}><Link to="/shop" className="hover:text-[#C5A059] transition-colors">{c}</Link></li>
               ))}
             </ul>

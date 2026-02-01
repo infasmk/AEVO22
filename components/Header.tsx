@@ -2,13 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useStore } from '../store';
-import { Heart, Search, Menu, X } from './Icons';
+import { Search, Menu, X, Heart } from './Icons';
 
 const Header: React.FC = () => {
-  const { wishlist } = useStore();
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // Accessing wishlist state to show indicators
+  const { wishlist } = useStore();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -28,7 +29,6 @@ const Header: React.FC = () => {
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'The Collection', path: '/shop' },
-    { name: 'The Vault', path: '/vault' },
     { name: 'Heritage', path: '/about' },
   ];
 
@@ -53,28 +53,24 @@ const Header: React.FC = () => {
 
         {/* Actions - Right Side */}
         <div className="flex items-center space-x-8">
-          <button className="hidden sm:block p-2 hover:text-[#C5A059] transition-all">
+          {/* Added Wishlist shortcut with dynamic indicator */}
+          <Link to="/wishlist" className="p-2 hover:text-[#C5A059] transition-all relative group">
+            <Heart className={`w-5 h-5 ${wishlist.length > 0 ? 'text-[#C5A059]' : ''}`} />
+            {wishlist.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-sm"></span>
+            )}
+          </Link>
+          <button className="p-2 hover:text-[#C5A059] transition-all">
             <Search className="w-5 h-5" />
           </button>
           
-          <Link to="/vault" className="relative group p-2 transition-all flex items-center space-x-3">
-            <div className="relative">
-              <Heart 
-                fill={wishlist.length > 0 ? "#C5A059" : "none"} 
-                className={`w-5 h-5 transition-transform duration-500 group-hover:scale-110 ${wishlist.length > 0 ? 'text-[#C5A059]' : 'text-[#2C2A28]'}`} 
-              />
-              {wishlist.length > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-[#2C2A28] text-white text-[7px] w-4 h-4 flex items-center justify-center rounded-full animate-bounce font-bold border border-[#C5A059]/20">
-                  {wishlist.length}
-                </span>
-              )}
-            </div>
-            <span className="hidden md:block text-[9px] uppercase tracking-[0.3em] font-bold group-hover:text-[#C5A059] transition-colors">The Vault</span>
-          </Link>
+          <div className="hidden md:flex items-center space-x-4">
+             <span className="text-[9px] uppercase tracking-[0.3em] font-bold text-[#2C2A28]">Concierge Access</span>
+          </div>
         </div>
       </div>
 
-      {/* Enhanced Mobile Menu Overlay - Added invisible and pointer-events-none to fix click interference */}
+      {/* Enhanced Mobile Menu Overlay */}
       <div 
         className={`fixed inset-0 z-[60] bg-[#FDFBF7] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${
           mobileMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 invisible pointer-events-none'
@@ -109,6 +105,18 @@ const Header: React.FC = () => {
                 </Link>
               );
             })}
+            {/* Added Wishlist to Mobile Menu for accessibility */}
+            <Link 
+              to="/wishlist" 
+              onClick={() => setMobileMenuOpen(false)}
+              className={`text-5xl md:text-6xl font-serif italic text-[#2C2A28] transition-all duration-700 hover:pl-6 hover:text-[#C5A059] flex items-center group ${
+                mobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+              } ${location.pathname === '/wishlist' ? 'text-[#C5A059] pl-6' : ''}`}
+              style={{ transitionDelay: `${navLinks.length * 100}ms` }}
+            >
+              <span className={`w-0 h-px bg-[#C5A059] transition-all duration-700 mr-0 group-hover:w-12 group-hover:mr-6 ${location.pathname === '/wishlist' ? 'w-12 mr-6' : ''}`} />
+              The Vault
+            </Link>
           </nav>
           
           <div className={`mt-auto p-12 pb-24 border-t border-[#F5F1E9] transition-all duration-1000 delay-500 ${mobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>

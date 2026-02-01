@@ -2,12 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useStore } from '../store';
-import { Star, Share, ChevronLeft, ChevronRight, ShoppingBag, Compass, Feather, Shield, Diamond, UserIcon } from '../components/Icons';
+import { Star, Share, ChevronLeft, ChevronRight, ShoppingBag, Compass, Feather, Shield, Diamond, UserIcon, Heart } from '../components/Icons';
 import ProductCard from '../components/ProductCard';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { products } = useStore();
+  // Destructuring wishlist utilities from store
+  const { products, wishlist, toggleWishlist } = useStore();
   const [activeImage, setActiveImage] = useState(0);
   const [shareFeedback, setShareFeedback] = useState(false);
   const [isConfiguring, setIsConfiguring] = useState(false);
@@ -18,6 +19,9 @@ const ProductDetail: React.FC = () => {
 
   const product = products.find(p => p.id === id);
   if (!product) return <div className="pt-40 text-center font-serif text-2xl">Masterpiece not found.</div>;
+
+  // Determine if this specific item is curated in the personal vault
+  const isWishlisted = wishlist.includes(product.id);
 
   const relatedProducts = products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
 
@@ -169,6 +173,14 @@ const ProductDetail: React.FC = () => {
               <div className="flex items-center justify-between mb-8">
                 <span className="text-[#C5A059] uppercase text-[10px] font-bold tracking-[0.7em]">{product.category}</span>
                 <div className="flex items-center space-x-6">
+                  {/* Added Interactive Wishlist Toggle */}
+                  <button 
+                    onClick={() => toggleWishlist(product.id)} 
+                    className={`relative group transition-all duration-500 transform active:scale-75 ${isWishlisted ? 'text-[#C5A059]' : 'text-gray-400 hover:text-black'}`}
+                  >
+                    <Heart className="w-6 h-6" fill={isWishlisted ? 'currentColor' : 'none'} />
+                    {isWishlisted && <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#C5A059] rounded-full animate-ping"></span>}
+                  </button>
                   <button onClick={handleShare} className="relative group text-gray-400 hover:text-black transition-all">
                     <Share className="w-6 h-6" />
                     {shareFeedback && <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-[8px] uppercase tracking-widest font-bold text-[#C5A059] whitespace-nowrap">Link Copied</span>}
@@ -275,7 +287,7 @@ const ProductDetail: React.FC = () => {
           </div>
         </section>
 
-        {/* ENHANCED: Acquire Piece Section - Updated to sharp rectangle layout */}
+        {/* ENHANCED: Acquire Piece Section - Updated to well-aligned rounded rectangle */}
         <section className="mb-40 animate-fadeInUp">
           <div className="relative overflow-hidden bg-[#1A1918] rounded-[4rem] shadow-[0_100px_150px_-40px_rgba(0,0,0,0.6)] group">
             {/* Visual Flair Elements */}
@@ -319,7 +331,7 @@ const ProductDetail: React.FC = () => {
 
               {/* Right Column: The Transaction */}
               <div className="lg:col-span-5 p-12 md:p-20 flex flex-col items-center justify-center bg-[#2C2A28]/30 backdrop-blur-xl">
-                <div className="text-center w-full space-y-12">
+                <div className="text-center w-full space-y-12 flex flex-col items-center">
                   <div className="space-y-2">
                     <span className="text-white/30 text-[10px] uppercase tracking-[0.5em] font-bold block">Final Valuation</span>
                     <div className="flex flex-col items-center">
@@ -334,22 +346,22 @@ const ProductDetail: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="relative group/btn w-full">
-                    {/* BUTTON UPDATED: rounded-none for sharp rectangle aesthetic */}
+                  <div className="relative group/btn w-full max-w-sm">
+                    {/* BUTTON UPDATED: rounded-2xl for rounded rectangle aesthetic and flex centering */}
                     <button 
                       onClick={handleBuyNow}
                       disabled={product.stock === 0}
-                      className={`w-full py-9 rounded-none uppercase text-[12px] font-black tracking-[0.8em] transition-all duration-700 flex items-center justify-center space-x-6 relative z-10 ${
+                      className={`w-full py-7 rounded-2xl uppercase text-[12px] font-black tracking-[0.8em] transition-all duration-700 flex items-center justify-center space-x-4 relative z-10 mx-auto ${
                         product.stock === 0 
                           ? 'bg-white/5 text-white/20 cursor-not-allowed border border-white/10' 
                           : 'bg-[#C5A059] text-white hover:bg-white hover:text-black shadow-[0_20px_60px_-10px_rgba(197,160,89,0.4)]'
                       }`}
                     >
-                      <ShoppingBag className="w-7 h-7 transition-transform duration-700 group-hover/btn:scale-125" />
+                      <ShoppingBag className="w-6 h-6 transition-transform duration-700 group-hover/btn:scale-110" />
                       <span>{product.stock === 0 ? 'Waitlist Open' : 'Secure This Piece'}</span>
                     </button>
-                    {/* Shadow pulse effect - updated to rounded-none */}
-                    <div className="absolute inset-0 bg-[#C5A059] rounded-none blur-[40px] opacity-0 group-hover/btn:opacity-20 transition-opacity duration-700" />
+                    {/* Shadow pulse effect - updated to rounded-2xl */}
+                    <div className="absolute inset-0 bg-[#C5A059] rounded-2xl blur-[30px] opacity-0 group-hover/btn:opacity-20 transition-opacity duration-700" />
                   </div>
 
                   <div className="space-y-4">
