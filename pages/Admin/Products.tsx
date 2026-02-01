@@ -3,26 +3,22 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from '../../store';
 import { Product, ProductTag, KeyFeature, Category } from '../../types';
 import { X, Search, ChevronRight, Star, ShoppingBag } from '../../components/Icons';
+import ConfirmDialog from '../../components/ConfirmDialog';
+import Toast from '../../components/Toast';
 
 const AdminProducts: React.FC = () => {
   const { products, categories, upsertProduct, deleteProduct, upsertCategory, deleteCategory } = useStore();
+  
+  // Modals & Feedback
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+  const [confirm, setConfirm] = useState<{ title: string, message: string, onConfirm: () => void } | null>(null);
 
   // Form States
-  const [formData, setFormData] = useState<Partial<Product>>({
-    name: '',
-    price: 0,
-    category: '',
-    tag: 'None',
-    description: '',
-    stock: 0,
-    images: []
-  });
-
-  // Simplified List Management for Specs and Features
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [formData, setFormData] = useState<Partial<Product>>({});
   const [specs, setSpecs] = useState<{ key: string, value: string }[]>([]);
   const [features, setFeatures] = useState<KeyFeature[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>(['']);
@@ -31,7 +27,7 @@ const AdminProducts: React.FC = () => {
   const openModal = (p?: Product) => {
     if (p) {
       setEditingProduct(p);
-      setFormData(p);
+      setFormData({ ...p });
       setSpecs(Object.entries(p.specs || {}).map(([key, value]) => ({ key, value })));
       setFeatures(p.key_features || []);
       setImageUrls(p.images.length > 0 ? p.images : ['']);
@@ -56,7 +52,6 @@ const AdminProducts: React.FC = () => {
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Convert arrays back to objects
     const specsObj: Record<string, string> = {};
     specs.forEach(s => { if(s.key) specsObj[s.key] = s.value; });
 
@@ -67,21 +62,47 @@ const AdminProducts: React.FC = () => {
       key_features: features.filter(f => f.title.trim() !== ''),
       id: editingProduct ? editingProduct.id : Math.random().toString(36).substr(2, 9),
       rating: editingProduct ? editingProduct.rating : 5,
-      reviews_count: editingProduct ? editingProduct.reviews_count : 0
+      reviews_count: editingProduct ? editingProduct.reviews_count : 0,
+      created_at: editingProduct ? editingProduct.created_at : new Date().toISOString()
     } as Product;
 
     await upsertProduct(finalProduct);
+    setToast({ message: editingProduct ? "Masterpiece Recalibrated" : "New Piece Enrolled", type: 'success' });
     setIsModalOpen(false);
+  };
+
+  const triggerDeleteProduct = (id: string, name: string) => {
+    setConfirm({
+      title: "Decommission Piece",
+      message: `Are you certain you wish to remove the "${name}" from the active vault? This action is irreversible.`,
+      onConfirm: async () => {
+        await deleteProduct(id);
+        setToast({ message: "Asset Purged from Vault", type: 'success' });
+      }
+    });
   };
 
   const handleAddCategory = async () => {
     if (!newCatName) return;
     await upsertCategory({ id: Math.random().toString(36).substr(2, 9), name: newCatName });
     setNewCatName('');
+    setToast({ message: "New Series Protocol Authorized", type: 'success' });
+  };
+
+  const triggerDeleteCategory = (id: string, name: string) => {
+    setConfirm({
+      title: "Archive Series Protocol",
+      message: `Decommissioning the "${name}" series? Products using this category will remain, but the series will be removed from registry.`,
+      onConfirm: async () => {
+        await deleteCategory(id);
+        setToast({ message: "Series Protocol Terminated", type: 'success' });
+      }
+    });
   };
 
   return (
     <div className="p-12 space-y-12 animate-fadeIn bg-[#0F0F0F]">
+      {/* Header Controls */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
           <h1 className="text-4xl font-serif mb-4">Inventory Vault</h1>
@@ -92,7 +113,7 @@ const AdminProducts: React.FC = () => {
             onClick={() => setIsCategoryModalOpen(true)}
             className="bg-white/5 text-[#C5A059] px-8 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest border border-[#C5A059]/20 hover:bg-[#C5A059]/10 transition-all"
           >
-            Manage Categories
+            Manage Series
           </button>
           <button 
             onClick={() => openModal()}
@@ -103,6 +124,7 @@ const AdminProducts: React.FC = () => {
         </div>
       </div>
 
+      {/* Search Protocol */}
       <div className="relative">
         <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 w-5 h-5" />
         <input 
@@ -114,6 +136,7 @@ const AdminProducts: React.FC = () => {
         />
       </div>
 
+      {/* Vault Table */}
       <div className="bg-[#1A1918] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
         <table className="w-full text-left">
           <thead>
@@ -146,7 +169,7 @@ const AdminProducts: React.FC = () => {
                 </td>
                 <td className="px-10 py-8 space-x-6">
                   <button onClick={() => openModal(product)} className="text-[10px] font-black uppercase tracking-widest text-[#C5A059] border-b border-[#C5A059]/20 pb-1 hover:text-white transition-all">Calibrate</button>
-                  <button onClick={() => deleteProduct(product.id)} className="text-[10px] font-black uppercase tracking-widest text-red-500/40 border-b border-red-500/10 pb-1 hover:text-red-500 transition-all">Decommission</button>
+                  <button onClick={() => triggerDeleteProduct(product.id, product.name)} className="text-[10px] font-black uppercase tracking-widest text-red-500/40 border-b border-red-500/10 pb-1 hover:text-red-500 transition-all">Decommission</button>
                 </td>
               </tr>
             ))}
@@ -154,7 +177,7 @@ const AdminProducts: React.FC = () => {
         </table>
       </div>
 
-      {/* Main Product Architect Modal */}
+      {/* Main Form Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-[#0F0F0F]/90 backdrop-blur-xl overflow-y-auto">
           <div className="bg-[#1A1918] w-full max-w-5xl rounded-[3rem] shadow-2xl border border-white/5 animate-fadeInUp my-auto">
@@ -169,7 +192,7 @@ const AdminProducts: React.FC = () => {
             </div>
 
             <form onSubmit={handleSaveProduct} className="p-10 space-y-16">
-              {/* Section 1: Designation */}
+              {/* Basics Section */}
               <div className="space-y-10">
                 <div className="flex items-center space-x-4">
                   <span className="text-[10px] font-black text-[#C5A059] uppercase tracking-[0.4em]">01. Designation</span>
@@ -178,36 +201,40 @@ const AdminProducts: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   <div className="space-y-3">
                     <label className="text-[9px] uppercase tracking-[0.3em] text-white/30 font-bold ml-1">Model Name</label>
-                    <input className="w-full bg-[#0F0F0F] border border-white/5 rounded-2xl p-4 text-white focus:border-[#C5A059] outline-none" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required />
+                    <input className="w-full bg-[#0F0F0F] border border-white/5 rounded-2xl p-4 text-white focus:border-[#C5A059] outline-none" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} required />
                   </div>
                   <div className="space-y-3">
                     <label className="text-[9px] uppercase tracking-[0.3em] text-white/30 font-bold ml-1">Series Category</label>
-                    <select className="w-full bg-[#0F0F0F] border border-white/5 rounded-2xl p-4 text-white focus:border-[#C5A059] outline-none cursor-pointer" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required>
+                    <select className="w-full bg-[#0F0F0F] border border-white/5 rounded-2xl p-4 text-white focus:border-[#C5A059] outline-none cursor-pointer" value={formData.category || ''} onChange={e => setFormData({...formData, category: e.target.value})} required>
                       {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                     </select>
                   </div>
                   <div className="space-y-3">
                     <label className="text-[9px] uppercase tracking-[0.3em] text-white/30 font-bold ml-1">Investment (₹)</label>
-                    <input type="number" className="w-full bg-[#0F0F0F] border border-white/5 rounded-2xl p-4 text-white focus:border-[#C5A059] outline-none" value={formData.price} onChange={e => setFormData({...formData, price: Number(e.target.value)})} required />
+                    <input type="number" className="w-full bg-[#0F0F0F] border border-white/5 rounded-2xl p-4 text-white focus:border-[#C5A059] outline-none" value={formData.price || 0} onChange={e => setFormData({...formData, price: Number(e.target.value)})} required />
                   </div>
                   <div className="space-y-3">
                     <label className="text-[9px] uppercase tracking-[0.3em] text-white/30 font-bold ml-1">Stock Allocation</label>
-                    <input type="number" className="w-full bg-[#0F0F0F] border border-white/5 rounded-2xl p-4 text-white focus:border-[#C5A059] outline-none" value={formData.stock} onChange={e => setFormData({...formData, stock: Number(e.target.value)})} required />
+                    <input type="number" className="w-full bg-[#0F0F0F] border border-white/5 rounded-2xl p-4 text-white focus:border-[#C5A059] outline-none" value={formData.stock || 0} onChange={e => setFormData({...formData, stock: Number(e.target.value)})} required />
                   </div>
                   <div className="space-y-3">
                     <label className="text-[9px] uppercase tracking-[0.3em] text-white/30 font-bold ml-1">Curation Badge</label>
-                    <select className="w-full bg-[#0F0F0F] border border-white/5 rounded-2xl p-4 text-white focus:border-[#C5A059] outline-none" value={formData.tag} onChange={e => setFormData({...formData, tag: e.target.value as ProductTag})}>
-                      <option>None</option><option>Latest</option><option>Best Seller</option><option>Offer</option><option>New Arrival</option>
+                    <select className="w-full bg-[#0F0F0F] border border-white/5 rounded-2xl p-4 text-white focus:border-[#C5A059] outline-none" value={formData.tag || 'None'} onChange={e => setFormData({...formData, tag: e.target.value as ProductTag})}>
+                      <option value="None">None</option>
+                      <option value="Latest">Latest</option>
+                      <option value="Best Seller">Best Seller</option>
+                      <option value="Offer">Offer</option>
+                      <option value="New Arrival">New Arrival</option>
                     </select>
                   </div>
                 </div>
                 <div className="space-y-3">
-                  <label className="text-[9px] uppercase tracking-[0.3em] text-white/30 font-bold ml-1">Master Narrative (Description)</label>
-                  <textarea className="w-full bg-[#0F0F0F] border border-white/5 rounded-2xl p-4 text-white h-32 focus:border-[#C5A059] outline-none italic font-light" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} required />
+                  <label className="text-[9px] uppercase tracking-[0.3em] text-white/30 font-bold ml-1">Master Narrative</label>
+                  <textarea className="w-full bg-[#0F0F0F] border border-white/5 rounded-2xl p-4 text-white h-32 focus:border-[#C5A059] outline-none italic font-light" value={formData.description || ''} onChange={e => setFormData({...formData, description: e.target.value})} required />
                 </div>
               </div>
 
-              {/* Section 2: Visual Assets */}
+              {/* Imagery Section */}
               <div className="space-y-10">
                 <div className="flex items-center space-x-4">
                   <span className="text-[10px] font-black text-[#C5A059] uppercase tracking-[0.4em]">02. Visual Assets</span>
@@ -229,11 +256,11 @@ const AdminProducts: React.FC = () => {
                       )}
                     </div>
                   ))}
-                  <button type="button" onClick={() => setImageUrls([...imageUrls, ''])} className="h-full mt-8 border border-dashed border-white/10 rounded-2xl p-4 text-[9px] uppercase tracking-widest text-white/20 hover:text-[#C5A059] hover:border-[#C5A059]/30 transition-all">+ Add Visual Frame</button>
+                  <button type="button" onClick={() => setImageUrls([...imageUrls, ''])} className="h-full mt-8 border border-dashed border-white/10 rounded-2xl p-4 text-[9px] uppercase tracking-widest text-white/20 hover:text-[#C5A059] transition-all">+ Add Visual Frame</button>
                 </div>
               </div>
 
-              {/* Section 3: Technical Dossier */}
+              {/* Technical Section */}
               <div className="space-y-10">
                 <div className="flex items-center space-x-4">
                   <span className="text-[10px] font-black text-[#C5A059] uppercase tracking-[0.4em]">03. Technical Dossier</span>
@@ -265,42 +292,11 @@ const AdminProducts: React.FC = () => {
                 </div>
               </div>
 
-              {/* Section 4: Key Features of Excellence */}
-              <div className="space-y-10">
-                <div className="flex items-center space-x-4">
-                  <span className="text-[10px] font-black text-[#C5A059] uppercase tracking-[0.4em]">04. Key Features of Excellence</span>
-                  <div className="h-px flex-1 bg-white/5" />
-                </div>
-                <div className="space-y-6">
-                  {features.map((feat, i) => (
-                    <div key={i} className="p-8 bg-[#0F0F0F] rounded-3xl border border-white/5 space-y-6 relative group">
-                      <button type="button" onClick={() => setFeatures(features.filter((_, idx) => idx !== i))} className="absolute top-6 right-6 text-white/10 group-hover:text-red-500/40"><X /></button>
-                      <div className="space-y-3">
-                        <label className="text-[9px] uppercase tracking-[0.3em] text-white/30 font-bold">Feature Title (Artisan Header)</label>
-                        <input className="w-full bg-[#1A1918] border border-white/5 rounded-xl p-4 text-white font-serif" value={feat.title} onChange={e => {
-                          const newFeats = [...features];
-                          newFeats[i].title = e.target.value;
-                          setFeatures(newFeats);
-                        }} />
-                      </div>
-                      <div className="space-y-3">
-                        <label className="text-[9px] uppercase tracking-[0.3em] text-white/30 font-bold">Elaboration (Description)</label>
-                        <textarea className="w-full bg-[#1A1918] border border-white/5 rounded-xl p-4 text-white/60 text-sm italic h-24" value={feat.description} onChange={e => {
-                          const newFeats = [...features];
-                          newFeats[i].description = e.target.value;
-                          setFeatures(newFeats);
-                        }} />
-                      </div>
-                    </div>
-                  ))}
-                  <button type="button" onClick={() => setFeatures([...features, { title: '', description: '' }])} className="w-full border border-dashed border-white/10 rounded-3xl p-8 text-[9px] uppercase tracking-widest text-white/20 hover:text-[#C5A059] hover:bg-white/5">+ Document New Feature</button>
-                </div>
-              </div>
-
+              {/* Save Controls */}
               <div className="flex justify-end space-x-8 pt-12 border-t border-white/5">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="text-[10px] uppercase tracking-widest font-black text-white/20">Discard Changes</button>
-                <button type="submit" className="bg-[#C5A059] text-white px-16 py-6 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-[0_30px_60px_-10px_rgba(197,160,89,0.3)] hover:scale-105 transition-all">
-                  Commit Piece to Vault
+                <button type="button" onClick={() => setIsModalOpen(false)} className="text-[10px] uppercase tracking-widest font-black text-white/20">Discard</button>
+                <button type="submit" className="bg-[#C5A059] text-white px-16 py-6 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl hover:scale-105 transition-all">
+                  Commit to Vault
                 </button>
               </div>
             </form>
@@ -308,19 +304,19 @@ const AdminProducts: React.FC = () => {
         </div>
       )}
 
-      {/* Category Manager Modal */}
+      {/* Category Manager */}
       {isCategoryModalOpen && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-[#0F0F0F]/95 backdrop-blur-2xl">
           <div className="bg-[#1A1918] w-full max-w-lg rounded-[2.5rem] shadow-2xl border border-white/5 p-10 space-y-10 animate-fadeInUp">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-serif text-white">Series Protocols</h2>
-              <button onClick={() => setIsCategoryModalOpen(false)}><X /></button>
+              <button onClick={() => setIsCategoryModalOpen(false)}><X className="text-white/20" /></button>
             </div>
             
             <div className="space-y-4">
-              <label className="text-[9px] uppercase tracking-[0.3em] text-white/30 font-bold block mb-4">Add New Collection Series</label>
+              <label className="text-[9px] uppercase tracking-[0.3em] text-white/30 font-bold block mb-4">Authorize New Series</label>
               <div className="flex gap-4">
-                <input className="flex-1 bg-[#0F0F0F] border border-white/5 rounded-2xl p-4 text-white" value={newCatName} onChange={e => setNewCatName(e.target.value)} placeholder="e.g. Lunar Series" />
+                <input className="flex-1 bg-[#0F0F0F] border border-white/5 rounded-2xl p-4 text-white outline-none focus:border-[#C5A059]" value={newCatName} onChange={e => setNewCatName(e.target.value)} placeholder="e.g. Lunar Series" />
                 <button onClick={handleAddCategory} className="bg-[#C5A059] text-white px-8 rounded-2xl text-[10px] font-bold uppercase tracking-widest">Enroll</button>
               </div>
             </div>
@@ -329,18 +325,29 @@ const AdminProducts: React.FC = () => {
                <label className="text-[9px] uppercase tracking-[0.3em] text-white/30 font-bold">Active Protocols</label>
                <div className="space-y-3 max-h-60 overflow-y-auto pr-2 no-scrollbar">
                  {categories.map(c => (
-                   <div key={c.id} className="flex justify-between items-center p-4 bg-white/5 rounded-xl border border-white/5">
+                   <div key={c.id} className="flex justify-between items-center p-4 bg-white/5 rounded-xl border border-white/5 group">
                      <span className="text-sm text-white/80">{c.name}</span>
-                     <button onClick={() => deleteCategory(c.id)} className="text-red-500/40 hover:text-red-500 p-2"><X className="w-4 h-4" /></button>
+                     <button onClick={() => triggerDeleteCategory(c.id, c.name)} className="text-red-500/0 group-hover:text-red-500/40 hover:!text-red-500 p-2 transition-all"><X className="w-4 h-4" /></button>
                    </div>
                  ))}
                </div>
             </div>
-
-            <button onClick={() => setIsCategoryModalOpen(false)} className="w-full py-5 border border-white/5 rounded-2xl text-[10px] uppercase font-bold text-white/40 tracking-widest">Close Registry</button>
+            <button onClick={() => setIsCategoryModalOpen(false)} className="w-full py-5 bg-white/5 rounded-2xl text-[10px] uppercase font-bold text-white/40 tracking-widest">Close Registry</button>
           </div>
         </div>
       )}
+
+      {/* Confirm & Toast */}
+      {confirm && (
+        <ConfirmDialog
+          isOpen={!!confirm}
+          title={confirm.title}
+          message={confirm.message}
+          onConfirm={confirm.onConfirm}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };

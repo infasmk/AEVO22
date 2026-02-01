@@ -13,11 +13,11 @@ interface AppState {
   isLoading: boolean;
   
   fetchData: () => Promise<void>;
-  upsertProduct: (p: Partial<Product>) => Promise<void>;
+  upsertProduct: (p: Product) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
-  upsertBanner: (b: Partial<Banner>) => Promise<void>;
+  upsertBanner: (b: Banner) => Promise<void>;
   deleteBanner: (id: string) => Promise<void>;
-  upsertCategory: (c: Partial<Category>) => Promise<void>;
+  upsertCategory: (c: Category) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
   updateOrderStatus: (id: string, status: Order['status']) => Promise<void>;
   toggleWishlist: (id: string) => void;
@@ -25,10 +25,9 @@ interface AppState {
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'aevo_vault_cache';
+const LOCAL_STORAGE_KEY = 'aevo_vault_v2';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize from LocalStorage or Constants
   const [products, setProducts] = useState<Product[]>(() => {
     const cached = localStorage.getItem(`${LOCAL_STORAGE_KEY}_products`);
     return cached ? JSON.parse(cached) : INITIAL_PRODUCTS;
@@ -53,24 +52,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
   
   const [wishlist, setWishlist] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Sync state to local storage whenever it changes
-  useEffect(() => {
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(products));
-  }, [products]);
-  useEffect(() => {
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(banners));
-  }, [banners]);
-  useEffect(() => {
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_orders`, JSON.stringify(orders));
-  }, [orders]);
-  useEffect(() => {
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_categories`, JSON.stringify(categories));
-  }, [categories]);
+  // Persistence hooks
+  useEffect(() => localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(products)), [products]);
+  useEffect(() => localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(banners)), [banners]);
+  useEffect(() => localStorage.setItem(`${LOCAL_STORAGE_KEY}_orders`, JSON.stringify(orders)), [orders]);
+  useEffect(() => localStorage.setItem(`${LOCAL_STORAGE_KEY}_categories`, JSON.stringify(categories)), [categories]);
 
   const fetchData = async () => {
-    setIsLoading(true);
     try {
       const [pRes, bRes, oRes, cRes] = await Promise.all([
         supabase.from('products').select('*').order('created_at', { ascending: false }),
@@ -84,9 +74,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (oRes.data && oRes.data.length > 0) setOrders(oRes.data);
       if (cRes.data && cRes.data.length > 0) setCategories(cRes.data);
     } catch (err) {
-      console.warn("AEVO: Database sync unavailable, using local cache.", err);
-    } finally {
-      setIsLoading(false);
+      console.warn("AEVO: Database sync unavailable, using local vault.");
     }
   };
 
@@ -94,71 +82,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     fetchData();
   }, []);
 
-  const upsertProduct = async (p: Partial<Product>) => {
-    // Optimistic UI Update
+  const upsertProduct = async (p: Product) => {
     setProducts(prev => {
       const exists = prev.find(item => item.id === p.id);
-      if (exists) {
-        return prev.map(item => item.id === p.id ? { ...item, ...p } as Product : item);
-      }
-      return [{ ...p, created_at: new Date().toISOString() } as Product, ...prev];
+      if (exists) return prev.map(item => item.id === p.id ? p : item);
+      return [p, ...prev];
     });
-
-    try {
-      await supabase.from('products').upsert(p);
-    } catch (e) {
-      console.error("Supabase upsert failed:", e);
-    }
+    try { await supabase.from('products').upsert(p); } catch (e) {}
   };
 
   const deleteProduct = async (id: string) => {
     setProducts(prev => prev.filter(p => p.id !== id));
-    try {
-      await supabase.from('products').delete().eq('id', id);
-    } catch (e) {}
+    try { await supabase.from('products').delete().eq('id', id); } catch (e) {}
   };
 
-  const upsertBanner = async (b: Partial<Banner>) => {
+  const upsertBanner = async (b: Banner) => {
     setBanners(prev => {
       const exists = prev.find(item => item.id === b.id);
-      if (exists) return prev.map(item => item.id === b.id ? { ...item, ...b } as Banner : item);
-      return [...prev, b as Banner];
+      if (exists) return prev.map(item => item.id === b.id ? b : item);
+      return [...prev, b];
     });
-    try {
-      await supabase.from('banners').upsert(b);
-    } catch (e) {}
+    try { await supabase.from('banners').upsert(b); } catch (e) {}
   };
 
   const deleteBanner = async (id: string) => {
     setBanners(prev => prev.filter(b => b.id !== id));
-    try {
-      await supabase.from('banners').delete().eq('id', id);
-    } catch (e) {}
+    try { await supabase.from('banners').delete().eq('id', id); } catch (e) {}
   };
 
-  const upsertCategory = async (c: Partial<Category>) => {
+  const upsertCategory = async (c: Category) => {
     setCategories(prev => {
       const exists = prev.find(item => item.id === c.id);
-      if (exists) return prev.map(item => item.id === c.id ? { ...item, ...c } as Category : item);
-      return [...prev, c as Category];
+      if (exists) return prev.map(item => item.id === c.id ? c : item);
+      return [...prev, c];
     });
-    try {
-      await supabase.from('categories').upsert(c);
-    } catch (e) {}
+    try { await supabase.from('categories').upsert(c); } catch (e) {}
   };
 
   const deleteCategory = async (id: string) => {
     setCategories(prev => prev.filter(c => c.id !== id));
-    try {
-      await supabase.from('categories').delete().eq('id', id);
-    } catch (e) {}
+    try { await supabase.from('categories').delete().eq('id', id); } catch (e) {}
   };
 
   const updateOrderStatus = async (id: string, status: Order['status']) => {
     setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
-    try {
-      await supabase.from('orders').update({ status }).eq('id', id);
-    } catch (e) {}
+    try { await supabase.from('orders').update({ status }).eq('id', id); } catch (e) {}
   };
 
   const toggleWishlist = (id: string) => {

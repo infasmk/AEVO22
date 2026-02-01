@@ -1,10 +1,14 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../../store';
 import { Order } from '../../types';
+import ConfirmDialog from '../../components/ConfirmDialog';
+import Toast from '../../components/Toast';
 
 const AdminOrders: React.FC = () => {
   const { orders, updateOrderStatus } = useStore();
+  const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+  const [confirm, setConfirm] = useState<{ id: string, status: Order['status'] } | null>(null);
 
   const getStatusStyles = (status: Order['status']) => {
     switch (status) {
@@ -13,6 +17,17 @@ const AdminOrders: React.FC = () => {
       case 'Artisan Prep': return 'bg-[#C5A059]/10 text-[#C5A059] border-[#C5A059]/20';
       default: return 'bg-white/5 text-white/40 border-white/10';
     }
+  };
+
+  const handleStatusUpdate = (id: string, status: Order['status']) => {
+    setConfirm({ id, status });
+  };
+
+  const executeStatusUpdate = async () => {
+    if (!confirm) return;
+    await updateOrderStatus(confirm.id, confirm.status);
+    setToast({ message: `Protocol set to ${confirm.status}`, type: 'success' });
+    setConfirm(null);
   };
 
   return (
@@ -40,7 +55,6 @@ const AdminOrders: React.FC = () => {
                   <div className="flex flex-col">
                     <span className="text-sm font-medium text-white mb-1">{order.user_name}</span>
                     <span className="text-[10px] text-white/20 font-mono">{order.id}</span>
-                    <span className="text-[10px] text-[#C5A059]/60 mt-1 uppercase tracking-widest">{order.user_email}</span>
                   </div>
                 </td>
                 <td className="px-8 py-8">
@@ -59,7 +73,7 @@ const AdminOrders: React.FC = () => {
                 <td className="px-8 py-8">
                   <select 
                     value={order.status}
-                    onChange={(e) => updateOrderStatus(order.id, e.target.value as Order['status'])}
+                    onChange={(e) => handleStatusUpdate(order.id, e.target.value as Order['status'])}
                     className={`text-[10px] uppercase tracking-widest font-bold px-4 py-2 rounded-full border outline-none cursor-pointer transition-all ${getStatusStyles(order.status)}`}
                   >
                     <option value="Pending">Pending</option>
@@ -80,6 +94,18 @@ const AdminOrders: React.FC = () => {
           </tbody>
         </table>
       </div>
+
+      {confirm && (
+        <ConfirmDialog
+          isOpen={!!confirm}
+          title="Update Status"
+          message={`Are you sure you wish to change the protocol status to "${confirm.status}"? Notification will be dispatched to the client.`}
+          onConfirm={executeStatusUpdate}
+          onCancel={() => setConfirm(null)}
+          type="info"
+        />
+      )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };

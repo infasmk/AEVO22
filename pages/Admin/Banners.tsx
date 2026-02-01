@@ -30,7 +30,14 @@ const AdminBanners: React.FC = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    await upsertBanner(formData);
+    // Construct a complete Banner object ensuring the required 'id' is present.
+    // Use existing ID if editing, otherwise generate a new one.
+    const finalBanner = {
+      ...formData,
+      id: editingBanner ? editingBanner.id : Math.random().toString(36).substr(2, 9)
+    } as Banner;
+    
+    await upsertBanner(finalBanner);
     setIsModalOpen(false);
   };
 
