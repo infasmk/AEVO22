@@ -11,18 +11,10 @@ const Header: React.FC = () => {
   const { wishlist } = useStore();
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-  }, [mobileMenuOpen]);
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -31,100 +23,70 @@ const Header: React.FC = () => {
   ];
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${isScrolled ? 'glass-effect shadow-sm py-4' : 'bg-transparent py-7'}`}>
-      <div className="container mx-auto px-8 flex items-center justify-between">
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'glass-effect border-b border-white/5 py-3' : 'bg-transparent py-6'}`}>
+      <div className="container mx-auto px-6 flex items-center justify-between">
         {/* Mobile Menu Toggle */}
-        <button className="lg:hidden p-2 text-[#2C2A28] hover:opacity-50 transition-opacity" onClick={() => setMobileMenuOpen(true)}>
-          <Menu />
+        <button className="lg:hidden p-2 text-white/80 hover:text-white" onClick={() => setMobileMenuOpen(true)}>
+          <Menu className="w-6 h-6" />
         </button>
 
         {/* Navigation - Left Side (Desktop) */}
-        <nav className="hidden lg:flex items-center space-x-12 text-[10px] uppercase tracking-[0.4em] font-bold">
-          <Link to="/shop" className={`transition-colors ${location.pathname === '/shop' ? 'text-[#C5A059]' : 'hover:text-[#C5A059]'}`}>The Collection</Link>
-          <Link to="/about" className={`transition-colors ${location.pathname === '/about' ? 'text-[#C5A059]' : 'hover:text-[#C5A059]'}`}>Heritage</Link>
+        <nav className="hidden lg:flex items-center space-x-10 text-[9px] uppercase tracking-[0.4em] font-bold">
+          <Link to="/shop" className={`transition-colors ${location.pathname === '/shop' ? 'text-[#C5A059]' : 'text-white/60 hover:text-white'}`}>The Collection</Link>
+          <Link to="/about" className={`transition-colors ${location.pathname === '/about' ? 'text-[#C5A059]' : 'text-white/60 hover:text-white'}`}>Heritage</Link>
         </nav>
 
         {/* Logo */}
-        <Link to="/" className="text-4xl font-serif tracking-tighter absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 transition-transform hover:scale-105 duration-500">
+        <Link to="/" className="text-3xl font-serif tracking-tighter absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 text-white transition-transform hover:scale-105">
           AEVO
         </Link>
 
         {/* Actions - Right Side */}
-        <div className="flex items-center space-x-8">
-          <Link to="/wishlist" className="p-2 hover:text-[#C5A059] transition-all relative group">
+        <div className="flex items-center space-x-5 md:space-x-8">
+          <Link to="/wishlist" className="p-2 text-white/60 hover:text-[#C5A059] transition-all relative">
             <Heart className={`w-5 h-5 ${wishlist.length > 0 ? 'text-[#C5A059]' : ''}`} />
-            {wishlist.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-sm"></span>
-            )}
+            {wishlist.length > 0 && <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[#C5A059] rounded-full"></span>}
           </Link>
-          <button className="p-2 hover:text-[#C5A059] transition-all">
+          <button className="hidden sm:block p-2 text-white/60 hover:text-white transition-all">
             <Search className="w-5 h-5" />
           </button>
           
-          <div className="hidden md:flex items-center space-x-4 border-l border-black/5 pl-8">
-             <Link to="/admin" className="text-[9px] uppercase tracking-[0.3em] font-black text-[#2C2A28] hover:text-[#C5A059] transition-colors">
-               Atelier Access
+          <div className="hidden md:flex items-center space-x-4 border-l border-white/10 pl-8">
+             <Link to="/admin" className="text-[9px] uppercase tracking-[0.3em] font-black text-[#C5A059] hover:text-white transition-colors">
+               Atelier
              </Link>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      <div 
-        className={`fixed inset-0 z-[60] bg-[#FDFBF7] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${
-          mobileMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 invisible pointer-events-none'
-        }`}
-      >
-        <div className="flex justify-between items-center p-8 border-b border-[#F5F1E9]">
-          <span className="font-serif text-3xl tracking-tighter">AEVO</span>
-          <button 
-            onClick={() => setMobileMenuOpen(false)} 
-            className="p-3 bg-[#F5F1E9] rounded-full hover:bg-[#2C2A28] hover:text-white transition-all duration-500 transform active:scale-90"
-          >
+      {/* Mobile Menu (Full Screen Overlay) */}
+      <div className={`fixed inset-0 z-[100] bg-[#0F0F0F] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${mobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'}`}>
+        <div className="flex justify-between items-center p-8">
+          <span className="font-serif text-3xl tracking-tighter text-white">AEVO</span>
+          <button onClick={() => setMobileMenuOpen(false)} className="p-3 bg-white/5 rounded-full text-white">
             <X className="w-6 h-6" />
           </button>
         </div>
         
-        <div className="flex flex-col h-full overflow-y-auto">
-          <nav className="flex flex-col p-12 space-y-8">
-            {navLinks.map((link, index) => {
-              const isActive = location.pathname === link.path;
-              return (
-                <Link 
-                  key={link.name}
-                  to={link.path} 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`text-5xl md:text-6xl font-serif italic text-[#2C2A28] transition-all duration-700 hover:pl-6 hover:text-[#C5A059] flex items-center group ${
-                    mobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-                  } ${isActive ? 'text-[#C5A059] pl-6' : ''}`}
-                  style={{ transitionDelay: `${index * 100}ms` }}
-                >
-                  <span className={`w-0 h-px bg-[#C5A059] transition-all duration-700 mr-0 group-hover:w-12 group-hover:mr-6 ${isActive ? 'w-12 mr-6' : ''}`} />
-                  {link.name}
-                </Link>
-              );
-            })}
+        <nav className="flex flex-col px-12 pt-20 space-y-10">
+          {navLinks.map((link, idx) => (
             <Link 
-              to="/admin" 
+              key={idx} 
+              to={link.path} 
               onClick={() => setMobileMenuOpen(false)}
-              className={`text-5xl md:text-6xl font-serif italic text-[#C5A059] transition-all duration-700 hover:pl-6 flex items-center group ${
-                mobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-              }`}
-              style={{ transitionDelay: `${navLinks.length * 100}ms` }}
+              className="text-4xl font-serif italic text-white/90 hover:text-[#C5A059] transition-colors"
             >
-              <span className="w-0 h-px bg-[#C5A059] transition-all duration-700 mr-0 group-hover:w-12 group-hover:mr-6" />
-              Atelier Portal
+              {link.name}
             </Link>
-          </nav>
-          
-          <div className={`mt-auto p-12 pb-24 border-t border-[#F5F1E9] transition-all duration-1000 delay-500 ${mobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <p className="text-[10px] uppercase tracking-[0.5em] text-[#C5A059] font-bold mb-6">Concierge Services</p>
-            <div className="space-y-4">
-              <a href="tel:+123456789" className="block text-xl font-light tracking-tight text-[#2C2A28] hover:text-[#C5A059] transition-colors">+1 (234) 567-AEVO</a>
-              <a href="mailto:concierge@aevo.luxury" className="block text-xl font-light tracking-tight text-[#2C2A28] hover:text-[#C5A059] transition-colors">concierge@aevo.luxury</a>
-            </div>
-          </div>
-        </div>
+          ))}
+          <Link 
+            to="/admin" 
+            onClick={() => setMobileMenuOpen(false)}
+            className="text-4xl font-serif italic text-[#C5A059]"
+          >
+            Atelier Portal
+          </Link>
+        </nav>
       </div>
     </header>
   );

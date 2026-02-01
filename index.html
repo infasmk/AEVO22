@@ -11,15 +11,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
       :root {
-        --color-cream: #FDFBF7;
-        --color-beige: #F5F1E9;
+        --color-obsidian: #0F0F0F;
+        --color-graphite: #1A1918;
         --color-gold: #C5A059;
-        --color-charcoal: #2C2A28;
+        --color-white: #FFFFFF;
       }
       body {
         font-family: 'Inter', sans-serif;
-        background-color: var(--color-cream);
-        color: var(--color-charcoal);
+        background-color: var(--color-obsidian);
+        color: var(--color-white);
         margin: 0;
         -webkit-font-smoothing: antialiased;
       }
@@ -27,21 +27,22 @@
         font-family: 'Playfair Display', serif;
       }
       ::-webkit-scrollbar {
-        width: 8px;
+        width: 6px;
       }
       ::-webkit-scrollbar-track {
-        background: #F5F1E9;
+        background: var(--color-obsidian);
       }
       ::-webkit-scrollbar-thumb {
-        background: #C5A059;
-        border-radius: 4px;
+        background: var(--color-gold);
+        border-radius: 10px;
       }
       .luxury-transition {
         transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
       }
       .glass-effect {
-        background: rgba(253, 251, 247, 0.8);
-        backdrop-filter: blur(10px);
+        background: rgba(15, 15, 15, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
       }
       @keyframes fadeIn {
         from { opacity: 0; }
@@ -51,13 +52,17 @@
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
       }
-      @keyframes scaleOut {
-        from { opacity: 1; transform: scale(1); }
-        to { opacity: 0; transform: scale(1.1); }
-      }
       .animate-fadeIn { animation: fadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
       .animate-fadeInUp { animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-      .animate-scaleOut { animation: scaleOut 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      
+      /* Mobile optimization for smooth scrolling */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
     </style>
     <script type="importmap">
     {
