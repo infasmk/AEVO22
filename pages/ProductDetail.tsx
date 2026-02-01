@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useStore } from '../store';
-import { Star, Share, ChevronLeft, ChevronRight, ShoppingBag, Compass, Feather, Shield, Diamond } from '../components/Icons';
+import { Star, Share, ChevronLeft, ChevronRight, ShoppingBag, Compass, Feather, Shield, Diamond, UserIcon } from '../components/Icons';
 import ProductCard from '../components/ProductCard';
 
 const ProductDetail: React.FC = () => {
@@ -275,40 +275,95 @@ const ProductDetail: React.FC = () => {
           </div>
         </section>
 
-        {/* Action Button Section */}
-        <div className="mb-40 flex flex-col items-center animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-          <div className="w-full max-w-3xl bg-[#2C2A28] p-12 md:p-16 rounded-[4rem] shadow-[0_80px_120px_-30px_rgba(0,0,0,0.4)] text-center relative overflow-hidden group">
-             {/* Decorative background element */}
-             <div className="absolute top-0 right-0 w-64 h-64 bg-[#C5A059] opacity-[0.03] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-1000" />
-             
-             <span className="text-[#C5A059] uppercase text-[10px] font-bold tracking-[0.6em] mb-10 block">Ready to Own a Legacy?</span>
-             <h2 className="text-4xl md:text-5xl font-serif text-white mb-14 italic">"Time waits for no one."</h2>
-             
-             <button 
-                onClick={handleBuyNow}
-                disabled={product.stock === 0}
-                className={`w-full py-10 rounded-[2.5rem] uppercase text-[13px] font-bold tracking-[0.7em] transition-all duration-700 flex items-center justify-center space-x-6 group ${
-                  product.stock === 0 
-                    ? 'bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700' 
-                    : 'bg-[#C5A059] text-white hover:bg-white hover:text-black shadow-2xl'
-                }`}
-             >
-               <ShoppingBag className="w-7 h-7 transition-transform duration-700 group-hover:scale-125" />
-               <span>{product.stock === 0 ? 'Waitlist for Re-release' : 'Acquire Piece Now'}</span>
-             </button>
-             
-             <div className="flex flex-col md:flex-row items-center justify-center gap-8 mt-14 pt-10 border-t border-white/5">
-                <p className="text-[10px] uppercase tracking-[0.3em] text-white/40 font-bold flex items-center gap-3">
-                  <div className="w-1.5 h-1.5 bg-[#C5A059] rounded-full animate-pulse" />
-                  Physical & Digital Authentication
+        {/* ENHANCED: Acquire Piece Section */}
+        <section className="mb-40 animate-fadeInUp">
+          <div className="relative overflow-hidden bg-[#1A1918] rounded-[4rem] shadow-[0_100px_150px_-40px_rgba(0,0,0,0.6)] group">
+            {/* Visual Flair Elements */}
+            <div className="absolute top-0 right-0 w-[40%] h-full bg-gradient-to-l from-[#C5A059]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#C5A059] blur-[120px] opacity-[0.05] -translate-x-1/2 translate-y-1/2" />
+            
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 items-stretch min-h-[500px]">
+              {/* Left Column: The Narrative */}
+              <div className="lg:col-span-7 p-12 md:p-20 flex flex-col justify-center border-b lg:border-b-0 lg:border-r border-white/5">
+                <div className="flex items-center space-x-4 mb-10">
+                  <div className="h-px w-12 bg-[#C5A059]" />
+                  <span className="text-[#C5A059] uppercase text-[11px] font-extrabold tracking-[0.6em]">Exclusive Acquisition</span>
+                </div>
+                
+                <h2 className="text-4xl md:text-6xl font-serif text-white mb-8 leading-tight">
+                  Your <span className="italic text-[#C5A059]">Heritage</span> <br />Begins Today.
+                </h2>
+                
+                <p className="text-white/50 text-lg font-light leading-relaxed max-w-xl mb-12 italic">
+                  Acquiring an AEVO timepiece is more than a purchase; it is a commitment to excellence. 
+                  Every piece in our collection is strictly numbered and hand-delivered by our private concierge network.
                 </p>
-                <p className="text-[10px] uppercase tracking-[0.3em] text-white/40 font-bold flex items-center gap-3">
-                  <div className="w-1.5 h-1.5 bg-[#C5A059] rounded-full animate-pulse" />
-                  Insured Doorstep Delivery
-                </p>
-             </div>
+
+                <div className="grid grid-cols-2 gap-8 pt-10 border-t border-white/5">
+                  <div className="flex items-start space-x-5">
+                    <Shield className="w-8 h-8 text-[#C5A059] flex-shrink-0" />
+                    <div>
+                      <h4 className="text-white text-xs font-bold uppercase tracking-widest mb-1">Authenticated</h4>
+                      <p className="text-white/40 text-[10px] uppercase tracking-wider">Physical & NFT Certificate</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-5">
+                    <UserIcon className="w-8 h-8 text-[#C5A059] flex-shrink-0" />
+                    <div>
+                      <h4 className="text-white text-xs font-bold uppercase tracking-widest mb-1">White-Glove</h4>
+                      <p className="text-white/40 text-[10px] uppercase tracking-wider">Insured Global Delivery</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: The Transaction */}
+              <div className="lg:col-span-5 p-12 md:p-20 flex flex-col items-center justify-center bg-[#2C2A28]/30 backdrop-blur-xl">
+                <div className="text-center w-full space-y-12">
+                  <div className="space-y-2">
+                    <span className="text-white/30 text-[10px] uppercase tracking-[0.5em] font-bold block">Final Valuation</span>
+                    <div className="flex flex-col items-center">
+                      <span className="text-6xl md:text-7xl font-light text-white tracking-tighter leading-none mb-2 transition-all duration-700">
+                        ₹{calculateTotalPrice().toLocaleString('en-IN')}
+                      </span>
+                      {product.originalPrice && (
+                        <span className="text-white/20 line-through text-xl font-light tracking-widest">
+                          ₹{product.originalPrice.toLocaleString('en-IN')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="relative group/btn w-full">
+                    <button 
+                      onClick={handleBuyNow}
+                      disabled={product.stock === 0}
+                      className={`w-full py-9 rounded-full uppercase text-[12px] font-black tracking-[0.8em] transition-all duration-700 flex items-center justify-center space-x-6 relative z-10 ${
+                        product.stock === 0 
+                          ? 'bg-white/5 text-white/20 cursor-not-allowed border border-white/10' 
+                          : 'bg-[#C5A059] text-white hover:bg-white hover:text-black shadow-[0_20px_60px_-10px_rgba(197,160,89,0.4)]'
+                      }`}
+                    >
+                      <ShoppingBag className="w-7 h-7 transition-transform duration-700 group-hover/btn:scale-125" />
+                      <span>{product.stock === 0 ? 'Waitlist Open' : 'Secure This Piece'}</span>
+                    </button>
+                    {/* Shadow pulse effect */}
+                    <div className="absolute inset-0 bg-[#C5A059] rounded-full blur-[40px] opacity-0 group-hover/btn:opacity-20 transition-opacity duration-700" />
+                  </div>
+
+                  <div className="space-y-4">
+                    <p className="text-white/30 text-[9px] uppercase tracking-[0.3em] font-medium max-w-[240px] mx-auto leading-relaxed">
+                      Complimentary personal laser engraving included with all direct acquisitions.
+                    </p>
+                    <div className="flex justify-center space-x-3 opacity-30 group-hover:opacity-60 transition-opacity duration-1000">
+                      {[1,2,3,4].map(i => <div key={i} className="w-1 h-1 bg-white rounded-full" />)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
 
         {/* Heritage Section */}
         <section className="py-40 border-y border-[#F5F1E9] text-center mb-40 animate-fadeInUp">
