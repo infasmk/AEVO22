@@ -28,8 +28,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const getStockStatus = () => {
     if (product.stock === 0) return { label: 'Sold Out', color: 'text-red-500', dot: 'bg-red-500' };
-    if (product.stock <= 5) return { label: 'Scarcity Alert', color: 'text-[#C5A059]', dot: 'bg-[#C5A059]' };
-    return { label: 'Available', color: 'text-emerald-600', dot: 'bg-emerald-600' };
+    if (product.stock <= 5) return { label: 'Low Stock', color: 'text-[#C5A059]', dot: 'bg-[#C5A059]' };
+    return { label: 'In Stock', color: 'text-emerald-600', dot: 'bg-emerald-600' };
   };
 
   const stockStatus = getStockStatus();
