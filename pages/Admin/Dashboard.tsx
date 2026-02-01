@@ -22,111 +22,63 @@ const AdminDashboard: React.FC = () => {
   ];
 
   return (
-    <div className="p-12 space-y-12 animate-fadeIn">
-      <div className="flex justify-between items-end">
+    <div className="space-y-12 animate-fadeIn">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
-          <h1 className="text-4xl font-serif mb-4">Command Center</h1>
-          <p className="text-white/40 text-[10px] uppercase tracking-[0.5em]">Global Horological Performance</p>
+          <h1 className="text-3xl font-serif mb-2 italic">Atelier Insights</h1>
+          <p className="text-black/30 text-[9px] uppercase tracking-[0.6em] font-black">Performance Analytics</p>
         </div>
-        <div className="flex space-x-6">
-          <Link to="/admin/products" className="bg-white/5 text-white/60 px-8 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest border border-white/10 hover:border-white/20 transition-all">Add Product</Link>
-          <button className="bg-[#C5A059] text-white px-8 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-2xl hover:scale-105 transition-all">Export Portfolio</button>
+        <div className="flex space-x-4">
+          <Link to="/admin/products" className="text-black/40 px-6 py-3 rounded-full text-[9px] font-black uppercase tracking-widest border border-black/5 hover:bg-black/5 transition-all">Enroll Product</Link>
+          <button className="bg-black text-white px-8 py-3 rounded-full text-[9px] font-black uppercase tracking-widest shadow-xl hover:scale-105 transition-all">Download Report</button>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'Total Portfolio Value', val: `₹${totalSales.toLocaleString('en-IN')}`, icon: <Star />, change: '+12.5%', up: true },
-          { label: 'Luxury Commissions', val: totalOrders, icon: <ShoppingBag />, change: '+5%', up: true },
-          { label: 'Average Acquisition', val: `₹${totalOrders > 0 ? (totalSales / totalOrders).toLocaleString('en-IN', { maximumFractionDigits: 0 }) : 0}`, icon: <Star />, change: '-2%', up: false },
-          { label: 'Active Vault Assets', val: totalProducts, icon: <UserIcon />, change: 'Steady', up: true },
+          { label: 'Portfolio Val', val: `₹${totalSales.toLocaleString('en-IN')}`, icon: <Star />, color: 'text-black' },
+          { label: 'Commissions', val: totalOrders, icon: <ShoppingBag />, color: 'text-[#A68E74]' },
+          { label: 'Avg Ticket', val: `₹${totalOrders > 0 ? (totalSales / totalOrders).toLocaleString('en-IN', { maximumFractionDigits: 0 }) : 0}`, icon: <Star />, color: 'text-black' },
+          { label: 'Vault Count', val: totalProducts, icon: <UserIcon />, color: 'text-[#A68E74]' },
         ].map((stat, i) => (
-          <div key={i} className="bg-[#1F1E1D] p-10 rounded-[2.5rem] border border-white/5 shadow-2xl">
+          <div key={i} className="bg-white p-8 rounded-[2rem] border border-black/[0.04] shadow-sm hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-6">
-              <span className="text-[9px] uppercase tracking-widest text-white/20 font-bold">{stat.label}</span>
-              <div className="text-[#C5A059] opacity-40">{stat.icon}</div>
+              <span className="text-[7px] uppercase tracking-[0.3em] text-black/20 font-black">{stat.label}</span>
+              <div className={`${stat.color} opacity-20`}>{stat.icon}</div>
             </div>
-            <p className="text-4xl font-light tracking-tighter text-white mb-2">{stat.val}</p>
-            <span className={`text-[10px] font-bold tracking-widest uppercase ${stat.up ? 'text-emerald-400' : 'text-red-400'}`}>{stat.change}</span>
+            <p className="text-xl md:text-2xl font-light tracking-tighter text-black/80">{stat.val}</p>
           </div>
         ))}
       </div>
 
-      {/* Analytics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        <div className="bg-[#1F1E1D] p-10 rounded-[2.5rem] border border-white/5">
-          <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/20 mb-12">Revenue Flow Pattern (₹)</h3>
-          <div className="h-[350px]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-white p-10 rounded-[2.5rem] border border-black/[0.04] shadow-sm">
+          <h3 className="text-[8px] font-black uppercase tracking-[0.4em] text-black/20 mb-12">Capital Flow Projection</h3>
+          <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.2)' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.2)' }} />
-                <Tooltip cursor={{ fill: 'rgba(255,255,255,0.02)' }} contentStyle={{ backgroundColor: '#1F1E1D', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1rem' }} />
-                <Bar dataKey="sales" fill="#C5A059" radius={[10, 10, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.03)" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'rgba(0,0,0,0.2)' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'rgba(0,0,0,0.2)' }} />
+                <Tooltip cursor={{ fill: 'rgba(0,0,0,0.01)' }} contentStyle={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '1rem', fontSize: '10px' }} />
+                <Bar dataKey="sales" fill="#A68E74" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
-        <div className="bg-[#1F1E1D] p-10 rounded-[2.5rem] border border-white/5">
-          <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/20 mb-12">Sales Momentum Vector</h3>
-          <div className="h-[350px]">
+        <div className="bg-white p-10 rounded-[2.5rem] border border-black/[0.04] shadow-sm">
+          <h3 className="text-[8px] font-black uppercase tracking-[0.4em] text-black/20 mb-12">Acquisition Velocity</h3>
+          <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.2)' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.2)' }} />
-                <Tooltip contentStyle={{ backgroundColor: '#1F1E1D', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1rem' }} />
-                <Line type="monotone" dataKey="sales" stroke="#C5A059" strokeWidth={3} dot={{ fill: '#C5A059', strokeWidth: 2, r: 4 }} activeDot={{ r: 8, fill: '#fff' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.03)" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'rgba(0,0,0,0.2)' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'rgba(0,0,0,0.2)' }} />
+                <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '1rem', fontSize: '10px' }} />
+                <Line type="monotone" dataKey="sales" stroke="#000" strokeWidth={1.5} dot={{ fill: '#A68E74', strokeWidth: 0, r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
-        </div>
-      </div>
-
-      {/* Activity Table */}
-      <div className="bg-[#1F1E1D] border border-white/5 rounded-[2.5rem] overflow-hidden">
-        <div className="p-10 border-b border-white/5 flex justify-between items-center">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">Recent Commissions</h3>
-          <Link to="/admin/orders" className="text-[10px] uppercase font-bold tracking-widest text-[#C5A059] border-b border-[#C5A059]/20 pb-1">Review All Records</Link>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="text-[9px] uppercase tracking-widest text-white/20 border-b border-white/5">
-                <th className="px-10 py-6 font-bold">Client Name</th>
-                <th className="px-10 py-6 font-bold">Valuation</th>
-                <th className="px-10 py-6 font-bold">Protocol Status</th>
-                <th className="px-10 py-6 font-bold">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {orders.slice(0, 5).map(order => (
-                <tr key={order.id} className="text-sm hover:bg-white/5 transition-colors">
-                  <td className="px-10 py-6">
-                    <div className="flex flex-col">
-                      <span className="text-white font-medium">{order.user_name}</span>
-                      <span className="text-[10px] text-white/20 font-mono uppercase">{order.id}</span>
-                    </div>
-                  </td>
-                  <td className="px-10 py-6 font-serif text-white">₹{order.total_amount.toLocaleString('en-IN')}</td>
-                  <td className="px-10 py-6">
-                    <span className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest border ${
-                      order.status === 'Delivered' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                      order.status === 'Shipped' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                      'bg-[#C5A059]/10 text-[#C5A059] border-[#C5A059]/20'
-                    }`}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="px-10 py-6">
-                    <Link to="/admin/orders" className="p-2 hover:bg-white/10 rounded-full transition-colors inline-block"><ChevronRight className="w-4 h-4 text-[#C5A059]" /></Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       </div>
     </div>

@@ -13,17 +13,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
 
-  // Exact requested pastel palette
+  // Recalibrated "More More Light" Pastel Palette
   const pastels = [
-    '#BFC6C4', // Sage Grey
-    '#E8E2D8', // Sand Taupe
-    '#FFEAD3', // Peach Cream
-    '#F6F0D7', // Ivory Silk
+    '#DDE2E0', // Lightened Sage Mist
+    '#F2EFEC', // Lightened Parchment
+    '#FFF5E9', // Lightened Apricot Silk
+    '#FAF9F2', // Lightened Ivory Dew
   ];
 
   const cardColor = useMemo(() => pastels[index % pastels.length], [index]);
 
-  const handleBuyNow = (e: React.MouseEvent) => {
+  const handleDetails = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     navigate(`/product/${product.id}`);
@@ -31,15 +31,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
 
   const getStockStatus = () => {
     if (product.stock === 0) return { label: 'Archived', color: 'text-gray-400', dot: 'bg-gray-400' };
-    if (product.stock <= 5) return { label: 'Limited', color: 'text-[#8C7861]', dot: 'bg-[#8C7861]' };
-    return { label: 'In Stock', color: 'text-emerald-600/70', dot: 'bg-emerald-500' };
+    if (product.stock <= 5) return { label: 'Limited', color: 'text-[#A68E74]', dot: 'bg-[#A68E74]' };
+    return { label: 'In Stock', color: 'text-emerald-600/60', dot: 'bg-emerald-400' };
   };
 
   const stockStatus = getStockStatus();
 
   return (
     <div 
-      className={`group relative rounded-[1.5rem] transition-all duration-[800ms] border border-black/5 overflow-hidden cursor-pointer ${
+      className={`group relative rounded-[1.5rem] transition-all duration-[800ms] border border-black/[0.03] overflow-hidden cursor-pointer ${
         isHovered ? 'shadow-xl -translate-y-1' : 'shadow-none'
       }`}
       style={{ backgroundColor: cardColor }}
@@ -49,8 +49,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
     >
       {/* Floating Tag */}
       {product.tag !== 'None' && (
-        <div className="absolute top-4 left-4 z-20">
-          <span className="bg-white/80 backdrop-blur-md text-black/60 text-[7px] px-3 py-1.5 uppercase tracking-[0.2em] font-bold rounded-full shadow-sm border border-black/5">
+        <div className="absolute top-3 left-3 z-20">
+          <span className="bg-white/90 backdrop-blur-md text-black/50 text-[7px] px-2.5 py-1 uppercase tracking-[0.2em] font-black rounded-full shadow-sm border border-black/5">
             {product.tag}
           </span>
         </div>
@@ -62,33 +62,33 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
           src={product.images[0]} 
           alt={product.name}
           loading="lazy"
-          className={`w-full h-full object-cover transition-all duration-[1500ms] mix-blend-multiply opacity-80 ${isHovered ? 'scale-105 rotate-1' : 'scale-100'}`}
+          className={`w-full h-full object-cover transition-all duration-[1200ms] mix-blend-multiply opacity-90 ${isHovered ? 'scale-105' : 'scale-100'}`}
         />
         
-        {/* Quick Action (Desktop) */}
-        <div className={`absolute bottom-4 left-4 right-4 transition-all duration-500 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-           <button onClick={handleBuyNow} className="w-full bg-white text-black py-3 rounded-xl text-[9px] font-bold uppercase tracking-widest shadow-lg border border-black/5">
-             View Details
+        {/* Quick Action */}
+        <div className={`absolute bottom-3 left-3 right-3 transition-all duration-500 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+           <button onClick={handleDetails} className="w-full bg-white/90 backdrop-blur-sm text-black py-2.5 rounded-xl text-[8px] font-black uppercase tracking-widest shadow-md border border-black/5">
+             View Piece
            </button>
         </div>
       </div>
 
       {/* Content Area */}
-      <div className="p-5">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-[7px] uppercase tracking-[0.3em] text-[#8C7861] font-black">{product.category}</span>
-          <div className="flex items-center space-x-1.5">
+      <div className="p-4 md:p-5">
+        <div className="flex justify-between items-center mb-1.5">
+          <span className="text-[7px] uppercase tracking-[0.3em] text-[#A68E74] font-black">{product.category}</span>
+          <div className="flex items-center space-x-1">
             <div className={`w-1 h-1 rounded-full ${stockStatus.dot}`} />
-            <span className={`text-[7px] uppercase tracking-widest font-bold ${stockStatus.color}`}>{stockStatus.label}</span>
+            <span className={`text-[7px] uppercase tracking-widest font-black ${stockStatus.color}`}>{stockStatus.label}</span>
           </div>
         </div>
 
-        <h3 className="font-serif text-lg text-black/80 group-hover:text-[#8C7861] transition-colors mb-2 line-clamp-1">{product.name}</h3>
+        <h3 className="font-serif text-base md:text-lg text-black/70 group-hover:text-[#A68E74] transition-colors mb-2 line-clamp-1">{product.name}</h3>
         
-        <div className="flex justify-between items-center pt-3 border-t border-black/5">
-          <span className="text-base font-medium text-black/60">₹{product.price.toLocaleString('en-IN')}</span>
-          <div className="w-8 h-8 rounded-full bg-white/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <ShoppingBag className="w-3.5 h-3.5 text-black/40" />
+        <div className="flex justify-between items-center pt-2.5 border-t border-black/[0.05]">
+          <span className="text-sm md:text-base font-medium text-black/50">₹{product.price.toLocaleString('en-IN')}</span>
+          <div className="w-7 h-7 rounded-full bg-white/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <ShoppingBag className="w-3 h-3 text-black/30" />
           </div>
         </div>
       </div>
