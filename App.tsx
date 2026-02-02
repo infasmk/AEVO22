@@ -1,8 +1,8 @@
 
 import React, { useEffect, useState } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
-const { BrowserRouter: Router, Routes, Route, useLocation } = ReactRouterDOM;
-import { AppProvider } from './store';
+const { BrowserRouter: Router, Routes, Route, useLocation, Navigate } = ReactRouterDOM;
+import { AppProvider, useStore } from './store';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -16,6 +16,7 @@ import AdminLayout from './pages/Admin/AdminLayout';
 import AdminDashboard from './pages/Admin/Dashboard';
 import AdminProducts from './pages/Admin/Products';
 import AdminBanners from './pages/Admin/Banners';
+import AdminLogin from './pages/Admin/Login';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -23,6 +24,23 @@ const ScrollToTop = () => {
     window.scrollTo(0, 0);
   }, [pathname]);
   return null;
+};
+
+const ProtectedAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { session, isAuthLoading, isAdmin } = useStore();
+  
+  if (isAuthLoading) {
+    return <LoadingScreen />;
+  }
+  
+  if (!session) {
+    return <AdminLogin />;
+  }
+
+  // Optional: If you want to strictly restrict to 'is_admin' true users only:
+  // if (!isAdmin) return <div className="h-screen flex items-center justify-center bg-[#1F1A16] text-[#A68E74] font-serif italic text-2xl">Access Revoked: Insufficient Privileges.</div>;
+
+  return <>{children}</>;
 };
 
 const MainContent: React.FC = () => {
@@ -49,13 +67,16 @@ const MainContent: React.FC = () => {
 
   if (isAdminPath) {
     return (
-      <Routes>
-        <Route element={<AdminLayout />}>
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/products" element={<AdminProducts />} />
-          <Route path="/admin/banners" element={<AdminBanners />} />
-        </Route>
-      </Routes>
+      <ProtectedAdminRoute>
+        <Routes>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/products" element={<AdminProducts />} />
+            <Route path="/admin/banners" element={<AdminBanners />} />
+            <Route path="/admin/*" element={<Navigate to="/admin" />} />
+          </Route>
+        </Routes>
+      </ProtectedAdminRoute>
     );
   }
 

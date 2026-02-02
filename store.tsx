@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { Product, Banner, Order, Category, ColorOption } from './types';
 import { supabase, isConfigValid } from './supabase';
 import { INITIAL_PRODUCTS, INITIAL_BANNERS, MOCK_ORDERS } from './constants';
+import { Session, User } from '@supabase/supabase-js';
 
 interface AppState {
   products: Product[];
@@ -13,6 +14,12 @@ interface AppState {
   isLoading: boolean;
   connectionStatus: 'online' | 'offline' | 'connecting' | 'invalid_config';
   
+  // Auth State
+  user: User | null;
+  session: Session | null;
+  isAdmin: boolean;
+  isAuthLoading: boolean;
+  
   fetchData: () => Promise<void>;
   upsertProduct: (p: Product) => Promise<boolean>;
   deleteProduct: (id: string) => Promise<boolean>;
@@ -22,6 +29,7 @@ interface AppState {
   deleteCategory: (id: string) => Promise<boolean>;
   updateOrderStatus: (id: string, status: Order['status']) => Promise<boolean>;
   toggleWishlist: (id: string) => void;
+  signOut: () => Promise<void>;
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
@@ -37,6 +45,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isLoading, setIsLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'connecting' | 'invalid_config'>('connecting');
   
+  // Auth States
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  
   const lastWriteTime = useRef<number>(0);
 
   // Helper to map DB string array to ColorOption objects
@@ -48,11 +62,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  // Helper to map ColorOption objects back to DB string format
   const stringifyColors = (colors: ColorOption[]): string[] => {
     if (!colors) return [];
     return colors.map(c => `${c.name}:${c.hex}`);
   };
+
+  // Auth Listener
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', session.user.id)
+          .single();
+        setIsAdmin(!!profile?.is_admin);
+      }
+      setIsAuthLoading(false);
+    };
+
+    checkUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', session.user.id)
+          .single();
+        setIsAdmin(!!profile?.is_admin);
+      } else {
+        setIsAdmin(false);
+      }
+      setIsAuthLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     const loadLocal = () => {
@@ -120,8 +172,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const upsertProduct = async (p: Product) => {
     lastWriteTime.current = Date.now();
-    
-    // Update local state immediately for responsiveness
     setProducts(prev => {
       const exists = prev.find(item => item.id === p.id);
       const updated = exists ? prev.map(item => item.id === p.id ? p : item) : [p, ...prev];
@@ -151,15 +201,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     try {
       const { error } = await supabase.from('products').upsert(dbPayload);
-      if (error) {
-        console.group("🔴 Sync Failure");
-        console.error("Supabase Error:", error.message);
-        console.groupEnd();
-        return false;
-      }
-      return true;
+      return !error;
     } catch (err) {
-      console.error("Unexpected sync error:", err);
       return false;
     }
   };
@@ -237,11 +280,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
+  const signOut = async () => {
+    await supabase.auth.signOut();
+  };
+
   return (
     <AppContext.Provider value={{
       products, banners, orders, wishlist, isLoading, categories, connectionStatus,
+      user, session, isAdmin, isAuthLoading,
       fetchData, upsertProduct, deleteProduct, upsertBanner, deleteBanner, 
-      upsertCategory, deleteCategory, updateOrderStatus, toggleWishlist
+      upsertCategory, deleteCategory, updateOrderStatus, toggleWishlist, signOut
     }}>
       {children}
     </AppContext.Provider>
