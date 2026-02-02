@@ -1,18 +1,16 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = 'https://qznujzgqcmirchkwhzxu.supabase.co';
 
 /**
- * ⚠️ CRITICAL WARNING:
- * The key 'sb_publishable_...' is a STRIPE PUBLIC KEY, not a Supabase key.
- * 
- * To fix the "Database not syncing" error:
- * 1. Go to your Supabase Dashboard (https://supabase.com/dashboard)
- * 2. Select Project > Settings > API
- * 3. Copy the 'anon' / 'public' key (IT MUST START WITH 'eyJ...')
- * 4. Paste it below.
+ * 🔗 DATABASE LINKED
+ * Using the verified Supabase Anon Key.
  */
-const supabaseAnonKey = 'sb_publishable_GmEeY_Tm7kmXIXO42mqxgw_0CidlEWG';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6bnVqemdxY21pcmNoa3doenh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NjU5MjEsImV4cCI6MjA4NTU0MTkyMX0.0PxfII9ZPyUs6Fa1ASiN5I57J3F7uZzlvpzKN-Za-BA';
+
+// Helper to check if configuration is valid (No longer detecting Stripe keys)
+export const isConfigValid = () => {
+  return supabaseAnonKey.startsWith('eyJ') && supabaseUrl.includes('.supabase.co');
+};
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);

@@ -1,6 +1,7 @@
-
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+// Use star import to resolve named export issues in some environments
+import * as ReactRouterDOM from 'react-router-dom';
+const { BrowserRouter: Router, Routes, Route, useLocation } = ReactRouterDOM;
 import { AppProvider } from './store';
 import Header from './components/Header';
 import Footer from './components/Footer';

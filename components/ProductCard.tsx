@@ -1,6 +1,7 @@
-
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+// Use star import to resolve named export issues in some environments
+import * as ReactRouterDOM from 'react-router-dom';
+const { useNavigate } = ReactRouterDOM;
 import { Product } from '../types';
 import { ShoppingBag } from './Icons';
 

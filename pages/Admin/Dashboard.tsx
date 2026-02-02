@@ -1,8 +1,9 @@
-
 import React from 'react';
-import { Link } from 'react-router-dom';
+// Use star import to resolve named export issues in some environments
+import * as ReactRouterDOM from 'react-router-dom';
+const { Link } = ReactRouterDOM;
 import { useStore } from '../../store';
-import { ShoppingBag, UserIcon, Star, ChevronRight, TrendingUp } from '../../components/Icons';
+import { ShoppingBag, UserIcon, Star, ChevronRight, TrendingUp, Shield } from '../../components/Icons';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 const AdminDashboard: React.FC = () => {
@@ -30,7 +31,7 @@ const AdminDashboard: React.FC = () => {
             <div className={`px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest border ${
               connectionStatus === 'online' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-100'
             }`}>
-              {connectionStatus}
+              {connectionStatus === 'invalid_config' ? 'Config Error' : connectionStatus}
             </div>
           </div>
           <p className="text-[#A68E74] text-[9px] uppercase tracking-[0.5em] font-black">Global Performance Registry</p>
@@ -40,6 +41,20 @@ const AdminDashboard: React.FC = () => {
           <button className="flex-1 md:flex-none bg-black text-white px-10 py-4 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-2xl hover:scale-105 transition-all">Export Ledger</button>
         </div>
       </div>
+
+      {/* Critical Sync Warning for User */}
+      {connectionStatus === 'invalid_config' && (
+        <div className="bg-red-50 border border-red-100 rounded-[2rem] p-8 flex flex-col md:flex-row gap-8 items-center animate-pulse">
+          <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center text-red-500 flex-shrink-0">
+             <Shield className="w-8 h-8" />
+          </div>
+          <div className="flex-1 text-center md:text-left">
+            <h3 className="text-red-800 font-bold text-lg mb-1">Database Sync Error: Invalid API Key</h3>
+            <p className="text-red-700/60 text-sm italic">You are currently using a <b>Stripe Publishable Key</b> (starting with <code className="bg-red-200/50 px-1 px-1">sb_publishable</code>) in your <code className="bg-red-200/50 px-1">supabase.ts</code> file.</p>
+            <p className="text-red-700/80 text-xs font-black uppercase tracking-widest mt-4">Fix: Use the "anon / public" key from your Supabase Dashboard API settings.</p>
+          </div>
+        </div>
+      )}
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">

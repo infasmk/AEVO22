@@ -1,6 +1,7 @@
-
 import React, { useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+// Use star import to resolve named export issues in some environments
+import * as ReactRouterDOM from 'react-router-dom';
+const { useSearchParams } = ReactRouterDOM;
 import { useStore } from '../store';
 import ProductCard from '../components/ProductCard';
 import SEO from '../components/SEO';

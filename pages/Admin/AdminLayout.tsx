@@ -1,6 +1,7 @@
-
 import React, { useState } from 'react';
-import { Link, useLocation, Outlet } from 'react-router-dom';
+// Use star import to resolve named export issues in some environments
+import * as ReactRouterDOM from 'react-router-dom';
+const { Link, useLocation, Outlet } = ReactRouterDOM;
 import { useStore } from '../../store';
 import { ShoppingBag, Star, UserIcon, Shield, Menu, X } from '../../components/Icons';
 

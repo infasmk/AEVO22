@@ -1,7 +1,6 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { Product, Banner, Order, Category } from './types';
-import { supabase } from './supabase';
+import { supabase, isConfigValid } from './supabase';
 import { INITIAL_PRODUCTS, INITIAL_BANNERS, MOCK_ORDERS } from './constants';
 
 interface AppState {
@@ -11,7 +10,7 @@ interface AppState {
   categories: Category[];
   wishlist: string[];
   isLoading: boolean;
-  connectionStatus: 'online' | 'offline' | 'connecting';
+  connectionStatus: 'online' | 'offline' | 'connecting' | 'invalid_config';
   
   fetchData: () => Promise<void>;
   upsertProduct: (p: Product) => Promise<boolean>;
@@ -26,7 +25,7 @@ interface AppState {
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'aevo_vault_v9';
+const LOCAL_STORAGE_KEY = 'aevo_vault_v11';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -35,11 +34,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [categories, setCategories] = useState<Category[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'connecting'>('connecting');
+  const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'connecting' | 'invalid_config'>('connecting');
   
   const lastWriteTime = useRef<number>(0);
 
-  // Initial local load for instant UI
   useEffect(() => {
     const loadLocal = () => {
       const cachedProducts = localStorage.getItem(`${LOCAL_STORAGE_KEY}_products`);
@@ -64,7 +62,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const fetchData = useCallback(async () => {
-    // Avoid race conditions: don't overwrite if we just wrote locally
+    if (!isConfigValid()) {
+      setConnectionStatus('invalid_config');
+      return;
+    }
+
     if (Date.now() - lastWriteTime.current < 4000) return;
 
     setConnectionStatus('connecting');
@@ -76,10 +78,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabase.from('categories').select('*').order('name', { ascending: true })
       ]);
 
-      if (pRes.error) {
-        console.warn("Supabase Access Restricted. Using local vault fallback.");
-        throw pRes.error;
-      }
+      if (pRes.error) throw pRes.error;
 
       if (pRes.data && pRes.data.length > 0) setProducts(pRes.data);
       if (bRes.data && bRes.data.length > 0) setBanners(bRes.data);
@@ -88,7 +87,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
       setConnectionStatus('online');
     } catch (err: any) {
-      console.warn("Cloud disconnected:", err.message);
+      console.warn("AEVO Sync: Database connection established, but tables might be missing. Check your SQL Editor.");
       setConnectionStatus('offline');
     }
   }, []);
@@ -100,7 +99,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const upsertProduct = async (p: Product) => {
     lastWriteTime.current = Date.now();
     
-    // 1. UPDATE UI INSTANTLY (Local-First)
+    // 1. UPDATE UI INSTANTLY (Local Persistence)
     setProducts(prev => {
       const exists = prev.find(item => item.id === p.id);
       const updated = exists ? prev.map(item => item.id === p.id ? p : item) : [p, ...prev];
@@ -108,7 +107,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updated;
     });
 
-    // 2. PREPARE DB PAYLOAD (Strict schema mapping)
+    if (!isConfigValid()) return false;
+
+    // Strict schema mapping to match the SQL script provided
     const dbPayload = {
       id: p.id,
       name: p.name,
@@ -129,7 +130,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const { error } = await supabase.from('products').upsert(dbPayload);
       if (error) {
-        console.error("SYNC FAILED: Ensure you have run the SQL script in Supabase. Error:", error.message);
+        console.error("SUPABASE ERROR:", error.message);
+        if (error.message.includes('relation "products" does not exist')) {
+          console.error("🔴 ACTION REQUIRED: You must run the CREATE TABLE SQL script in your Supabase SQL Editor.");
+        }
         return false;
       }
       return true;
