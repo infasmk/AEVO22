@@ -2,7 +2,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Product, Banner, Order, Category, ColorOption } from './types';
 import { supabase, isConfigValid } from './supabase';
-import { INITIAL_PRODUCTS, INITIAL_BANNERS } from './constants';
 import { Session, User } from '@supabase/supabase-js';
 
 interface AppState {
@@ -34,7 +33,7 @@ interface AppState {
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'aevo_v24_forced_live';
+const LOCAL_STORAGE_KEY = 'aevo_v26_absolute_live';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -70,8 +69,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsAdmin(!!data.is_admin);
         return !!data.is_admin;
       }
+      setIsAdmin(false);
       return false;
     } catch (e) {
+      setIsAdmin(false);
       return false;
     }
   };
@@ -84,9 +85,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setConnectionStatus('connecting');
     try {
-      const { data: { session: activeSession } } = await supabase.auth.getSession();
-      if (activeSession?.user) await verifyAdmin(activeSession.user.id);
-
+      // Get data in parallel
       const [pRes, bRes, cRes, oRes] = await Promise.all([
         supabase.from('products').select('*').order('created_at', { ascending: false }),
         supabase.from('banners').select('*').order('display_order', { ascending: true }),
@@ -94,84 +93,85 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabase.from('orders').select('*').order('created_at', { ascending: false })
       ]);
 
-      // CRITICAL: Force update even if array is empty (to hide demo data)
-      if (!pRes.error) {
-        const liveProducts = pRes.data || [];
-        const transformed = liveProducts.map(p => ({ ...p, colors: parseColors(p.colors) }));
-        setProducts(transformed);
-        localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(transformed));
+      // If there's an error in critical tables, mark as offline
+      if (pRes.error || bRes.error) {
+        throw new Error('Database response failed');
       }
 
-      if (!bRes.error) {
-        const liveBanners = bRes.data || [];
-        setBanners(liveBanners);
-        localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(liveBanners));
-      }
+      const liveProducts = pRes.data || [];
+      const transformed = liveProducts.map(p => ({ ...p, colors: parseColors(p.colors) }));
+      setProducts(transformed);
+      localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(transformed));
 
-      if (!cRes.error) setCategories(cRes.data || []);
-      if (!oRes.error) setOrders(oRes.data || []);
+      const liveBanners = bRes.data || [];
+      setBanners(liveBanners);
+      localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(liveBanners));
+
+      setCategories(cRes.data || []);
+      setOrders(oRes.data || []);
       
       setConnectionStatus('online');
     } catch (err: any) {
+      console.error("Fetch Error:", err);
       setConnectionStatus('offline');
     }
   }, []);
 
+  // Auth & Initial Data Sequence
   useEffect(() => {
-    const initAuth = async () => {
+    const initApp = async () => {
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         setSession(initialSession);
         setUser(initialSession?.user ?? null);
-        if (initialSession?.user) await verifyAdmin(initialSession.user.id);
+        
+        if (initialSession?.user) {
+          await verifyAdmin(initialSession.user.id);
+        }
+        
+        await fetchData();
+      } catch (e) {
+        console.error("Init error", e);
+        setConnectionStatus('offline');
       } finally {
         setIsAuthLoading(false);
+        setIsLoading(false);
       }
     };
 
-    initAuth();
+    initApp();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setSession(null);
-        setIsAdmin(false);
-        fetchData();
-        return;
-      }
       setSession(newSession);
       setUser(newSession?.user ?? null);
-      if (newSession?.user) await verifyAdmin(newSession.user.id);
+      
+      if (event === 'SIGNED_OUT') {
+        setIsAdmin(false);
+        setProducts([]);
+        setBanners([]);
+        setOrders([]);
+        localStorage.removeItem(`${LOCAL_STORAGE_KEY}_products`);
+        localStorage.removeItem(`${LOCAL_STORAGE_KEY}_banners`);
+      } else if (newSession?.user) {
+        await verifyAdmin(newSession.user.id);
+      }
+      
       fetchData();
     });
 
     return () => subscription.unsubscribe();
   }, [fetchData]);
 
+  // Fast Hydration from Cache (prevents blank flashes)
   useEffect(() => {
     const cachedProducts = localStorage.getItem(`${LOCAL_STORAGE_KEY}_products`);
     const cachedBanners = localStorage.getItem(`${LOCAL_STORAGE_KEY}_banners`);
     const cachedWishlist = localStorage.getItem(`${LOCAL_STORAGE_KEY}_wishlist`);
 
-    // Only show demo data if we have NEVER successfully fetched from DB before
-    if (cachedProducts) {
-      setProducts(JSON.parse(cachedProducts));
-    } else {
-      setProducts(INITIAL_PRODUCTS);
-    }
-
-    if (cachedBanners) {
-      setBanners(JSON.parse(cachedBanners));
-    } else {
-      setBanners(INITIAL_BANNERS);
-    }
-
-    if (cachedWishlist) {
-      setWishlist(JSON.parse(cachedWishlist));
-    }
-
-    fetchData().finally(() => setIsLoading(false));
-  }, [fetchData]);
+    if (cachedProducts) setProducts(JSON.parse(cachedProducts));
+    if (cachedBanners) setBanners(JSON.parse(cachedBanners));
+    if (cachedWishlist) setWishlist(JSON.parse(cachedWishlist));
+  }, []);
 
   const upsertProduct = async (p: Product) => {
     const dbPayload = {

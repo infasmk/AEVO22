@@ -32,7 +32,6 @@ const AdminLayout: React.FC = () => {
   const status = getStatusConfig(connectionStatus);
 
   const handleTerminate = async () => {
-    console.log('AEVO: Initializing Termination Sequence...');
     await signOut();
   };
 
@@ -124,21 +123,27 @@ ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
            <Link to="/" className="font-serif text-lg md:text-xl tracking-tighter truncate max-w-[120px]">AEVO Atelier</Link>
          </div>
          
-         <div className="flex items-center space-x-3 md:space-x-8">
+         <div className="flex items-center space-x-4 md:space-x-8">
            <button 
-             onClick={() => {
-                console.log('AEVO: Requesting Registry Refresh...');
-                fetchData();
-             }}
+             onClick={() => fetchData()}
              className={`flex items-center space-x-2 px-3 py-1.5 rounded-full border transition-all duration-500 ${status.pillBg} ${status.borderColor} ${status.textColor} hover:scale-105 active:scale-95 shadow-sm`}
            >
               <div className={`w-1.5 h-1.5 rounded-full ${status.dotColor} ${status.isSyncing ? 'animate-spin' : 'animate-pulse'}`} />
               <span className="text-[8px] md:text-[9px] uppercase tracking-[0.2em] font-black whitespace-nowrap">{status.label}</span>
            </button>
+           
            <div className="hidden sm:flex flex-col items-end border-l border-black/5 pl-6">
              <span className="text-[7px] uppercase tracking-[0.2em] font-black text-black/30 leading-none">Artisan</span>
              <span className="text-[9px] font-bold text-[#A68E74] truncate max-w-[150px]">{user?.email}</span>
            </div>
+
+           <button 
+             onClick={handleTerminate}
+             className="p-2.5 bg-red-50 text-red-500 rounded-full hover:bg-red-500 hover:text-white transition-all active:scale-90 shadow-sm flex items-center justify-center border border-red-100"
+             title="Logout"
+           >
+             <X className="w-4 h-4" />
+           </button>
          </div>
       </div>
 
@@ -181,7 +186,7 @@ ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
                   <h4 className="text-amber-900 font-serif text-3xl italic">Administrative Credentials Required</h4>
                   <p className="text-amber-800/60 text-[10px] md:text-[12px] font-medium uppercase tracking-[0.15em] leading-relaxed max-w-2xl">
                     Session established for <span className="text-amber-900 font-black">{user.email}</span>. 
-                    However, your database profile has not been initialized. You are currently viewing <span className="underline font-bold">Offline Demo Data</span>.
+                    Your database profile is uninitialized. Demo data has been purged. Enroll your pieces to see them in the live registry.
                   </p>
                   <button 
                     onClick={() => setShowGuide(!showGuide)}
@@ -247,7 +252,7 @@ ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
                         </div>
                         <div className="p-8 bg-amber-900/10 border border-amber-900/20 rounded-3xl">
                           <p className="text-amber-200/40 text-[10px] leading-relaxed italic">
-                            * Once synced, the demo clocks will vanish, allowing you to begin cataloging your collection in the live vault.
+                            * Once synced, you can begin cataloging your collection in the live vault. Demo data has been permanently disabled.
                           </p>
                         </div>
                       </div>
