@@ -135,9 +135,9 @@ const AdminProducts: React.FC = () => {
         ))}
       </div>
 
-      {/* Product Configurator Modal */}
+      {/* Product Configurator Modal - Elevated z-index to 300 to cover sidebar completely */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-0 sm:p-6 lg:p-12 overflow-hidden">
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-0 sm:p-6 lg:p-12 overflow-hidden">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md animate-fadeIn" onClick={() => setIsModalOpen(false)} />
           <div className="relative bg-[#FCFCFA] w-full h-full sm:h-auto sm:max-h-[92vh] sm:max-w-6xl sm:rounded-[3rem] shadow-2xl flex flex-col overflow-hidden animate-scaleIn">
             

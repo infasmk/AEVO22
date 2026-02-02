@@ -1,5 +1,5 @@
+
 import React, { useEffect, useState } from 'react';
-// Use star import to resolve named export issues in some environments
 import * as ReactRouterDOM from 'react-router-dom';
 const { BrowserRouter: Router, Routes, Route, useLocation } = ReactRouterDOM;
 import { AppProvider } from './store';
@@ -16,7 +16,6 @@ import AdminLayout from './pages/Admin/AdminLayout';
 import AdminDashboard from './pages/Admin/Dashboard';
 import AdminProducts from './pages/Admin/Products';
 import AdminBanners from './pages/Admin/Banners';
-import AdminOrders from './pages/Admin/Orders';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -48,7 +47,6 @@ const MainContent: React.FC = () => {
     );
   }
 
-  // Admin section has its own layout, so we skip general Header/Footer
   if (isAdminPath) {
     return (
       <Routes>
@@ -56,7 +54,6 @@ const MainContent: React.FC = () => {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="/admin/banners" element={<AdminBanners />} />
-          <Route path="/admin/orders" element={<AdminOrders />} />
         </Route>
       </Routes>
     );
