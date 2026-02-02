@@ -1,3 +1,4 @@
+
 import React from 'react';
 // Use star import to resolve named export issues in some environments
 import * as ReactRouterDOM from 'react-router-dom';
@@ -48,8 +49,15 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="pt-10 border-t border-black/5 flex flex-col md:flex-row justify-between items-center text-[8px] text-black/30 uppercase tracking-[0.3em]">
-          <p>© 2024 AEVO Atelier Geneva.</p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
+          <div className="flex flex-col md:flex-row items-center md:space-x-4 space-y-2 md:space-y-0 text-center md:text-left">
+            <p>© 2024 AEVO Atelier Geneva.</p>
+            <p className="hidden md:block opacity-20">|</p>
+            <p>
+              Created by <span className="text-[#A68E74] font-black">Infas.mk</span> || 
+              <a href="https://webbits.space" target="_blank" rel="noopener noreferrer" className="ml-1 hover:text-[#A68E74] transition-all font-black">Team Webbits</a>
+            </p>
+          </div>
+          <div className="flex space-x-6 mt-6 md:mt-0">
             <Link to="#" className="hover:text-black">Privacy</Link>
             <Link to="#" className="hover:text-black">Terms</Link>
           </div>
