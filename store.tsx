@@ -34,7 +34,7 @@ interface AppState {
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'aevo_vault_v20';
+const LOCAL_STORAGE_KEY = 'aevo_v21_vault';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -63,33 +63,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return colors.map(c => `${c.name}:${c.hex}`);
   };
 
-  // Auth & Admin Verification
-  useEffect(() => {
-    const checkAdmin = async (userId: string) => {
-      try {
-        const { data, error } = await supabase.from('profiles').select('is_admin').eq('id', userId).maybeSingle();
-        if (!error && data) setIsAdmin(!!data.is_admin);
-        else setIsAdmin(false);
-      } catch (e) {
-        setIsAdmin(false);
+  // Improved Admin Check
+  const verifyAdmin = async (userId: string) => {
+    try {
+      const { data, error } = await supabase.from('profiles').select('is_admin').eq('id', userId).maybeSingle();
+      if (!error && data) {
+        setIsAdmin(!!data.is_admin);
+        return !!data.is_admin;
       }
-    };
+      setIsAdmin(false);
+      return false;
+    } catch (e) {
+      setIsAdmin(false);
+      return false;
+    }
+  };
 
+  // Auth Lifecycle
+  useEffect(() => {
     const initAuth = async () => {
-      try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        if (currentSession?.user) await checkAdmin(currentSession.user.id);
-      } finally {
-        setIsAuthLoading(false);
-      }
+      const { data: { session: initialSession } } = await supabase.auth.getSession();
+      setSession(initialSession);
+      setUser(initialSession?.user ?? null);
+      if (initialSession?.user) await verifyAdmin(initialSession.user.id);
+      setIsAuthLoading(false);
     };
 
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      if (event === 'SIGNED_OUT') {
+      if (event === 'SIGNED_OUT' || event === 'USER_UPDATED' && !newSession) {
         setUser(null);
         setSession(null);
         setIsAdmin(false);
@@ -97,13 +100,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       setSession(newSession);
       setUser(newSession?.user ?? null);
-      if (newSession?.user) await checkAdmin(newSession.user.id);
+      if (newSession?.user) await verifyAdmin(newSession.user.id);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Registry Fetcher
+  // Registry Synchronizer
   const fetchData = useCallback(async () => {
     if (!isConfigValid()) {
       setConnectionStatus('invalid_config');
@@ -112,11 +115,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setConnectionStatus('connecting');
     try {
-      // Re-validate Admin status on sync
-      if (user) {
-        const { data } = await supabase.from('profiles').select('is_admin').eq('id', user.id).maybeSingle();
-        setIsAdmin(!!data?.is_admin);
-      }
+      // Re-check elevation status on every sync
+      if (user) await verifyAdmin(user.id);
 
       const [pRes, bRes, cRes, oRes] = await Promise.all([
         supabase.from('products').select('*').order('created_at', { ascending: false }),
@@ -125,26 +125,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabase.from('orders').select('*').order('created_at', { ascending: false })
       ]);
 
-      // Logic: If database is reachable but 0 items, show 0 items (Registry Mode). 
-      // Do NOT fallback to INITIAL_PRODUCTS if connection is successful.
-      if (!pRes.error && pRes.data) {
-        const transformed = pRes.data.map(p => ({ ...p, colors: parseColors(p.colors) }));
+      // If online, we use whatever the DB says. If DB is empty, state is empty.
+      if (!pRes.error) {
+        const transformed = (pRes.data || []).map(p => ({ ...p, colors: parseColors(p.colors) }));
         setProducts(transformed);
         localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(transformed));
       }
 
-      if (!bRes.error && bRes.data) {
-        setBanners(bRes.data);
-        localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(bRes.data));
+      if (!bRes.error) {
+        setBanners(bRes.data || []);
+        localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(bRes.data || []));
       }
 
-      if (!cRes.error && cRes.data) {
-        setCategories(cRes.data);
-      }
-
-      if (!oRes.error && oRes.data) {
-        setOrders(oRes.data);
-      }
+      if (!cRes.error) setCategories(cRes.data || []);
+      if (!oRes.error) setOrders(oRes.data || []);
       
       setConnectionStatus('online');
     } catch (err: any) {
@@ -152,17 +146,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [user]);
 
+  // Initial Data Loading Strategy
   useEffect(() => {
-    // Initial Load from Cache
     const cachedProducts = localStorage.getItem(`${LOCAL_STORAGE_KEY}_products`);
     const cachedBanners = localStorage.getItem(`${LOCAL_STORAGE_KEY}_banners`);
     const cachedWishlist = localStorage.getItem(`${LOCAL_STORAGE_KEY}_wishlist`);
 
-    if (cachedProducts) setProducts(JSON.parse(cachedProducts));
-    else setProducts(INITIAL_PRODUCTS);
-
-    if (cachedBanners) setBanners(JSON.parse(cachedBanners));
-    else setBanners(INITIAL_BANNERS);
+    // Only show mock data if not logged in and nothing is cached
+    if (!session && !cachedProducts) {
+      setProducts(INITIAL_PRODUCTS);
+      setBanners(INITIAL_BANNERS);
+    } else {
+      if (cachedProducts) setProducts(JSON.parse(cachedProducts));
+      if (cachedBanners) setBanners(JSON.parse(cachedBanners));
+    }
 
     if (cachedWishlist) setWishlist(JSON.parse(cachedWishlist));
 
@@ -179,11 +176,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     const { error } = await supabase.from('products').upsert(dbPayload);
     if (!error) {
-      setProducts(prev => {
-        const updated = prev.find(item => item.id === p.id) ? prev.map(item => item.id === p.id ? p : item) : [p, ...prev];
-        localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(updated));
-        return updated;
-      });
+      await fetchData(); // Refresh state after mutation
       return true;
     }
     return false;
@@ -192,11 +185,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteProduct = async (id: string) => {
     const { error } = await supabase.from('products').delete().eq('id', id);
     if (!error) {
-      setProducts(prev => {
-        const filtered = prev.filter(p => p.id !== id);
-        localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(filtered));
-        return filtered;
-      });
+      setProducts(prev => prev.filter(p => p.id !== id));
       return true;
     }
     return false;
@@ -205,11 +194,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const upsertBanner = async (b: Banner) => {
     const { error } = await supabase.from('banners').upsert(b);
     if (!error) {
-      setBanners(prev => {
-        const updated = prev.find(item => item.id === b.id) ? prev.map(item => item.id === b.id ? b : item) : [...prev, b];
-        localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(updated));
-        return updated;
-      });
+      await fetchData();
       return true;
     }
     return false;
@@ -218,11 +203,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteBanner = async (id: string) => {
     const { error } = await supabase.from('banners').delete().eq('id', id);
     if (!error) {
-      setBanners(prev => {
-        const filtered = prev.filter(b => b.id !== id);
-        localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(filtered));
-        return filtered;
-      });
+      setBanners(prev => prev.filter(b => b.id !== id));
       return true;
     }
     return false;
@@ -266,12 +247,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const signOut = async () => {
     await supabase.auth.signOut();
     localStorage.clear();
-    setSession(null);
+    sessionStorage.clear();
+    
+    // Reset all states
     setUser(null);
+    setSession(null);
     setIsAdmin(false);
     setProducts(INITIAL_PRODUCTS);
     setBanners(INITIAL_BANNERS);
-    window.location.href = '/'; // Hard redirect to clear any residual state
+    
+    // Absolute redirect and force reload to kill all context
+    window.location.replace('/');
   };
 
   return (
