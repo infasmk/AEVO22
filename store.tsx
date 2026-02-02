@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Product, Banner, Order, Category, ColorOption } from './types';
 import { supabase, isConfigValid } from './supabase';
 import { INITIAL_PRODUCTS, INITIAL_BANNERS } from './constants';
@@ -34,7 +34,7 @@ interface AppState {
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'aevo_v21_vault';
+const LOCAL_STORAGE_KEY = 'aevo_v22_final';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -63,7 +63,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return colors.map(c => `${c.name}:${c.hex}`);
   };
 
-  // Improved Admin Check
   const verifyAdmin = async (userId: string) => {
     try {
       const { data, error } = await supabase.from('profiles').select('is_admin').eq('id', userId).maybeSingle();
@@ -71,28 +70,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsAdmin(!!data.is_admin);
         return !!data.is_admin;
       }
-      setIsAdmin(false);
       return false;
     } catch (e) {
-      setIsAdmin(false);
       return false;
     }
   };
 
-  // Auth Lifecycle
   useEffect(() => {
     const initAuth = async () => {
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
-      setSession(initialSession);
-      setUser(initialSession?.user ?? null);
-      if (initialSession?.user) await verifyAdmin(initialSession.user.id);
-      setIsAuthLoading(false);
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
+        if (initialSession?.user) await verifyAdmin(initialSession.user.id);
+      } finally {
+        setIsAuthLoading(false);
+      }
     };
 
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      if (event === 'SIGNED_OUT' || event === 'USER_UPDATED' && !newSession) {
+      console.log('AEVO Auth Event:', event);
+      if (event === 'SIGNED_OUT') {
         setUser(null);
         setSession(null);
         setIsAdmin(false);
@@ -106,7 +106,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Registry Synchronizer
   const fetchData = useCallback(async () => {
     if (!isConfigValid()) {
       setConnectionStatus('invalid_config');
@@ -115,7 +114,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setConnectionStatus('connecting');
     try {
-      // Re-check elevation status on every sync
       if (user) await verifyAdmin(user.id);
 
       const [pRes, bRes, cRes, oRes] = await Promise.all([
@@ -125,7 +123,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabase.from('orders').select('*').order('created_at', { ascending: false })
       ]);
 
-      // If online, we use whatever the DB says. If DB is empty, state is empty.
       if (!pRes.error) {
         const transformed = (pRes.data || []).map(p => ({ ...p, colors: parseColors(p.colors) }));
         setProducts(transformed);
@@ -142,17 +139,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
       setConnectionStatus('online');
     } catch (err: any) {
+      console.error('AEVO Registry Sync Error:', err);
       setConnectionStatus('offline');
     }
   }, [user]);
 
-  // Initial Data Loading Strategy
   useEffect(() => {
     const cachedProducts = localStorage.getItem(`${LOCAL_STORAGE_KEY}_products`);
     const cachedBanners = localStorage.getItem(`${LOCAL_STORAGE_KEY}_banners`);
     const cachedWishlist = localStorage.getItem(`${LOCAL_STORAGE_KEY}_wishlist`);
 
-    // Only show mock data if not logged in and nothing is cached
     if (!session && !cachedProducts) {
       setProducts(INITIAL_PRODUCTS);
       setBanners(INITIAL_BANNERS);
@@ -176,7 +172,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     const { error } = await supabase.from('products').upsert(dbPayload);
     if (!error) {
-      await fetchData(); // Refresh state after mutation
+      await fetchData();
       return true;
     }
     return false;
@@ -245,19 +241,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    localStorage.clear();
-    sessionStorage.clear();
-    
-    // Reset all states
-    setUser(null);
-    setSession(null);
-    setIsAdmin(false);
-    setProducts(INITIAL_PRODUCTS);
-    setBanners(INITIAL_BANNERS);
-    
-    // Absolute redirect and force reload to kill all context
-    window.location.replace('/');
+    try {
+      await supabase.auth.signOut();
+    } finally {
+      // Force state wipe and refresh regardless of Supabase response
+      localStorage.clear();
+      sessionStorage.clear();
+      setUser(null);
+      setSession(null);
+      setIsAdmin(false);
+      window.location.replace('/');
+    }
   };
 
   return (

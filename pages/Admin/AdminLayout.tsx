@@ -23,7 +23,7 @@ const AdminLayout: React.FC = () => {
       case 'online':
         return { label: 'Registry Live', dotColor: 'bg-emerald-500', pillBg: 'bg-emerald-50/50', textColor: 'text-emerald-700', borderColor: 'border-emerald-100', isSyncing: false };
       case 'connecting':
-        return { label: 'Verifying...', dotColor: 'bg-blue-500', pillBg: 'bg-blue-50/50', textColor: 'text-blue-700', borderColor: 'border-blue-100', isSyncing: true };
+        return { label: 'Syncing...', dotColor: 'bg-blue-500', pillBg: 'bg-blue-50/50', textColor: 'text-blue-700', borderColor: 'border-blue-100', isSyncing: true };
       default:
         return { label: 'Disconnected', dotColor: 'bg-red-500', pillBg: 'bg-red-50/50', textColor: 'text-red-700', borderColor: 'border-red-100', isSyncing: false };
     }
@@ -32,12 +32,17 @@ const AdminLayout: React.FC = () => {
   const status = getStatusConfig(connectionStatus);
 
   const handleTerminate = async () => {
+    console.log('AEVO: Initializing Termination Sequence...');
     await signOut();
   };
 
-  const fullSetupSQL = `-- 1. ATELIER DATABASE ARCHITECTURE
--- Run this in the Supabase SQL Editor
+  const fullSetupSQL = `-- 1. ATELIER REGISTRY SYSTEM INITIALIZATION
+-- Run this script in your Supabase SQL Editor
 
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Create Core Tables
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
   is_admin BOOLEAN DEFAULT FALSE,
@@ -76,27 +81,34 @@ CREATE TABLE IF NOT EXISTS public.banners (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 2. SECURITY POLICIES (RLS)
+-- 2. SECURITY & PERMISSIONS (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.banners ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 
--- 3. PERMISSIONS
-DROP POLICY IF EXISTS "Public Select" ON public.products;
-CREATE POLICY "Public Select" ON public.products FOR SELECT USING (true);
-DROP POLICY IF EXISTS "Public Select" ON public.banners;
-CREATE POLICY "Public Select" ON public.banners FOR SELECT USING (true);
-DROP POLICY IF EXISTS "Public Select" ON public.profiles;
-CREATE POLICY "Public Select" ON public.profiles FOR SELECT USING (true);
+-- 3. ACCESS POLICIES
+DROP POLICY IF EXISTS "Public Read Access" ON public.products;
+CREATE POLICY "Public Read Access" ON public.products FOR SELECT USING (true);
 
-DROP POLICY IF EXISTS "Admin All" ON public.products;
-CREATE POLICY "Admin All" ON public.products FOR ALL USING (
+DROP POLICY IF EXISTS "Public Read Access" ON public.banners;
+CREATE POLICY "Public Read Access" ON public.banners FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Access" ON public.profiles;
+CREATE POLICY "Public Read Access" ON public.profiles FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Admin Full Access" ON public.products;
+CREATE POLICY "Admin Full Access" ON public.products FOR ALL USING (
   EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
 );
 
--- 4. GRANT ADMIN RIGHTS TO YOUR ACCOUNT
--- This elevates your current session
+DROP POLICY IF EXISTS "Admin Full Access" ON public.banners;
+CREATE POLICY "Admin Full Access" ON public.banners FOR ALL USING (
+  EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
+);
+
+-- 4. ARTISAN ELEVATION
+-- Run this AFTER you have logged in to the app at least once
 INSERT INTO public.profiles (id, is_admin) 
 VALUES ('${user?.id}', TRUE)
 ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
@@ -114,7 +126,10 @@ ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
          
          <div className="flex items-center space-x-3 md:space-x-8">
            <button 
-             onClick={() => fetchData()}
+             onClick={() => {
+                console.log('AEVO: Requesting Registry Refresh...');
+                fetchData();
+             }}
              className={`flex items-center space-x-2 px-3 py-1.5 rounded-full border transition-all duration-500 ${status.pillBg} ${status.borderColor} ${status.textColor} hover:scale-105 active:scale-95 shadow-sm`}
            >
               <div className={`w-1.5 h-1.5 rounded-full ${status.dotColor} ${status.isSyncing ? 'animate-spin' : 'animate-pulse'}`} />
@@ -122,7 +137,7 @@ ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
            </button>
            <div className="hidden sm:flex flex-col items-end border-l border-black/5 pl-6">
              <span className="text-[7px] uppercase tracking-[0.2em] font-black text-black/30 leading-none">Artisan</span>
-             <span className="text-[9px] font-bold text-[#A68E74] truncate max-w-[100px]">{user?.email}</span>
+             <span className="text-[9px] font-bold text-[#A68E74] truncate max-w-[150px]">{user?.email}</span>
            </div>
          </div>
       </div>
@@ -141,8 +156,11 @@ ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
           ))}
         </nav>
         <div className="p-8 border-t border-black/[0.03] bg-[#FDFBF9]/50">
-           <button onClick={handleTerminate} className="w-full flex items-center justify-between px-5 py-4 border border-red-500/20 rounded-2xl hover:bg-red-500 hover:text-white transition-all text-[8px] uppercase tracking-[0.4em] font-black text-red-500 active:scale-95 shadow-sm group">
-             <span>Terminate Registry</span><X className="w-3 h-3 group-hover:rotate-90 transition-transform" />
+           <button 
+             onClick={handleTerminate} 
+             className="w-full flex items-center justify-between px-5 py-4 border border-red-500/20 rounded-2xl hover:bg-red-500 hover:text-white transition-all text-[8px] uppercase tracking-[0.4em] font-black text-red-500 active:scale-95 shadow-sm group"
+           >
+             <span>Terminate Session</span><X className="w-3 h-3 group-hover:rotate-90 transition-transform" />
            </button>
         </div>
       </aside>
@@ -160,16 +178,16 @@ ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
                   <Shield className="w-10 h-10" />
                 </div>
                 <div className="flex-1 space-y-4">
-                  <h4 className="text-amber-900 font-serif text-3xl italic">Administrative Access Required</h4>
+                  <h4 className="text-amber-900 font-serif text-3xl italic">Administrative Credentials Required</h4>
                   <p className="text-amber-800/60 text-[10px] md:text-[12px] font-medium uppercase tracking-[0.15em] leading-relaxed max-w-2xl">
-                    Artisan session detected for <span className="text-amber-900 font-black">{user.email}</span>. 
-                    However, your account does not have database privileges. The current data is <span className="underline font-bold">Mock/Demo Data</span>.
+                    Session established for <span className="text-amber-900 font-black">{user.email}</span>. 
+                    However, your database profile has not been initialized. You are currently viewing <span className="underline font-bold">Offline Demo Data</span>.
                   </p>
                   <button 
                     onClick={() => setShowGuide(!showGuide)}
                     className="flex items-center space-x-3 text-[10px] font-black uppercase tracking-widest text-white bg-amber-700 px-8 py-3 rounded-full hover:bg-amber-800 transition-all active:scale-95 shadow-xl shadow-amber-900/20"
                   >
-                    <span>{showGuide ? 'Hide Registry Protocol' : 'Initialize Live Registry Now'}</span>
+                    <span>{showGuide ? 'Hide Initialization Protocol' : 'Complete Registry Setup'}</span>
                     <ChevronRight className={`w-4 h-4 transition-transform ${showGuide ? 'rotate-90' : ''}`} />
                   </button>
                 </div>
@@ -183,8 +201,8 @@ ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
                         <Edit3 className="w-7 h-7" />
                       </div>
                       <div>
-                        <h5 className="text-white text-2xl font-serif italic">Atelier Initialization Script</h5>
-                        <p className="text-[#A68E74] text-[8px] uppercase tracking-[0.4em] font-black mt-1">Registry Schema v3.2</p>
+                        <h5 className="text-white text-2xl font-serif italic">Atelier Setup Protocol</h5>
+                        <p className="text-[#A68E74] text-[8px] uppercase tracking-[0.4em] font-black mt-1">Registry Schema v4.0</p>
                       </div>
                     </div>
 
@@ -199,11 +217,11 @@ ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
                             <button 
                               onClick={() => {
                                 navigator.clipboard.writeText(fullSetupSQL);
-                                alert("Initialization script copied. Proceed to Supabase.");
+                                alert("Setup script copied. Proceed to Supabase SQL Editor.");
                               }}
                               className="absolute top-6 right-6 text-[9px] font-black text-white bg-emerald-500/20 hover:bg-emerald-500 px-4 py-2 rounded-lg transition-all uppercase tracking-widest"
                             >
-                              Copy Script
+                              Copy Protocol
                             </button>
                           </div>
                         </div>
@@ -211,21 +229,26 @@ ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
 
                       <div className="space-y-12 py-4">
                         <div className="space-y-6">
-                          <h6 className="text-[10px] uppercase tracking-[0.4em] font-black text-white/30">Action Steps:</h6>
+                          <h6 className="text-[10px] uppercase tracking-[0.4em] font-black text-white/30">Action Protocol:</h6>
                           <ul className="space-y-8">
                             <li className="flex items-start space-x-6">
                               <span className="text-xl font-serif italic text-[#A68E74] opacity-40">01</span>
-                              <p className="text-white/70 text-sm italic font-light leading-relaxed">Execute the script in the <a href="https://supabase.com/dashboard" target="_blank" rel="noreferrer" className="text-emerald-400 underline underline-offset-4 ml-2">Supabase SQL Editor</a>.</p>
+                              <p className="text-white/70 text-sm italic font-light leading-relaxed">Log into <a href="https://supabase.com/dashboard" target="_blank" rel="noreferrer" className="text-emerald-400 underline underline-offset-4 ml-2">Supabase</a> and open the SQL Editor.</p>
                             </li>
                             <li className="flex items-start space-x-6">
                               <span className="text-xl font-serif italic text-[#A68E74] opacity-40">02</span>
-                              <p className="text-white/70 text-sm italic font-light leading-relaxed">After clicking "Run" in Supabase, return here and click the **Registry Live** status pill at the top of the screen.</p>
+                              <p className="text-white/70 text-sm italic font-light leading-relaxed">Paste and execute the script. Ensure all commands succeed.</p>
                             </li>
                             <li className="flex items-start space-x-6">
                               <span className="text-xl font-serif italic text-[#A68E74] opacity-40">03</span>
-                              <p className="text-white/70 text-sm italic font-light leading-relaxed">The demo data will disappear, and you can begin adding your pieces to the registry.</p>
+                              <p className="text-white/70 text-sm italic font-light leading-relaxed">Return here and click the **Registry Live** pill at the top of the screen.</p>
                             </li>
                           </ul>
+                        </div>
+                        <div className="p-8 bg-amber-900/10 border border-amber-900/20 rounded-3xl">
+                          <p className="text-amber-200/40 text-[10px] leading-relaxed italic">
+                            * Once synced, the demo clocks will vanish, allowing you to begin cataloging your collection in the live vault.
+                          </p>
                         </div>
                       </div>
                     </div>
