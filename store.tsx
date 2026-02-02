@@ -34,7 +34,7 @@ interface AppState {
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'aevo_v23_live';
+const LOCAL_STORAGE_KEY = 'aevo_v24_final_registry';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -76,7 +76,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Registry Synchronizer - accessible to all (Public Read)
   const fetchData = useCallback(async () => {
     if (!isConfigValid()) {
       setConnectionStatus('invalid_config');
@@ -85,10 +84,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setConnectionStatus('connecting');
     try {
-      // Re-check admin status if session exists
-      const { data: { session: activeSession } } = await supabase.auth.getSession();
-      if (activeSession?.user) await verifyAdmin(activeSession.user.id);
-
       const [pRes, bRes, cRes, oRes] = await Promise.all([
         supabase.from('products').select('*').order('created_at', { ascending: false }),
         supabase.from('banners').select('*').order('display_order', { ascending: true }),
@@ -96,28 +91,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabase.from('orders').select('*').order('created_at', { ascending: false })
       ]);
 
-      // Update products state with live DB data
+      // Handle Products with strict precedence: DB > Cache > Demo
       if (!pRes.error) {
-        const liveProducts = pRes.data || [];
-        if (liveProducts.length > 0) {
-          const transformed = liveProducts.map(p => ({ ...p, colors: parseColors(p.colors) }));
-          setProducts(transformed);
-          localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(transformed));
-        } else if (activeSession) {
-          // If logged in but DB is empty, show empty registry
-          setProducts([]);
-        }
+        const transformed = (pRes.data || []).map(p => ({ ...p, colors: parseColors(p.colors) }));
+        setProducts(transformed);
+        localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(transformed));
       }
 
-      // Update banners state with live DB data
+      // Handle Banners
       if (!bRes.error) {
         const liveBanners = bRes.data || [];
-        if (liveBanners.length > 0) {
-          setBanners(liveBanners);
-          localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(liveBanners));
-        } else if (activeSession) {
-          setBanners([]);
-        }
+        setBanners(liveBanners);
+        localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(liveBanners));
       }
 
       if (!cRes.error) setCategories(cRes.data || []);
@@ -125,7 +110,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
       setConnectionStatus('online');
     } catch (err: any) {
-      console.error('AEVO Registry Sync Error:', err);
+      console.error('AEVO Sync Error:', err);
       setConnectionStatus('offline');
     }
   }, []);
@@ -150,7 +135,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setUser(null);
         setSession(null);
         setIsAdmin(false);
-        // Refresh to public state
         fetchData();
         return;
       }
@@ -163,13 +147,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => subscription.unsubscribe();
   }, [fetchData]);
 
-  // Global Hydration Strategy
+  // Initial Load & Hydration
   useEffect(() => {
     const cachedProducts = localStorage.getItem(`${LOCAL_STORAGE_KEY}_products`);
     const cachedBanners = localStorage.getItem(`${LOCAL_STORAGE_KEY}_banners`);
     const cachedWishlist = localStorage.getItem(`${LOCAL_STORAGE_KEY}_wishlist`);
 
-    // Load from cache or show initial demo data immediately
     if (cachedProducts) {
       setProducts(JSON.parse(cachedProducts));
     } else {
@@ -186,7 +169,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setWishlist(JSON.parse(cachedWishlist));
     }
 
-    // Trigger live fetch for everyone
     fetchData().finally(() => setIsLoading(false));
   }, [fetchData]);
 
@@ -235,7 +217,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const upsertCategory = async (c: Category) => {
     const { error } = await supabase.from('categories').upsert(c);
     if (!error) {
-      setCategories(prev => prev.find(item => item.id === c.id) ? prev.map(item => item.id === c.id ? c : item) : [...prev, c]);
+      await fetchData();
       return true;
     }
     return false;
@@ -244,7 +226,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteCategory = async (id: string) => {
     const { error } = await supabase.from('categories').delete().eq('id', id);
     if (!error) {
-      setCategories(prev => prev.filter(c => c.id !== id));
+      await fetchData();
       return true;
     }
     return false;
@@ -253,7 +235,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateOrderStatus = async (id: string, status: Order['status']) => {
     const { error } = await supabase.from('orders').update({ status }).eq('id', id);
     if (!error) {
-      setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
+      await fetchData();
       return true;
     }
     return false;
@@ -270,9 +252,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
+    } catch (err) {
+      console.warn('Sign out call failed, proceeding with local wipe');
     } finally {
       localStorage.clear();
       sessionStorage.clear();
+      // Total UI reset before redirect
+      setProducts(INITIAL_PRODUCTS);
+      setBanners(INITIAL_BANNERS);
+      setUser(null);
+      setSession(null);
+      setIsAdmin(false);
       window.location.replace('/');
     }
   };
