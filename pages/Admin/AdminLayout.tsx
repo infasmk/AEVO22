@@ -1,12 +1,13 @@
 
 import React, { useState } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
-const { Link, useLocation, Outlet } = ReactRouterDOM;
+const { Link, useLocation, Outlet, useNavigate } = ReactRouterDOM;
 import { useStore } from '../../store';
 import { ShoppingBag, Star, Shield, Menu, X, Info, ChevronRight, Edit3, TrendingUp } from '../../components/Icons';
 
 const AdminLayout: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
   const [showGuide, setShowGuide] = useState(false);
   const { connectionStatus, signOut, user, isAdmin, fetchData } = useStore();
@@ -29,6 +30,11 @@ const AdminLayout: React.FC = () => {
   };
 
   const status = getStatusConfig(connectionStatus);
+
+  const handleTerminate = async () => {
+    await signOut();
+    navigate('/'); // Redirect to home immediately on sign out
+  };
 
   const fullSetupSQL = `-- 1. Create Profiles Table
 CREATE TABLE IF NOT EXISTS public.profiles (
@@ -55,7 +61,7 @@ CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles
       {/* Top Nav */}
       <div className="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-black/5 z-[110] flex items-center justify-between px-4 lg:px-10">
          <div className="flex items-center space-x-3 md:space-x-6">
-           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 text-[#A68E74] hover:bg-black/5 rounded-full transition-colors">
+           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 text-[#A68E74] hover:bg-black/5 rounded-full transition-colors active:scale-90">
              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
            </button>
            <Link to="/" className="font-serif text-lg md:text-xl tracking-tighter truncate max-w-[120px]">AEVO Atelier</Link>
@@ -65,6 +71,7 @@ CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles
            <button 
              onClick={() => fetchData()}
              className={`flex items-center space-x-2 px-3 py-1.5 rounded-full border transition-all duration-500 ${status.pillBg} ${status.borderColor} ${status.textColor} hover:scale-105 active:scale-95`}
+             title="Synchronize Registry with Supabase"
            >
               <div className={`w-1.5 h-1.5 rounded-full ${status.dotColor} ${status.isSyncing ? 'animate-spin' : 'animate-pulse'}`} />
               <span className="text-[8px] md:text-[9px] uppercase tracking-[0.2em] font-black whitespace-nowrap">{status.label}</span>
@@ -77,20 +84,20 @@ CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles
       </div>
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 w-72 bg-white border-r border-black/[0.05] flex flex-col z-[120] transition-transform duration-500 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 left-0 w-72 bg-white border-r border-black/[0.05] flex flex-col z-[120] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${sidebarOpen ? 'translate-x-0 shadow-2xl lg:shadow-none' : '-translate-x-full'}`}>
         <div className="p-8 border-b border-black/[0.03] flex items-center justify-between">
           <Link to="/" className="text-xl font-serif text-black tracking-tighter">AEVO <span className="text-[7px] uppercase tracking-widest text-[#A68E74] ml-2 font-black">Atelier</span></Link>
-          <button className="lg:hidden text-black/20 hover:text-black" onClick={() => setSidebarOpen(false)}><X className="w-5 h-5" /></button>
+          <button className="lg:hidden text-black/20 hover:text-black transition-colors" onClick={() => setSidebarOpen(false)}><X className="w-5 h-5" /></button>
         </div>
-        <nav className="flex-1 p-6 space-y-2">
+        <nav className="flex-1 p-6 space-y-2 overflow-y-auto no-scrollbar">
           {links.map(link => (
             <Link key={link.path} to={link.path} onClick={() => { if (window.innerWidth < 1024) setSidebarOpen(false); }} className={`flex items-center space-x-4 px-5 py-4 rounded-2xl transition-all duration-300 text-[9px] uppercase tracking-[0.3em] font-black ${location.pathname === link.path ? 'bg-black text-white shadow-xl' : 'text-black/30 hover:text-black hover:bg-black/[0.03]'}`}>
               {link.icon}<span>{link.name}</span>
             </Link>
           ))}
         </nav>
-        <div className="p-8 border-t border-black/[0.03]">
-           <button onClick={signOut} className="w-full flex items-center justify-between px-5 py-3 border border-red-500/10 rounded-xl hover:bg-red-500 hover:text-white transition-all text-[8px] uppercase tracking-[0.4em] font-black text-red-500">
+        <div className="p-8 border-t border-black/[0.03] bg-[#FDFBF9]/50">
+           <button onClick={handleTerminate} className="w-full flex items-center justify-between px-5 py-3 border border-red-500/10 rounded-xl hover:bg-red-500 hover:text-white transition-all text-[8px] uppercase tracking-[0.4em] font-black text-red-500 active:scale-95 shadow-sm">
              <span>Terminate Session</span><X className="w-3 h-3" />
            </button>
         </div>
@@ -98,10 +105,10 @@ CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles
 
       {sidebarOpen && <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[115] lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      <main className={`flex-1 transition-all duration-500 ${sidebarOpen ? 'lg:ml-72' : 'ml-0'} min-h-screen pt-24 pb-20 px-4 md:px-10 lg:px-16`}>
+      <main className={`flex-1 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${sidebarOpen ? 'lg:ml-72' : 'ml-0'} min-h-screen pt-24 pb-20 px-4 md:px-10 lg:px-16`}>
         <div className="max-w-7xl mx-auto">
           
-          {/* Resolution Guide for non-admins */}
+          {/* Enhanced Resolution Guide for non-admins */}
           {!isAdmin && user && (
             <div className="mb-12">
               <div className="bg-amber-50 border border-amber-200 rounded-[2rem] p-6 md:p-10 flex flex-col md:flex-row gap-8 items-start md:items-center animate-fadeInUp shadow-sm">
@@ -109,15 +116,16 @@ CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles
                   <Shield className="w-7 h-7" />
                 </div>
                 <div className="flex-1 space-y-3">
-                  <h4 className="text-amber-900 font-serif text-2xl italic">Registry Synchronization Required</h4>
+                  <h4 className="text-amber-900 font-serif text-2xl italic">Registry Authorization Required</h4>
                   <p className="text-amber-800/60 text-[10px] md:text-[11px] font-medium uppercase tracking-[0.15em] leading-relaxed max-w-2xl">
-                    The portal is currently in <span className="text-amber-900 font-black underline">Demo Mode</span> because your artisan profile hasn't been initialized in Supabase yet.
+                    You are connected as <span className="text-amber-900 font-bold">{user.email}</span>, but you do not have administrative privileges in the database yet. 
+                    Registry data is locked for security.
                   </p>
                   <button 
                     onClick={() => setShowGuide(!showGuide)}
-                    className="flex items-center space-x-2 text-[9px] font-black uppercase tracking-widest text-amber-700 bg-amber-200/50 px-4 py-2 rounded-full hover:bg-amber-200 transition-all"
+                    className="flex items-center space-x-2 text-[9px] font-black uppercase tracking-widest text-amber-700 bg-amber-200/50 px-4 py-2 rounded-full hover:bg-amber-200 transition-all active:scale-95"
                   >
-                    <span>{showGuide ? 'Close Setup Guide' : 'Initialize Registry Now'}</span>
+                    <span>{showGuide ? 'Close Setup Guide' : 'How to Elevate Permissions'}</span>
                     <ChevronRight className={`w-3 h-3 transition-transform ${showGuide ? 'rotate-90' : ''}`} />
                   </button>
                 </div>
@@ -130,13 +138,13 @@ CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles
                       <div className="w-10 h-10 rounded-xl bg-[#A68E74]/10 flex items-center justify-center text-[#A68E74] border border-[#A68E74]/20">
                         <Edit3 className="w-5 h-5" />
                       </div>
-                      <h5 className="text-white text-lg font-serif italic">Atelier Registry Setup</h5>
+                      <h5 className="text-white text-lg font-serif italic">Atelier Setup Protocol</h5>
                     </div>
 
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
                       <div className="space-y-6">
                         <div className="space-y-3">
-                          <label className="text-[8px] uppercase tracking-[0.5em] text-[#A68E74] font-black">1. Copy This SQL Command</label>
+                          <label className="text-[8px] uppercase tracking-[0.5em] text-[#A68E74] font-black">1. Copy Required SQL</label>
                           <div className="bg-black rounded-2xl p-6 border border-white/5 relative group">
                             <pre className="text-[10px] md:text-[11px] font-mono text-emerald-400 whitespace-pre-wrap leading-relaxed max-h-60 overflow-y-auto thin-scrollbar">
                               {fullSetupSQL}
@@ -144,9 +152,9 @@ CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles
                             <button 
                               onClick={() => {
                                 navigator.clipboard.writeText(fullSetupSQL);
-                                alert("SQL copied to clipboard!");
+                                alert("Full SQL protocol copied to clipboard.");
                               }}
-                              className="absolute top-4 right-4 text-[8px] font-black text-white/20 hover:text-white uppercase"
+                              className="absolute top-4 right-4 text-[8px] font-black text-white/20 hover:text-white uppercase transition-colors"
                             >
                               Copy Full Setup
                             </button>
@@ -160,17 +168,22 @@ CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles
                           <ul className="space-y-6">
                             <li className="flex items-start space-x-4">
                               <span className="text-[9px] font-black text-[#A68E74] mt-1">01</span>
-                              <p className="text-white/60 text-xs italic">Go to your <a href="https://supabase.com/dashboard" target="_blank" rel="noreferrer" className="underline text-emerald-400">Supabase Dashboard</a>.</p>
+                              <p className="text-white/60 text-xs italic">Open your <a href="https://supabase.com/dashboard" target="_blank" rel="noreferrer" className="underline text-emerald-400 decoration-emerald-400/30">Supabase SQL Editor</a>.</p>
                             </li>
                             <li className="flex items-start space-x-4">
                               <span className="text-[9px] font-black text-[#A68E74] mt-1">02</span>
-                              <p className="text-white/60 text-xs italic">Select **SQL Editor** from the left navigation.</p>
+                              <p className="text-white/60 text-xs italic">Paste the command above and click **Run**.</p>
                             </li>
                             <li className="flex items-start space-x-4">
-                              <span className="text-[9px] font-black text-[#A68E74] mt-103">03</span>
-                              <p className="text-white/60 text-xs italic">Paste the command, click **Run**, and then click the **Live Sync** pill at the top of this page to refresh.</p>
+                              <span className="text-[9px] font-black text-[#A68E74] mt-1">03</span>
+                              <p className="text-white/60 text-xs italic">Return here and click the **Live Sync** pill at the top-right to authorize your session.</p>
                             </li>
                           </ul>
+                        </div>
+                        <div className="p-6 bg-amber-900/10 border border-amber-900/20 rounded-2xl">
+                          <p className="text-amber-200/40 text-[9px] leading-relaxed italic">
+                            * Technical Note: The 'profiles' table must be initialized to store administrative status. Running this script ensures proper registry binding.
+                          </p>
                         </div>
                       </div>
                     </div>

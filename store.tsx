@@ -69,7 +69,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // 1. Auth & Session Management with Failsafe
   useEffect(() => {
-    // Failsafe: Ensure loading screen disappears after 5 seconds no matter what
     authTimeoutRef.current = window.setTimeout(() => {
       setIsAuthLoading(false);
     }, 5000);
@@ -98,13 +97,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     initAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
       setSession(newSession);
       setUser(newSession?.user ?? null);
       if (newSession?.user) {
         const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', newSession.user.id).maybeSingle();
         setIsAdmin(!!profile?.is_admin);
       } else {
+        setIsAdmin(false);
+      }
+      
+      if (event === 'SIGNED_OUT') {
+        setSession(null);
+        setUser(null);
         setIsAdmin(false);
       }
     });
@@ -143,10 +148,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
 
-    if (Date.now() - lastWriteTime.current < 1500) return;
-
     setConnectionStatus('connecting');
     try {
+      // CRITICAL: Also re-check profile status so "Sync Registry" elevations work
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', user.id)
+          .maybeSingle();
+        if (profile) setIsAdmin(!!profile.is_admin);
+      }
+
       // Products
       const pRes = await supabase.from('products').select('*').order('created_at', { ascending: false });
       if (!pRes.error && pRes.data) {
@@ -178,11 +191,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn("AEVO Sync: Connection interrupted", err.message);
       setConnectionStatus('offline');
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (session) fetchData();
+  }, [fetchData, session]);
 
   // Actions
   const upsertProduct = async (p: Product) => {
@@ -281,6 +294,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    // Explicitly reset UI states immediately
+    setSession(null);
+    setUser(null);
+    setIsAdmin(false);
   };
 
   return (
