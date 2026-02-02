@@ -6,6 +6,11 @@ export interface KeyFeature {
   description: string;
 }
 
+export interface ColorOption {
+  name: string;
+  hex: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -14,7 +19,7 @@ export interface Product {
   original_price?: number;
   category: string;
   images: string[];
-  colors?: string[]; // New field for color options
+  colors?: ColorOption[]; 
   specs: Record<string, string>;
   key_features: KeyFeature[];
   tag: ProductTag;

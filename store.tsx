@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { Product, Banner, Order, Category } from './types';
+import { Product, Banner, Order, Category, ColorOption } from './types';
 import { supabase, isConfigValid } from './supabase';
 import { INITIAL_PRODUCTS, INITIAL_BANNERS, MOCK_ORDERS } from './constants';
 
@@ -38,6 +38,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'connecting' | 'invalid_config'>('connecting');
   
   const lastWriteTime = useRef<number>(0);
+
+  // Helper to map DB string array to ColorOption objects
+  const parseColors = (colors: any[]): ColorOption[] => {
+    if (!colors || !Array.isArray(colors)) return [];
+    return colors.map(c => {
+      const parts = String(c).split(':');
+      return { name: parts[0] || 'Unknown', hex: parts[1] || '#000000' };
+    });
+  };
+
+  // Helper to map ColorOption objects back to DB string format
+  const stringifyColors = (colors: ColorOption[]): string[] => {
+    if (!colors) return [];
+    return colors.map(c => `${c.name}:${c.hex}`);
+  };
 
   useEffect(() => {
     const loadLocal = () => {
@@ -81,7 +96,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       if (pRes.error) throw pRes.error;
 
-      if (pRes.data && pRes.data.length > 0) setProducts(pRes.data);
+      if (pRes.data) {
+        const transformedProducts = pRes.data.map(p => ({
+          ...p,
+          colors: parseColors(p.colors)
+        }));
+        setProducts(transformedProducts);
+      }
       if (bRes.data && bRes.data.length > 0) setBanners(bRes.data);
       if (oRes.data && oRes.data.length > 0) setOrders(oRes.data);
       if (cRes.data && cRes.data.length > 0) setCategories(cRes.data);
@@ -110,7 +131,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (!isConfigValid()) return false;
 
-    // Explicit payload mapping to ensure type safety with Postgres
     const dbPayload = {
       id: String(p.id),
       name: p.name,
@@ -119,7 +139,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       original_price: p.original_price ? Number(p.original_price) : null,
       category: p.category,
       images: p.images || [],
-      colors: p.colors || [], 
+      colors: stringifyColors(p.colors || []), 
       specs: p.specs || {},
       key_features: p.key_features || [],
       tag: p.tag || 'None',
@@ -133,9 +153,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const { error } = await supabase.from('products').upsert(dbPayload);
       if (error) {
         console.group("🔴 Sync Failure");
-        console.error("Supabase Error Code:", error.code);
-        console.error("Supabase Error Message:", error.message);
-        console.error("Failed Payload:", dbPayload);
+        console.error("Supabase Error:", error.message);
         console.groupEnd();
         return false;
       }

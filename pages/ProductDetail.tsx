@@ -5,13 +5,14 @@ const { useParams, useNavigate } = ReactRouterDOM;
 import { useStore } from '../store';
 import { Star, Share, ChevronLeft, Heart, Compass, Feather, Shield, Diamond } from '../components/Icons';
 import SEO from '../components/SEO';
+import { ColorOption } from '../types';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { products, wishlist, toggleWishlist } = useStore();
   const [activeImage, setActiveImage] = useState(0);
-  const [selectedColor, setSelectedColor] = useState<string>('');
+  const [selectedColor, setSelectedColor] = useState<ColorOption | null>(null);
 
   const product = products.find(p => p.id === id);
   if (!product) return <div className="pt-40 text-center font-serif text-2xl text-black/40">Masterpiece not found.</div>;
@@ -25,7 +26,7 @@ const ProductDetail: React.FC = () => {
 
   const handleAcquire = () => {
     const phoneNumber = "919745019658";
-    const colorText = selectedColor ? `Selected Color: ${selectedColor}` : "";
+    const colorText = selectedColor ? `Selected Finish: ${selectedColor.name}` : "";
     const message = `Hello AEVO Atelier, I am interested in acquiring the following masterpiece:
     
 Piece: ${product.name}
@@ -95,20 +96,38 @@ Please guide me through the acquisition process.`;
               {product.description}
             </p>
 
-            {/* Color Selection */}
+            {/* CINEMATIC SWATCH SELECTION */}
             {product.colors && product.colors.length > 0 && (
               <div className="mb-12">
-                <span className="text-[9px] uppercase tracking-[0.4em] text-black/30 font-black mb-4 block">Atelier Colorway</span>
-                <div className="flex flex-wrap gap-4">
-                  {product.colors.map(color => (
-                    <button
-                      key={color}
-                      onClick={() => setSelectedColor(color)}
-                      className={`px-4 py-2 rounded-full text-[9px] uppercase tracking-widest font-bold border transition-all ${selectedColor === color ? 'bg-black text-white border-black shadow-lg' : 'bg-white text-black/40 border-black/10 hover:border-black/30'}`}
-                    >
-                      {color}
-                    </button>
-                  ))}
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-[9px] uppercase tracking-[0.4em] text-black/30 font-black">Atelier Colorway</span>
+                  {selectedColor && (
+                    <span className="text-[9px] uppercase tracking-[0.2em] text-[#8C7861] font-black animate-fadeIn">
+                      {selectedColor.name}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-5">
+                  {product.colors.map(color => {
+                    const isActive = selectedColor?.name === color.name;
+                    return (
+                      <button
+                        key={color.name}
+                        onClick={() => setSelectedColor(color)}
+                        className={`group relative w-10 h-10 rounded-full transition-all duration-500 flex items-center justify-center ${isActive ? 'scale-110' : 'hover:scale-105'}`}
+                        title={color.name}
+                      >
+                        {/* Elegant Selection Ring */}
+                        <div className={`absolute -inset-1.5 rounded-full border border-[#8C7861]/40 transition-all duration-700 ${isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`} />
+                        
+                        {/* Swatch Color Circle */}
+                        <div 
+                          className={`w-full h-full rounded-full border border-black/5 shadow-inner transition-transform duration-500 ${isActive ? 'scale-90' : 'group-hover:scale-95'}`}
+                          style={{ backgroundColor: color.hex }}
+                        />
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -142,7 +161,6 @@ Please guide me through the acquisition process.`;
               )}
           </div>
 
-          {/* Secure Acquisition Button - Positioned below Features */}
           <div className="max-w-md mx-auto">
             <button 
               onClick={handleAcquire}
