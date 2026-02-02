@@ -33,7 +33,7 @@ interface AppState {
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'aevo_v26_absolute_live';
+const LOCAL_STORAGE_KEY = 'aevo_v27_final_strict';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -85,7 +85,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setConnectionStatus('connecting');
     try {
-      // Get data in parallel
+      // Parallel fetch with error suppression for missing tables (Postgres error 42P01)
       const [pRes, bRes, cRes, oRes] = await Promise.all([
         supabase.from('products').select('*').order('created_at', { ascending: false }),
         supabase.from('banners').select('*').order('display_order', { ascending: true }),
@@ -93,31 +93,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabase.from('orders').select('*').order('created_at', { ascending: false })
       ]);
 
-      // If there's an error in critical tables, mark as offline
-      if (pRes.error || bRes.error) {
-        throw new Error('Database response failed');
-      }
+      // Handle table results. If error is 42P01 (relation does not exist), treat as empty [].
+      const processRes = (res: any) => {
+        if (res.error) {
+          if (res.error.code === '42P01') return [];
+          throw res.error;
+        }
+        return res.data || [];
+      };
 
-      const liveProducts = pRes.data || [];
-      const transformed = liveProducts.map(p => ({ ...p, colors: parseColors(p.colors) }));
+      const liveProducts = processRes(pRes);
+      const transformed = liveProducts.map((p: any) => ({ ...p, colors: parseColors(p.colors) }));
       setProducts(transformed);
       localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(transformed));
 
-      const liveBanners = bRes.data || [];
+      const liveBanners = processRes(bRes);
       setBanners(liveBanners);
       localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(liveBanners));
 
-      setCategories(cRes.data || []);
-      setOrders(oRes.data || []);
+      setCategories(processRes(cRes));
+      setOrders(processRes(oRes));
       
       setConnectionStatus('online');
     } catch (err: any) {
-      console.error("Fetch Error:", err);
+      console.error("Critical Registry Sync Error:", err);
       setConnectionStatus('offline');
     }
   }, []);
 
-  // Auth & Initial Data Sequence
+  // Strict Initialization Lifecycle
   useEffect(() => {
     const initApp = async () => {
       try {
@@ -131,7 +135,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         
         await fetchData();
       } catch (e) {
-        console.error("Init error", e);
         setConnectionStatus('offline');
       } finally {
         setIsAuthLoading(false);
@@ -162,7 +165,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => subscription.unsubscribe();
   }, [fetchData]);
 
-  // Fast Hydration from Cache (prevents blank flashes)
+  // Load from Cache (Strictly internal state, cleared on logout)
   useEffect(() => {
     const cachedProducts = localStorage.getItem(`${LOCAL_STORAGE_KEY}_products`);
     const cachedBanners = localStorage.getItem(`${LOCAL_STORAGE_KEY}_banners`);

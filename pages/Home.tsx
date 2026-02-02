@@ -29,13 +29,15 @@ const Home: React.FC = () => {
 
   const tabs: (ProductTag | 'All')[] = ['All', 'Latest', 'Best Seller', 'Offer'];
 
-  // If connected and DB is empty, we show empty state, NOT demo data
+  // Registry state detection
   const isRegistryEmpty = connectionStatus === 'online' && products.length === 0;
+  const isSyncInProgress = connectionStatus === 'connecting' || (isLoading && products.length === 0);
 
-  if (isLoading && products.length === 0) {
+  if (isSyncInProgress) {
     return (
-      <div className="min-h-screen bg-[#FCFCFA] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#A68E74]/20 border-t-[#A68E74] rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-[#FCFCFA] flex flex-col items-center justify-center space-y-6">
+        <div className="w-10 h-10 border-2 border-[#A68E74]/10 border-t-[#A68E74] rounded-full animate-spin"></div>
+        <span className="text-[9px] uppercase tracking-[0.5em] font-black text-[#A68E74] animate-pulse">Syncing Live Registry</span>
       </div>
     );
   }
@@ -78,7 +80,7 @@ const Home: React.FC = () => {
           </div>
         )) : (
           <div className="absolute inset-0 flex items-center justify-center bg-[#1F1A16]">
-            <span className="font-serif italic text-[#A68E74] text-xl opacity-30 tracking-widest animate-pulse">Initializing Showcase...</span>
+            <span className="font-serif italic text-[#A68E74] text-xl opacity-30 tracking-widest animate-pulse">Awaiting Showcase Synchronization...</span>
           </div>
         )}
         
@@ -119,10 +121,10 @@ const Home: React.FC = () => {
 
           {isRegistryEmpty ? (
             <div className="py-40 text-center border border-dashed border-black/10 rounded-[3rem] animate-fadeIn">
-               <span className="text-[#A68E74] uppercase text-[9px] font-black tracking-[0.5em] mb-6 block">Registry Sync Complete</span>
-               <h3 className="text-3xl font-serif text-black/20 italic mb-8">Live Registry is Empty</h3>
+               <span className="text-[#A68E74] uppercase text-[9px] font-black tracking-[0.5em] mb-6 block">Live Sync Active</span>
+               <h3 className="text-3xl font-serif text-black/20 italic mb-8">Registry is Uninitialized</h3>
                <p className="text-black/30 text-xs italic max-w-sm mx-auto leading-relaxed">
-                 The connection to Supabase is active, but no pieces have been cataloged in the live vault yet. Enroll pieces via the Atelier Portal.
+                 The AEVO Vault is connected to the live database, but no pieces have been enrolled. Use the Atelier Portal to populate the registry.
                </p>
             </div>
           ) : (
