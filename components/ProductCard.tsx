@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 // Use star import to resolve named export issues in some environments
 import * as ReactRouterDOM from 'react-router-dom';
@@ -31,9 +32,25 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
   };
 
   const getStockStatus = () => {
-    if (product.stock === 0) return { label: 'Archived', color: 'text-gray-400', dot: 'bg-gray-400' };
-    if (product.stock <= 5) return { label: 'Limited', color: 'text-[#A68E74]', dot: 'bg-[#A68E74]' };
-    return { label: 'In Stock', color: 'text-emerald-600/60', dot: 'bg-emerald-400' };
+    if (product.stock === 0) {
+      return { 
+        label: 'Out of Stock', 
+        color: 'text-red-600', 
+        dot: 'bg-red-500' 
+      };
+    }
+    if (product.stock <= 3) {
+      return { 
+        label: 'Low Stock', 
+        color: 'text-orange-600', 
+        dot: 'bg-orange-500' 
+      };
+    }
+    return { 
+      label: 'Available', 
+      color: 'text-emerald-600', 
+      dot: 'bg-emerald-500' 
+    };
   };
 
   const stockStatus = getStockStatus();
@@ -78,8 +95,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
       <div className="p-4 md:p-5">
         <div className="flex justify-between items-center mb-1.5">
           <span className="text-[7px] uppercase tracking-[0.3em] text-[#A68E74] font-black">{product.category}</span>
-          <div className="flex items-center space-x-1">
-            <div className={`w-1 h-1 rounded-full ${stockStatus.dot}`} />
+          <div className="flex items-center space-x-1.5">
+            <div className={`w-1.5 h-1.5 rounded-full ${stockStatus.dot} ${product.stock > 0 ? 'animate-pulse' : ''}`} />
             <span className={`text-[7px] uppercase tracking-widest font-black ${stockStatus.color}`}>{stockStatus.label}</span>
           </div>
         </div>
