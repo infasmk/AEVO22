@@ -26,7 +26,7 @@ interface AppState {
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'aevo_vault_v13';
+const LOCAL_STORAGE_KEY = 'aevo_vault_v14';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -81,7 +81,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       if (pRes.error) throw pRes.error;
 
-      // Only set from DB if we actually have remote data
       if (pRes.data && pRes.data.length > 0) setProducts(pRes.data);
       if (bRes.data && bRes.data.length > 0) setBanners(bRes.data);
       if (oRes.data && oRes.data.length > 0) setOrders(oRes.data);
@@ -89,7 +88,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
       setConnectionStatus('online');
     } catch (err: any) {
-      console.warn("AEVO Sync Engine: Remote disconnected. Local vault remains active.", err.message);
+      console.warn("AEVO Sync Engine: Remote disconnected.", err.message);
       setConnectionStatus('offline');
     }
   }, []);
@@ -101,7 +100,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const upsertProduct = async (p: Product) => {
     lastWriteTime.current = Date.now();
     
-    // UI Update (Optimistic)
     setProducts(prev => {
       const exists = prev.find(item => item.id === p.id);
       const updated = exists ? prev.map(item => item.id === p.id ? p : item) : [p, ...prev];
@@ -111,15 +109,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (!isConfigValid()) return false;
 
-    // Strict schema mapping
     const dbPayload = {
-      id: String(p.id), // Ensure it's a string
+      id: String(p.id),
       name: p.name,
       description: p.description,
       price: p.price,
       original_price: p.original_price,
       category: p.category,
       images: p.images,
+      colors: p.colors || [], // New persistence
       specs: p.specs,
       key_features: p.key_features || [],
       tag: p.tag,
@@ -134,9 +132,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (error) {
         console.group("🔴 Sync Failure");
         console.error("Supabase says:", error.message);
-        if (error.message.includes('invalid input syntax for type uuid')) {
-          console.error("CRITICAL: Your 'products' table 'id' column is a UUID type. It MUST be TEXT. Please run the provided DROP/CREATE SQL script.");
-        }
         console.groupEnd();
         return false;
       }

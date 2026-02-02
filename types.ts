@@ -12,10 +12,11 @@ export interface Product {
   description: string;
   price: number;
   original_price?: number;
-  category: string; // Changed from fixed union to string for dynamic support
+  category: string;
   images: string[];
+  colors?: string[]; // New field for color options
   specs: Record<string, string>;
-  key_features: KeyFeature[]; // New field
+  key_features: KeyFeature[];
   tag: ProductTag;
   stock: number;
   rating: number;

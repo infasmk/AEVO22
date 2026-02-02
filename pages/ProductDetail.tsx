@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-// Use star import to resolve named export issues in some environments
+
+import React, { useState } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 const { useParams, useNavigate } = ReactRouterDOM;
 import { useStore } from '../store';
-import { Star, Share, ChevronLeft, ShoppingBag, Heart, Compass, Feather, Shield, Diamond } from '../components/Icons';
+import { Star, Share, ChevronLeft, Heart, Compass, Feather, Shield, Diamond } from '../components/Icons';
 import SEO from '../components/SEO';
 
 const ProductDetail: React.FC = () => {
@@ -11,6 +11,7 @@ const ProductDetail: React.FC = () => {
   const navigate = useNavigate();
   const { products, wishlist, toggleWishlist } = useStore();
   const [activeImage, setActiveImage] = useState(0);
+  const [selectedColor, setSelectedColor] = useState<string>('');
 
   const product = products.find(p => p.id === id);
   if (!product) return <div className="pt-40 text-center font-serif text-2xl text-black/40">Masterpiece not found.</div>;
@@ -22,82 +23,62 @@ const ProductDetail: React.FC = () => {
     return icons[idx % icons.length] as React.ReactElement<{ className?: string }>;
   };
 
-  const productSchema = {
-    "@context": "https://schema.org/",
-    "@type": "Product",
-    "name": product.name,
-    "image": product.images,
-    "description": product.description,
-    "sku": product.id,
-    "brand": {
-      "@type": "Brand",
-      "name": "AEVO"
-    },
-    "offers": {
-      "@type": "Offer",
-      "url": window.location.href,
-      "priceCurrency": "INR",
-      "price": product.price,
-      "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-      "itemCondition": "https://schema.org/NewCondition"
-    },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": product.rating,
-      "reviewCount": product.reviews_count
-    }
+  const handleAcquire = () => {
+    const phoneNumber = "919745019658";
+    const colorText = selectedColor ? `Selected Color: ${selectedColor}` : "";
+    const message = `Hello AEVO Atelier, I am interested in acquiring the following masterpiece:
+    
+Piece: ${product.name}
+ID: ${product.id}
+Price: ₹${product.price.toLocaleString('en-IN')}
+${colorText}
+
+Please guide me through the acquisition process.`;
+    
+    window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   return (
     <div className="pt-24 pb-32 bg-[#FCFCFA]">
-      <SEO 
-        title={product.name} 
-        description={product.description.slice(0, 155) + "..."} 
-        schema={productSchema}
-      />
+      <SEO title={product.name} description={product.description.slice(0, 155)} />
 
       <div className="container mx-auto px-6 max-w-7xl">
         <div className="flex items-center justify-between mb-12">
            <button onClick={() => navigate(-1)} className="text-black/30 hover:text-black flex items-center space-x-2 text-[10px] uppercase tracking-widest">
              <ChevronLeft className="w-4 h-4" />
-             <span>Back</span>
+             <span>Back to Archive</span>
            </button>
            <div className="flex space-x-6">
               <button 
                 onClick={() => toggleWishlist(product.id)} 
                 className={`transition-colors ${isWishlisted ? 'text-[#8C7861]' : 'text-black/20'}`}
-                aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
               >
                 <Heart fill={isWishlisted ? 'currentColor' : 'none'} className="w-5 h-5" />
               </button>
-              <button onClick={() => {}} className="text-black/20" aria-label="Share product">
-                <Share className="w-5 h-5" />
-              </button>
+              <button onClick={() => {}} className="text-black/20"><Share className="w-5 h-5" /></button>
            </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 mb-32">
+          {/* Visual Showcase */}
           <div className="space-y-6">
             <div className="aspect-[4/5] bg-[#FDFBF7] rounded-[2.5rem] overflow-hidden border border-black/5 relative group">
-              <img src={product.images[activeImage]} alt={`${product.name} - View ${activeImage + 1}`} className="w-full h-full object-cover transition-transform duration-[3s] group-hover:scale-110 mix-blend-multiply opacity-90" />
-              <div className="absolute bottom-6 right-6 bg-white/60 backdrop-blur-md px-4 py-2 rounded-full text-[9px] text-black/40 tracking-widest uppercase shadow-sm">
-                {activeImage + 1} / {product.images.length}
-              </div>
+              <img src={product.images[activeImage]} alt={product.name} className="w-full h-full object-cover transition-transform duration-[3s] group-hover:scale-110 mix-blend-multiply" />
             </div>
             <div className="flex space-x-4 overflow-x-auto no-scrollbar py-2">
               {product.images.map((img, i) => (
                 <button 
                   key={i} 
                   onClick={() => setActiveImage(i)}
-                  className={`w-20 h-24 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${activeImage === i ? 'border-[#8C7861] opacity-100 shadow-lg' : 'border-transparent opacity-40 hover:opacity-100'}`}
-                  aria-label={`Switch to image ${i + 1}`}
+                  className={`w-20 h-24 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${activeImage === i ? 'border-[#8C7861] opacity-100' : 'border-transparent opacity-40'}`}
                 >
-                  <img src={img} alt={`${product.name} thumbnail ${i + 1}`} className="w-full h-full object-cover mix-blend-multiply" />
+                  <img src={img} alt="thumbnail" className="w-full h-full object-cover mix-blend-multiply" />
                 </button>
               ))}
             </div>
           </div>
 
+          {/* Details */}
           <div className="flex flex-col pt-4">
             <span className="text-[#8C7861] uppercase text-[10px] font-black tracking-[0.5em] mb-4">{product.category} Series</span>
             <h1 className="text-5xl md:text-7xl font-serif text-black/80 mb-8 italic leading-tight">{product.name}</h1>
@@ -110,9 +91,27 @@ const ProductDetail: React.FC = () => {
                </div>
             </div>
 
-            <p className="text-black/50 text-base md:text-lg italic font-light leading-relaxed mb-16 max-w-xl">
+            <p className="text-black/50 text-base md:text-lg italic font-light leading-relaxed mb-12">
               {product.description}
             </p>
+
+            {/* Color Selection */}
+            {product.colors && product.colors.length > 0 && (
+              <div className="mb-12">
+                <span className="text-[9px] uppercase tracking-[0.4em] text-black/30 font-black mb-4 block">Atelier Colorway</span>
+                <div className="flex flex-wrap gap-4">
+                  {product.colors.map(color => (
+                    <button
+                      key={color}
+                      onClick={() => setSelectedColor(color)}
+                      className={`px-4 py-2 rounded-full text-[9px] uppercase tracking-widest font-bold border transition-all ${selectedColor === color ? 'bg-black text-white border-black shadow-lg' : 'bg-white text-black/40 border-black/10 hover:border-black/30'}`}
+                    >
+                      {color}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-8 mb-16 border-y border-black/5 py-12">
               {Object.entries(product.specs).map(([k, v]) => (
@@ -122,35 +121,38 @@ const ProductDetail: React.FC = () => {
                 </div>
               ))}
             </div>
-
-            <div className="flex flex-col sm:flex-row gap-6 mt-auto">
-              <button onClick={() => alert('Commission Request Initiated')} className="flex-1 bg-black text-white py-6 rounded-full text-[10px] font-black uppercase tracking-[0.4em] hover:scale-[1.02] transition-transform shadow-2xl">
-                Secure Acquisition
-              </button>
-              <button className="flex-1 bg-white text-black py-6 rounded-full text-[10px] font-black uppercase tracking-[0.4em] border border-black/10 hover:bg-black hover:text-white transition-all">
-                Personal Consultation
-              </button>
-            </div>
           </div>
         </div>
         
         {/* Anatomy of Excellence Section */}
-        {product.key_features && product.key_features.length > 0 && (
-          <div className="mt-40 pt-32 border-t border-black/5 text-center">
-            <h2 className="text-[#8C7861] uppercase text-[10px] font-black tracking-[0.8em] mb-12 block">Anatomy of Excellence</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 text-left">
-                {product.key_features.map((item, idx) => (
-                  <div key={idx} className="p-12 bg-white rounded-[3rem] border border-black/5 space-y-6 group hover:border-[#8C7861]/30 transition-all shadow-sm">
-                    <div className="w-16 h-16 bg-[#FDFBF7] rounded-2xl flex items-center justify-center text-[#8C7861] group-hover:scale-110 transition-transform">
-                      {React.cloneElement(getIcon(idx), { className: 'w-8 h-8' })}
-                    </div>
-                    <h3 className="text-black/80 text-2xl font-serif italic">{item.title}</h3>
-                    <p className="text-black/40 text-sm italic font-light leading-relaxed">{item.description}</p>
+        <div className="pt-32 border-t border-black/5 text-center mb-24">
+          <h2 className="text-[#8C7861] uppercase text-[10px] font-black tracking-[0.8em] mb-12 block">Anatomy of Excellence</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 text-left mb-24">
+              {(product.key_features || []).map((item, idx) => (
+                <div key={idx} className="p-12 bg-white rounded-[3rem] border border-black/5 space-y-6 group hover:border-[#8C7861]/30 transition-all shadow-sm">
+                  <div className="w-16 h-16 bg-[#FDFBF7] rounded-2xl flex items-center justify-center text-[#8C7861] group-hover:scale-110 transition-transform">
+                    {React.cloneElement(getIcon(idx), { className: 'w-8 h-8' })}
                   </div>
-                ))}
-            </div>
+                  <h3 className="text-black/80 text-2xl font-serif italic">{item.title}</h3>
+                  <p className="text-black/40 text-sm italic font-light leading-relaxed">{item.description}</p>
+                </div>
+              ))}
+              {(!product.key_features || product.key_features.length === 0) && (
+                <div className="col-span-full text-center py-10 opacity-20 italic">No features registered in the archive.</div>
+              )}
           </div>
-        )}
+
+          {/* Secure Acquisition Button - Positioned below Features */}
+          <div className="max-w-md mx-auto">
+            <button 
+              onClick={handleAcquire}
+              className="w-full bg-black text-white py-8 rounded-full text-[12px] font-black uppercase tracking-[0.5em] hover:scale-[1.02] transition-transform shadow-2xl flex items-center justify-center space-x-4"
+            >
+              <span>Secure Acquisition via WhatsApp</span>
+            </button>
+            <p className="mt-6 text-[9px] uppercase tracking-[0.3em] text-black/30 font-medium">Direct connection to the AEVO Artisan Portal</p>
+          </div>
+        </div>
       </div>
     </div>
   );
