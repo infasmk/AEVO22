@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 // Use star import to resolve named export issues in some environments
 import * as ReactRouterDOM from 'react-router-dom';
@@ -68,8 +69,16 @@ const AdminLayout: React.FC = () => {
         </div>
       </aside>
 
+      {/* Overlay for mobile sidebar */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[90] lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       <main className="flex-1 lg:ml-64 pt-16 lg:pt-0 min-h-screen">
-        <div className="max-w-6xl mx-auto p-6 lg:p-14">
+        <div className="max-w-6xl mx-auto px-4 py-8 md:p-14">
           <Outlet />
         </div>
       </main>

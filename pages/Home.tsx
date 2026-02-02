@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 // Use star import to resolve named export issues in some environments
 import * as ReactRouterDOM from 'react-router-dom';
@@ -43,7 +44,6 @@ const Home: React.FC = () => {
     }
   };
 
-  // Only show spin loader if we have NO products at all
   if (isLoading && products.length === 0) {
     return (
       <div className="min-h-screen bg-[#FCFCFA] flex items-center justify-center">
@@ -61,27 +61,32 @@ const Home: React.FC = () => {
       />
 
       {/* Hero Showcase */}
-      <section className="relative h-[85vh] w-full overflow-hidden bg-[#FAF8F6]">
+      <section className="relative h-[85vh] w-full overflow-hidden bg-black">
         {banners.length > 0 ? banners.map((banner, index) => (
           <div 
             key={banner.id}
             className={`absolute inset-0 transition-all duration-[2s] ease-in-out ${index === activeBanner ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-105 z-0'}`}
           >
-            <img src={banner.image_url} alt={banner.title} className="w-full h-full object-cover opacity-20 grayscale-[20%]" />
-            <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-[#FCFCFA]" />
+            {/* Visual Fix: Increased Opacity and simplified overlays */}
+            <img src={banner.image_url} alt={banner.title} className="w-full h-full object-cover opacity-60 transition-opacity duration-1000" />
+            
+            {/* Scrim for text readability without washing out the image */}
+            <div className="absolute inset-0 bg-black/30" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#FCFCFA] via-transparent to-black/10" />
+
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-8">
-              <span className="text-[10px] font-black uppercase tracking-[0.8em] mb-6 text-[#A68E74] animate-fadeInUp">
+              <span className="text-[10px] font-black uppercase tracking-[0.8em] mb-6 text-white animate-fadeInUp drop-shadow-md">
                 {banner.tag_label}
               </span>
-              <h1 className="text-4xl sm:text-6xl md:text-8xl font-serif mb-8 max-w-5xl leading-[1.1] text-black/80 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+              <h1 className="text-4xl sm:text-6xl md:text-8xl font-serif mb-8 max-w-5xl leading-[1.1] text-white animate-fadeInUp drop-shadow-xl" style={{ animationDelay: '0.2s' }}>
                 {banner.title}
               </h1>
-              <p className="text-black/40 text-sm md:text-lg font-light italic mb-10 max-w-lg animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
+              <p className="text-white/80 text-sm md:text-lg font-light italic mb-10 max-w-lg animate-fadeInUp drop-shadow-lg" style={{ animationDelay: '0.4s' }}>
                 {banner.subtitle}
               </p>
               <button 
                 onClick={() => navigate('/shop')}
-                className="group relative px-12 py-4 bg-black text-white rounded-full uppercase text-[9px] font-black tracking-[0.3em] transition-all hover:scale-105 active:scale-95 animate-fadeInUp shadow-xl" 
+                className="group relative px-12 py-4 bg-[#A68E74] text-white rounded-full uppercase text-[9px] font-black tracking-[0.3em] transition-all hover:scale-105 active:scale-95 animate-fadeInUp shadow-2xl" 
                 style={{ animationDelay: '0.6s' }}
               >
                 Browse Archive
@@ -101,7 +106,7 @@ const Home: React.FC = () => {
               <button 
                 key={i} 
                 onClick={() => setActiveBanner(i)}
-                className={`h-0.5 transition-all duration-700 ${i === activeBanner ? 'w-10 bg-[#A68E74]' : 'w-4 bg-black/10'}`}
+                className={`h-0.5 transition-all duration-700 ${i === activeBanner ? 'w-10 bg-white' : 'w-4 bg-white/30'}`}
                 aria-label={`Go to slide ${i + 1}`}
               />
             ))}
