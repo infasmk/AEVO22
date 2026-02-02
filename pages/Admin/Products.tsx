@@ -61,13 +61,16 @@ const AdminProducts: React.FC = () => {
       created_at: editingProduct ? editingProduct.created_at : new Date().toISOString()
     } as Product;
 
-    const success = await upsertProduct(finalProduct);
-    if (success) {
-      setToast({ message: editingProduct ? "Masterpiece Refined" : "Masterpiece Enrolled Successfully", type: 'success' });
-      setIsModalOpen(false);
+    // We attempt the save. Even if it returns false (DB error), 
+    // the store has already updated the local UI.
+    const syncSuccess = await upsertProduct(finalProduct);
+    
+    if (syncSuccess) {
+      setToast({ message: editingProduct ? "Piece Refined" : "Piece Enrolled Successfully", type: 'success' });
     } else {
-      setToast({ message: "Cloud Sync Delayed - Saved Locally", type: 'error' });
+      setToast({ message: "Saved Locally. Database sync failed (Check Console).", type: 'error' });
     }
+    setIsModalOpen(false);
   };
 
   const handleAddCategory = async () => {
@@ -75,7 +78,7 @@ const AdminProducts: React.FC = () => {
     const success = await upsertCategory({ id: `cat-${Date.now()}`, name: newCatName });
     if (success) {
       setNewCatName('');
-      setToast({ message: "New Series Registered", type: 'success' });
+      setToast({ message: "Series Registered Locally", type: 'success' });
     }
   };
 
@@ -103,7 +106,7 @@ const AdminProducts: React.FC = () => {
         />
       </div>
 
-      {/* Grid of Items for better mobile usability */}
+      {/* Grid of Items */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())).map(product => (
           <div key={product.id} className="bg-white border border-black/5 rounded-[2rem] p-6 shadow-sm group hover:shadow-xl transition-all duration-500">
@@ -141,7 +144,7 @@ const AdminProducts: React.FC = () => {
             <div className="sticky top-0 z-30 p-8 border-b border-black/5 flex justify-between items-center bg-[#FCFCFA]/90 backdrop-blur-md">
               <div>
                 <h2 className="text-2xl font-serif italic text-black">{editingProduct ? 'Refine Masterpiece' : 'Enroll New Piece'}</h2>
-                <p className="text-[8px] uppercase tracking-[0.4em] text-[#A68E74] font-black mt-1">Digital Calibration Interface</p>
+                <p className="text-[8px] uppercase tracking-[0.4em] text-[#A68E74] font-black mt-1">Atelier Registry Update</p>
               </div>
               <button onClick={() => setIsModalOpen(false)} className="p-4 bg-white border border-black/5 rounded-full hover:bg-black hover:text-white transition-all"><X className="w-4 h-4" /></button>
             </div>
@@ -211,55 +214,9 @@ const AdminProducts: React.FC = () => {
                  <button type="button" onClick={() => setImageUrls([...imageUrls, ''])} className="text-[9px] font-black uppercase tracking-widest text-[#A68E74] border-b border-[#A68E74]/20">+ Add New Asset Angle</button>
                </div>
 
-               {/* Specs & Features */}
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 pt-8 border-t border-black/5">
-                  <div className="space-y-6">
-                    <label className="text-[9px] uppercase tracking-[0.4em] text-black/40 font-black flex items-center gap-2"><Settings className="w-4 h-4" /> Technical Blueprint</label>
-                    <div className="space-y-3">
-                      {specs.map((s, i) => (
-                        <div key={i} className="flex gap-3">
-                          <input className="w-1/3 bg-white rounded-xl p-4 text-[9px] uppercase font-black border border-black/10" placeholder="Parameter" value={s.key} onChange={e => {
-                             const newSpecs = [...specs];
-                             newSpecs[i].key = e.target.value;
-                             setSpecs(newSpecs);
-                          }} />
-                          <input className="flex-1 bg-white rounded-xl p-4 text-[10px] font-medium border border-black/10" placeholder="Value" value={s.value} onChange={e => {
-                             const newSpecs = [...specs];
-                             newSpecs[i].value = e.target.value;
-                             setSpecs(newSpecs);
-                          }} />
-                        </div>
-                      ))}
-                      <button type="button" onClick={() => setSpecs([...specs, { key: '', value: '' }])} className="text-[9px] font-black uppercase tracking-widest text-[#A68E74] border-b border-[#A68E74]/20">+ Add Blueprint Parameter</button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-6">
-                    <label className="text-[9px] uppercase tracking-[0.4em] text-black/40 font-black flex items-center gap-2"><Star className="w-4 h-4" /> Artisanal Details</label>
-                    <div className="space-y-4">
-                      {features.map((f, i) => (
-                        <div key={i} className="p-6 bg-white rounded-2xl border border-black/10 space-y-4 relative shadow-sm">
-                           <input className="w-full bg-transparent font-serif text-lg text-[#111111] outline-none italic" placeholder="Feature Distinction" value={f.title} onChange={e => {
-                             const newF = [...features];
-                             newF[i].title = e.target.value;
-                             setFeatures(newF);
-                           }} />
-                           <textarea className="w-full bg-transparent text-[10px] text-black/50 uppercase tracking-widest leading-relaxed outline-none h-16" placeholder="Narrative feature description..." value={f.description} onChange={e => {
-                             const newF = [...features];
-                             newF[i].description = e.target.value;
-                             setFeatures(newF);
-                           }} />
-                           <button type="button" onClick={() => setFeatures(features.filter((_, idx) => idx !== i))} className="absolute top-4 right-4 text-black/10 hover:text-red-500 transition-colors"><X className="w-4 h-4" /></button>
-                        </div>
-                      ))}
-                      <button type="button" onClick={() => setFeatures([...features, { title: '', description: '' }])} className="text-[9px] font-black uppercase tracking-widest text-[#A68E74] border-b border-[#A68E74]/20">+ Add Artisanal Note</button>
-                    </div>
-                  </div>
-               </div>
-
                <div className="flex justify-end pt-12 border-t border-black/5 space-x-6">
-                 <button type="button" onClick={() => setIsModalOpen(false)} className="text-[10px] font-black uppercase tracking-widest text-black/30 hover:text-black">Abort Synchronization</button>
-                 <button type="submit" className="bg-[#111111] text-white px-14 py-6 rounded-full text-[10px] font-black uppercase tracking-[0.4em] shadow-2xl hover:scale-105 transition-all">Commit to Registry</button>
+                 <button type="button" onClick={() => setIsModalOpen(false)} className="text-[10px] font-black uppercase tracking-widest text-black/30 hover:text-black">Abort Sync</button>
+                 <button type="submit" className="bg-[#111111] text-white px-14 py-6 rounded-full text-[10px] font-black uppercase tracking-[0.4em] shadow-2xl hover:scale-105 transition-all">Enroll to Vault</button>
                </div>
             </form>
           </div>

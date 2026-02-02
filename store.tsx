@@ -26,7 +26,7 @@ interface AppState {
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'aevo_vault_v6';
+const LOCAL_STORAGE_KEY = 'aevo_vault_v9';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -39,18 +39,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   
   const lastWriteTime = useRef<number>(0);
 
-  // Load local cache immediately for fast startup
+  // Initial local load for instant UI
   useEffect(() => {
-    const cachedProducts = localStorage.getItem(`${LOCAL_STORAGE_KEY}_products`);
-    const cachedCategories = localStorage.getItem(`${LOCAL_STORAGE_KEY}_categories`);
-    if (cachedProducts) setProducts(JSON.parse(cachedProducts));
-    if (cachedCategories) setCategories(JSON.parse(cachedCategories));
+    const loadLocal = () => {
+      const cachedProducts = localStorage.getItem(`${LOCAL_STORAGE_KEY}_products`);
+      const cachedBanners = localStorage.getItem(`${LOCAL_STORAGE_KEY}_banners`);
+      const cachedCategories = localStorage.getItem(`${LOCAL_STORAGE_KEY}_categories`);
+      const cachedWishlist = localStorage.getItem(`${LOCAL_STORAGE_KEY}_wishlist`);
+
+      if (cachedProducts) setProducts(JSON.parse(cachedProducts));
+      else setProducts(INITIAL_PRODUCTS);
+
+      if (cachedBanners) setBanners(JSON.parse(cachedBanners));
+      else setBanners(INITIAL_BANNERS);
+
+      if (cachedCategories) setCategories(JSON.parse(cachedCategories));
+      else setCategories([{ id: '1', name: 'Luxury Series' }, { id: '2', name: 'Wall Clocks' }]);
+
+      if (cachedWishlist) setWishlist(JSON.parse(cachedWishlist));
+      
+      setIsLoading(false);
+    };
+    loadLocal();
   }, []);
 
   const fetchData = useCallback(async () => {
-    if (Date.now() - lastWriteTime.current < 3000) return;
+    // Avoid race conditions: don't overwrite if we just wrote locally
+    if (Date.now() - lastWriteTime.current < 4000) return;
 
-    setIsLoading(true);
     setConnectionStatus('connecting');
     try {
       const [pRes, bRes, oRes, cRes] = await Promise.all([
@@ -60,37 +76,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabase.from('categories').select('*').order('name', { ascending: true })
       ]);
 
-      if (pRes.error) throw pRes.error;
+      if (pRes.error) {
+        console.warn("Supabase Access Restricted. Using local vault fallback.");
+        throw pRes.error;
+      }
 
-      const finalProducts = pRes.data && pRes.data.length > 0 ? pRes.data : INITIAL_PRODUCTS;
-      const finalBanners = bRes.data && bRes.data.length > 0 ? bRes.data : INITIAL_BANNERS;
-      const finalOrders = oRes.data && oRes.data.length > 0 ? oRes.data : MOCK_ORDERS;
-      const finalCategories = cRes.data && cRes.data.length > 0 ? cRes.data : categories.length > 0 ? categories : [
-        { id: '1', name: 'Luxury Series' },
-        { id: '2', name: 'Wall Clocks' },
-        { id: '3', name: 'Men' },
-        { id: '4', name: 'Women' }
-      ];
-
-      setProducts(finalProducts);
-      setBanners(finalBanners);
-      setOrders(finalOrders);
-      setCategories(finalCategories);
+      if (pRes.data && pRes.data.length > 0) setProducts(pRes.data);
+      if (bRes.data && bRes.data.length > 0) setBanners(bRes.data);
+      if (oRes.data && oRes.data.length > 0) setOrders(oRes.data);
+      if (cRes.data && cRes.data.length > 0) setCategories(cRes.data);
+      
       setConnectionStatus('online');
-
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(finalProducts));
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(finalBanners));
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_categories`, JSON.stringify(finalCategories));
-
-    } catch (err) {
-      console.warn("AEVO: Using local vault archive.", err);
+    } catch (err: any) {
+      console.warn("Cloud disconnected:", err.message);
       setConnectionStatus('offline');
-      if (products.length === 0) setProducts(INITIAL_PRODUCTS);
-      if (banners.length === 0) setBanners(INITIAL_BANNERS);
-    } finally {
-      setIsLoading(false);
     }
-  }, [products.length, banners.length, categories]);
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -99,20 +100,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const upsertProduct = async (p: Product) => {
     lastWriteTime.current = Date.now();
     
-    // 1. Optimistic UI Update
+    // 1. UPDATE UI INSTANTLY (Local-First)
     setProducts(prev => {
-      const newProducts = prev.find(item => item.id === p.id) 
-        ? prev.map(item => item.id === p.id ? p : item)
-        : [p, ...prev];
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(newProducts));
-      return newProducts;
+      const exists = prev.find(item => item.id === p.id);
+      const updated = exists ? prev.map(item => item.id === p.id ? p : item) : [p, ...prev];
+      localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(updated));
+      return updated;
     });
 
-    // 2. Sync to Supabase
+    // 2. PREPARE DB PAYLOAD (Strict schema mapping)
+    const dbPayload = {
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      price: p.price,
+      original_price: p.original_price,
+      category: p.category,
+      images: p.images,
+      specs: p.specs,
+      key_features: p.key_features,
+      tag: p.tag,
+      stock: p.stock,
+      rating: p.rating,
+      reviews_count: p.reviews_count,
+      created_at: p.created_at || new Date().toISOString()
+    };
+
     try {
-      const { error } = await supabase.from('products').upsert(p);
+      const { error } = await supabase.from('products').upsert(dbPayload);
       if (error) {
-        console.error("AEVO Sync Error:", error.message);
+        console.error("SYNC FAILED: Ensure you have run the SQL script in Supabase. Error:", error.message);
         return false;
       }
       return true;
@@ -135,9 +152,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const upsertCategory = async (c: Category) => {
     lastWriteTime.current = Date.now();
     setCategories(prev => {
-      const newCats = prev.find(item => item.id === c.id) ? prev.map(item => item.id === c.id ? c : item) : [...prev, c];
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_categories`, JSON.stringify(newCats));
-      return newCats;
+      const exists = prev.find(item => item.id === c.id);
+      const updated = exists ? prev.map(item => item.id === c.id ? c : item) : [...prev, c];
+      localStorage.setItem(`${LOCAL_STORAGE_KEY}_categories`, JSON.stringify(updated));
+      return updated;
     });
     const { error } = await supabase.from('categories').upsert(c);
     return !error;
@@ -157,9 +175,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const upsertBanner = async (b: Banner) => {
     lastWriteTime.current = Date.now();
     setBanners(prev => {
-      const newBanners = prev.find(item => item.id === b.id) ? prev.map(item => item.id === b.id ? b : item) : [...prev, b];
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(newBanners));
-      return newBanners;
+      const updated = prev.find(item => item.id === b.id) ? prev.map(item => item.id === b.id ? b : item) : [...prev, b];
+      localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(updated));
+      return updated;
     });
     const { error } = await supabase.from('banners').upsert(b);
     return !error;
