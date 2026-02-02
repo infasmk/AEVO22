@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { Product, Banner, Order, Category } from './types';
 import { supabase, isConfigValid } from './supabase';
@@ -25,7 +26,7 @@ interface AppState {
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'aevo_vault_v11';
+const LOCAL_STORAGE_KEY = 'aevo_vault_v12';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -80,17 +81,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       if (pRes.error) throw pRes.error;
 
-      if (pRes.data && pRes.data.length > 0) setProducts(pRes.data);
-      if (bRes.data && bRes.data.length > 0) setBanners(bRes.data);
-      if (oRes.data && oRes.data.length > 0) setOrders(oRes.data);
-      if (cRes.data && cRes.data.length > 0) setCategories(cRes.data);
+      if (pRes.data) setProducts(pRes.data.length > 0 ? pRes.data : INITIAL_PRODUCTS);
+      if (bRes.data) setBanners(bRes.data.length > 0 ? bRes.data : INITIAL_BANNERS);
+      if (oRes.data) setOrders(oRes.data.length > 0 ? oRes.data : []);
+      if (cRes.data) setCategories(cRes.data.length > 0 ? cRes.data : categories);
       
       setConnectionStatus('online');
     } catch (err: any) {
-      console.warn("AEVO Sync: Database connection established, but tables might be missing. Check your SQL Editor.");
+      console.warn("AEVO Sync Status:", err.message);
       setConnectionStatus('offline');
     }
-  }, []);
+  }, [categories]);
 
   useEffect(() => {
     fetchData();
@@ -99,7 +100,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const upsertProduct = async (p: Product) => {
     lastWriteTime.current = Date.now();
     
-    // 1. UPDATE UI INSTANTLY (Local Persistence)
+    // 1. Update UI immediately (Offline-first)
     setProducts(prev => {
       const exists = prev.find(item => item.id === p.id);
       const updated = exists ? prev.map(item => item.id === p.id ? p : item) : [p, ...prev];
@@ -109,7 +110,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (!isConfigValid()) return false;
 
-    // Strict schema mapping to match the SQL script provided
+    // Payload exactly matching the latest SQL schema
     const dbPayload = {
       id: p.id,
       name: p.name,
@@ -119,21 +120,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       category: p.category,
       images: p.images,
       specs: p.specs,
-      key_features: p.key_features,
+      key_features: p.key_features || [],
       tag: p.tag,
       stock: p.stock,
-      rating: p.rating,
-      reviews_count: p.reviews_count,
+      rating: p.rating || 5,
+      reviews_count: p.reviews_count || 0,
       created_at: p.created_at || new Date().toISOString()
     };
 
     try {
       const { error } = await supabase.from('products').upsert(dbPayload);
       if (error) {
-        console.error("SUPABASE ERROR:", error.message);
-        if (error.message.includes('relation "products" does not exist')) {
-          console.error("🔴 ACTION REQUIRED: You must run the CREATE TABLE SQL script in your Supabase SQL Editor.");
+        console.group("🔴 Supabase Sync Error");
+        console.error("Message:", error.message);
+        if (error.message.includes('column "key_features" of relation "products" does not exist')) {
+          console.error("FIX REQUIRED: Run the SQL REPAIR SCRIPT in your Supabase SQL Editor to add the 'key_features' column.");
+        } else if (error.message.includes('relation "products" does not exist')) {
+          console.error("FIX REQUIRED: Table 'products' is missing. Run the full SQL setup script.");
         }
+        console.groupEnd();
         return false;
       }
       return true;
