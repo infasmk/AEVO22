@@ -67,22 +67,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return colors.map(c => `${c.name}:${c.hex}`);
   };
 
-  // Auth Listener with Failsafe
+  // Auth Listener
   useEffect(() => {
-    // 5-second Failsafe for Mobile Networks
-    const failsafe = setTimeout(() => {
-      if (isAuthLoading) {
-        console.warn("AEVO Auth Engine: Resolution timed out. Force-resolving loader.");
-        setIsAuthLoading(false);
-      }
-    }, 5000);
-
     const checkUser = async () => {
       try {
-        const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) throw sessionError;
-
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
@@ -95,13 +84,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           
           if (!profileError && profile) {
             setIsAdmin(!!profile.is_admin);
+          } else {
+            setIsAdmin(false);
           }
         }
       } catch (err) {
         console.error("AEVO Auth Engine: Initialization failure.", err);
       } finally {
         setIsAuthLoading(false);
-        clearTimeout(failsafe);
       }
     };
 
@@ -122,33 +112,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     });
 
-    return () => {
-      subscription.unsubscribe();
-      clearTimeout(failsafe);
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
+  // Initial local load
   useEffect(() => {
-    const loadLocal = () => {
-      const cachedProducts = localStorage.getItem(`${LOCAL_STORAGE_KEY}_products`);
-      const cachedBanners = localStorage.getItem(`${LOCAL_STORAGE_KEY}_banners`);
-      const cachedCategories = localStorage.getItem(`${LOCAL_STORAGE_KEY}_categories`);
-      const cachedWishlist = localStorage.getItem(`${LOCAL_STORAGE_KEY}_wishlist`);
+    const cachedProducts = localStorage.getItem(`${LOCAL_STORAGE_KEY}_products`);
+    const cachedBanners = localStorage.getItem(`${LOCAL_STORAGE_KEY}_banners`);
+    const cachedCategories = localStorage.getItem(`${LOCAL_STORAGE_KEY}_categories`);
+    const cachedWishlist = localStorage.getItem(`${LOCAL_STORAGE_KEY}_wishlist`);
 
-      if (cachedProducts) setProducts(JSON.parse(cachedProducts));
-      else setProducts(INITIAL_PRODUCTS);
+    if (cachedProducts) setProducts(JSON.parse(cachedProducts));
+    else setProducts(INITIAL_PRODUCTS);
 
-      if (cachedBanners) setBanners(JSON.parse(cachedBanners));
-      else setBanners(INITIAL_BANNERS);
+    if (cachedBanners) setBanners(JSON.parse(cachedBanners));
+    else setBanners(INITIAL_BANNERS);
 
-      if (cachedCategories) setCategories(JSON.parse(cachedCategories));
-      else setCategories([{ id: '1', name: 'Luxury Series' }, { id: '2', name: 'Wall Clocks' }]);
+    if (cachedCategories) setCategories(JSON.parse(cachedCategories));
+    else setCategories([{ id: '1', name: 'Luxury Series' }, { id: '2', name: 'Wall Clocks' }]);
 
-      if (cachedWishlist) setWishlist(JSON.parse(cachedWishlist));
-      
-      setIsLoading(false);
-    };
-    loadLocal();
+    if (cachedWishlist) setWishlist(JSON.parse(cachedWishlist));
+    
+    setIsLoading(false);
   }, []);
 
   const fetchData = useCallback(async () => {
@@ -157,33 +142,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
 
-    if (Date.now() - lastWriteTime.current < 4000) return;
+    // Throttle fetches to avoid excessive DB calls during rapid state changes
+    if (Date.now() - lastWriteTime.current < 2000) return;
 
     setConnectionStatus('connecting');
     try {
-      const [pRes, bRes, oRes, cRes] = await Promise.all([
-        supabase.from('products').select('*').order('created_at', { ascending: false }),
-        supabase.from('banners').select('*').order('display_order', { ascending: true }),
-        supabase.from('orders').select('*').order('created_at', { ascending: false }),
-        supabase.from('categories').select('*').order('name', { ascending: true })
-      ]);
-
-      if (pRes.error) throw pRes.error;
-
-      if (pRes.data) {
+      // Fetch products (Public access)
+      const pRes = await supabase.from('products').select('*').order('created_at', { ascending: false });
+      if (pRes.data && pRes.data.length > 0) {
         const transformedProducts = pRes.data.map(p => ({
           ...p,
           colors: parseColors(p.colors)
         }));
         setProducts(transformedProducts);
+        localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(transformedProducts));
       }
-      if (bRes.data && bRes.data.length > 0) setBanners(bRes.data);
-      if (oRes.data && oRes.data.length > 0) setOrders(oRes.data);
-      if (cRes.data && cRes.data.length > 0) setCategories(cRes.data);
+
+      // Fetch banners (Public access)
+      const bRes = await supabase.from('banners').select('*').order('display_order', { ascending: true });
+      if (bRes.data && bRes.data.length > 0) {
+        setBanners(bRes.data);
+        localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(bRes.data));
+      }
+
+      // Fetch categories (Public access)
+      const cRes = await supabase.from('categories').select('*').order('name', { ascending: true });
+      if (cRes.data && cRes.data.length > 0) {
+        setCategories(cRes.data);
+        localStorage.setItem(`${LOCAL_STORAGE_KEY}_categories`, JSON.stringify(cRes.data));
+      }
+
+      // Fetch orders (Private access - might fail if not admin)
+      const oRes = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+      if (oRes.data) setOrders(oRes.data);
       
       setConnectionStatus('online');
     } catch (err: any) {
-      console.warn("AEVO Sync Engine: Remote disconnected.", err.message);
+      console.warn("AEVO Sync Engine: Remote partially disconnected.", err.message);
       setConnectionStatus('offline');
     }
   }, []);

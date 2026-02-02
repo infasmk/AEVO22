@@ -3,12 +3,12 @@ import React, { useState } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 const { Link, useLocation, Outlet } = ReactRouterDOM;
 import { useStore } from '../../store';
-import { ShoppingBag, Star, Shield, Menu, X } from '../../components/Icons';
+import { ShoppingBag, Star, Shield, Menu, X, Info } from '../../components/Icons';
 
 const AdminLayout: React.FC = () => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
-  const { connectionStatus, signOut, user } = useStore();
+  const { connectionStatus, signOut, user, isAdmin } = useStore();
 
   const links = [
     { name: 'Insights', path: '/admin', icon: <Star className="w-4 h-4" /> },
@@ -107,6 +107,21 @@ const AdminLayout: React.FC = () => {
       {/* Main Orchestrator */}
       <main className={`flex-1 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${sidebarOpen ? 'lg:ml-72' : 'ml-0'} min-h-screen`}>
         <div className="max-w-7xl mx-auto px-6 py-10 lg:p-16 pt-24 lg:pt-24">
+          {/* Authorization Check Feedback */}
+          {!isAdmin && (
+            <div className="mb-12 bg-amber-50 border border-amber-200 rounded-[2rem] p-8 flex flex-col md:flex-row gap-6 items-center animate-fadeInUp">
+               <div className="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 flex-shrink-0">
+                  <Info className="w-6 h-6" />
+               </div>
+               <div className="flex-1 space-y-1 text-center md:text-left">
+                  <h4 className="text-amber-900 font-serif text-lg italic">Restricted Registry Access</h4>
+                  <p className="text-amber-800/60 text-[10px] font-medium uppercase tracking-widest leading-relaxed">
+                    Your session is valid, but your artisan profile is not marked as <span className="text-amber-900 font-black underline">Admin</span> in the database. 
+                    Supabase Row Level Security (RLS) is currently hiding existing data. Update your profile in the Supabase Dashboard to see all records.
+                  </p>
+               </div>
+            </div>
+          )}
           <Outlet />
         </div>
       </main>
