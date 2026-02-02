@@ -34,7 +34,7 @@ interface AppState {
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'aevo_vault_v14';
+const LOCAL_STORAGE_KEY = 'aevo_vault_v15';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -70,19 +70,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Auth Listener
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', session.user.id)
-          .single();
-        setIsAdmin(!!profile?.is_admin);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (!profileError && profile) {
+            setIsAdmin(!!profile.is_admin);
+          }
+        }
+      } catch (err) {
+        console.error("AEVO Auth Engine: Initialization failure.", err);
+      } finally {
+        setIsAuthLoading(false);
       }
-      setIsAuthLoading(false);
     };
 
     checkUser();
@@ -100,7 +108,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } else {
         setIsAdmin(false);
       }
-      setIsAuthLoading(false);
     });
 
     return () => subscription.unsubscribe();
