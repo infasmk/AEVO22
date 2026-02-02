@@ -14,8 +14,8 @@ const AdminOrders: React.FC = () => {
     switch (status) {
       case 'Delivered': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
       case 'Shipped': return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
-      case 'Artisan Prep': return 'bg-[#C5A059]/10 text-[#C5A059] border-[#C5A059]/20';
-      default: return 'bg-white/5 text-white/40 border-white/10';
+      case 'Artisan Prep': return 'bg-[#A68E74]/10 text-[#A68E74] border-[#A68E74]/20';
+      default: return 'bg-black/5 text-black/30 border-black/10';
     }
   };
 
@@ -31,75 +31,80 @@ const AdminOrders: React.FC = () => {
   };
 
   return (
-    <div className="p-12 space-y-12 animate-fadeIn">
-      <div>
-        <h1 className="text-4xl font-serif mb-4">Acquisition Ledger</h1>
-        <p className="text-white/40 text-[10px] uppercase tracking-[0.5em]">Monitor and Fulfill Global Commissions</p>
+    <div className="space-y-8 md:space-y-12 animate-fadeIn pb-24">
+      <div className="border-b border-black/[0.05] pb-8">
+        <h1 className="text-2xl md:text-4xl font-serif mb-2 text-black italic">Acquisition Ledger</h1>
+        <p className="text-[#A68E74] text-[8px] md:text-[10px] uppercase tracking-[0.5em] font-black">Monitor and Fulfill Global Commissions</p>
       </div>
 
-      <div className="bg-[#1F1E1D] border border-white/5 rounded-[2rem] overflow-hidden shadow-2xl">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="text-[10px] uppercase tracking-[0.3em] text-white/40 border-b border-white/5">
-              <th className="px-8 py-6 font-bold">Client / Order ID</th>
-              <th className="px-8 py-6 font-bold">Commissioned Pieces</th>
-              <th className="px-8 py-6 font-bold">Investment</th>
-              <th className="px-8 py-6 font-bold">Protocol Status</th>
-              <th className="px-8 py-6 font-bold">Date</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {orders.length > 0 ? orders.map(order => (
-              <tr key={order.id} className="hover:bg-white/5 transition-colors group">
-                <td className="px-8 py-8">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-white mb-1">{order.user_name}</span>
-                    <span className="text-[10px] text-white/20 font-mono">{order.id}</span>
-                  </div>
-                </td>
-                <td className="px-8 py-8">
-                  <div className="space-y-2">
-                    {order.items.map((item, idx) => (
-                      <div key={idx} className="flex items-center space-x-3">
-                        <img src={item.image} className="w-8 h-8 rounded-lg object-cover grayscale group-hover:grayscale-0 transition-all" />
-                        <span className="text-xs text-white/60">{item.quantity}x {item.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                </td>
-                <td className="px-8 py-8">
-                  <span className="text-sm font-serif text-white">₹{order.total_amount.toLocaleString('en-IN')}</span>
-                </td>
-                <td className="px-8 py-8">
-                  <select 
-                    value={order.status}
-                    onChange={(e) => handleStatusUpdate(order.id, e.target.value as Order['status'])}
-                    className={`text-[10px] uppercase tracking-widest font-bold px-4 py-2 rounded-full border outline-none cursor-pointer transition-all ${getStatusStyles(order.status)}`}
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="Artisan Prep">Artisan Prep</option>
-                    <option value="Shipped">Shipped</option>
-                    <option value="Delivered">Delivered</option>
-                  </select>
-                </td>
-                <td className="px-8 py-8 text-white/20 text-xs">
-                  {new Date(order.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                </td>
+      <div className="bg-white border border-black/5 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-sm">
+        {/* Table Wrapper for Horizontal Scroll on Mobile */}
+        <div className="w-full overflow-x-auto no-scrollbar">
+          <table className="w-full text-left border-collapse min-w-[800px]">
+            <thead>
+              <tr className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] text-black/30 border-b border-black/5">
+                <th className="px-6 md:px-8 py-5 md:py-6 font-black">Client / Order ID</th>
+                <th className="px-6 md:px-8 py-5 md:py-6 font-black">Commissioned Pieces</th>
+                <th className="px-6 md:px-8 py-5 md:py-6 font-black">Investment</th>
+                <th className="px-6 md:px-8 py-5 md:py-6 font-black">Protocol Status</th>
+                <th className="px-6 md:px-8 py-5 md:py-6 font-black">Date</th>
               </tr>
-            )) : (
-              <tr>
-                <td colSpan={5} className="px-8 py-20 text-center text-white/20 uppercase tracking-widest text-[10px]">No sales recorded in the ledger</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-black/[0.03]">
+              {orders.length > 0 ? orders.map(order => (
+                <tr key={order.id} className="hover:bg-black/[0.01] transition-colors group">
+                  <td className="px-6 md:px-8 py-6 md:py-8">
+                    <div className="flex flex-col">
+                      <span className="text-xs md:text-sm font-bold text-black/80 mb-1">{order.user_name}</span>
+                      <span className="text-[9px] text-black/20 font-mono">{order.id}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 md:px-8 py-6 md:py-8">
+                    <div className="space-y-3">
+                      {order.items.map((item, idx) => (
+                        <div key={idx} className="flex items-center space-x-3">
+                          <div className="w-8 h-8 rounded-lg bg-[#F9F7F5] border border-black/5 overflow-hidden flex-shrink-0">
+                            <img src={item.image} className="w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all" />
+                          </div>
+                          <span className="text-[10px] md:text-xs text-black/50 font-medium">{item.quantity}x {item.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-6 md:px-8 py-6 md:py-8">
+                    <span className="text-xs md:text-sm font-serif italic text-black/70">₹{order.total_amount.toLocaleString('en-IN')}</span>
+                  </td>
+                  <td className="px-6 md:px-8 py-6 md:py-8">
+                    <select 
+                      value={order.status}
+                      onChange={(e) => handleStatusUpdate(order.id, e.target.value as Order['status'])}
+                      className={`text-[8px] md:text-[10px] uppercase tracking-widest font-black px-4 py-2 rounded-full border outline-none cursor-pointer appearance-none transition-all ${getStatusStyles(order.status)}`}
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="Artisan Prep">Artisan Prep</option>
+                      <option value="Shipped">Shipped</option>
+                      <option value="Delivered">Delivered</option>
+                    </select>
+                  </td>
+                  <td className="px-6 md:px-8 py-6 md:py-8 text-black/20 text-[10px] font-medium">
+                    {new Date(order.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </td>
+                </tr>
+              )) : (
+                <tr>
+                  <td colSpan={5} className="px-8 py-24 text-center text-black/15 uppercase tracking-[0.5em] text-[10px] font-black italic">No commissions recorded in the archive</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {confirm && (
         <ConfirmDialog
           isOpen={!!confirm}
-          title="Update Status"
-          message={`Are you sure you wish to change the protocol status to "${confirm.status}"? Notification will be dispatched to the client.`}
+          title="Update Protocol"
+          message={`Are you certain you wish to change the acquisition status to "${confirm.status}"? This action will be memorialized in the client registry.`}
           onConfirm={executeStatusUpdate}
           onCancel={() => setConfirm(null)}
           type="info"
