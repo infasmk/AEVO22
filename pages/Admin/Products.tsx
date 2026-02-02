@@ -38,7 +38,8 @@ const AdminProducts: React.FC = () => {
         name: '', price: 0, original_price: 0, category: categories.length > 0 ? categories[0].name : 'Luxury Series',
         tag: 'Latest', description: '', stock: 10, images: []
       });
-      setSpecs([{ key: 'Movement', value: '' }, { key: 'Material', value: '' }]);
+      // Removed default Movement/Material specs as requested
+      setSpecs([]); 
       setFeatures([{ title: '', description: '' }]);
       setColors([{ name: 'Obsidian', hex: '#1a1a1a' }]);
       setImageUrls(['']);
@@ -135,7 +136,7 @@ const AdminProducts: React.FC = () => {
         ))}
       </div>
 
-      {/* Product Configurator Modal - Elevated z-index to 300 to cover sidebar completely */}
+      {/* Product Configurator Modal - High z-index to overlay Sidebar/Burger Menu */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-0 sm:p-6 lg:p-12 overflow-hidden">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md animate-fadeIn" onClick={() => setIsModalOpen(false)} />
