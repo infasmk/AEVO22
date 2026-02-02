@@ -26,7 +26,7 @@ const ScrollToTop = () => {
   return null;
 };
 
-// Layout for Public Pages (Header + Footer)
+// Layout for Public Pages
 const PublicLayout: React.FC = () => {
   const [appLoading, setAppLoading] = useState(true);
   const [exitAnimation, setExitAnimation] = useState(false);
@@ -35,16 +35,12 @@ const PublicLayout: React.FC = () => {
     const timer = setTimeout(() => {
       setExitAnimation(true);
       setTimeout(() => setAppLoading(false), 800);
-    }, 2500);
+    }, 2000); // Reduced delay for better UX
     return () => clearTimeout(timer);
   }, []);
 
   if (appLoading) {
-    return (
-      <div className={exitAnimation ? 'animate-scaleOut' : ''}>
-        <LoadingScreen />
-      </div>
-    );
+    return <LoadingScreen key="public-loader" />;
   }
 
   return (
@@ -58,18 +54,21 @@ const PublicLayout: React.FC = () => {
   );
 };
 
-// Protected Admin Route Handler
+// Resilient Protected Admin Route Handler
 const ProtectedAdminRoute: React.FC = () => {
   const { session, isAuthLoading } = useStore();
   
-  if (isAuthLoading) {
-    return <LoadingScreen />;
+  // If still loading auth, show a brief loader
+  if (isAuthLoading && !session) {
+    return <LoadingScreen key="admin-auth-loader" />;
   }
   
+  // If no session after loading, show login
   if (!session) {
     return <AdminLogin />;
   }
 
+  // Session exists, show the layout
   return <AdminLayout />;
 };
 

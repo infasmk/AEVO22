@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { Product, Banner, Order, Category, ColorOption } from './types';
 import { supabase, isConfigValid } from './supabase';
-import { INITIAL_PRODUCTS, INITIAL_BANNERS, MOCK_ORDERS } from './constants';
+import { INITIAL_PRODUCTS, INITIAL_BANNERS } from './constants';
 import { Session, User } from '@supabase/supabase-js';
 
 interface AppState {
@@ -34,7 +34,7 @@ interface AppState {
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'aevo_vault_v15';
+const LOCAL_STORAGE_KEY = 'aevo_vault_v16';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -52,8 +52,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   
   const lastWriteTime = useRef<number>(0);
+  const authTimeoutRef = useRef<number | null>(null);
 
-  // Helper to map DB string array to ColorOption objects
   const parseColors = (colors: any[]): ColorOption[] => {
     if (!colors || !Array.isArray(colors)) return [];
     return colors.map(c => {
@@ -67,55 +67,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return colors.map(c => `${c.name}:${c.hex}`);
   };
 
-  // Auth Listener
+  // 1. Auth & Session Management with Failsafe
   useEffect(() => {
-    const checkUser = async () => {
+    // Failsafe: Ensure loading screen disappears after 5 seconds no matter what
+    authTimeoutRef.current = window.setTimeout(() => {
+      setIsAuthLoading(false);
+    }, 5000);
+
+    const initAuth = async () => {
       try {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
         if (currentSession?.user) {
-          const { data: profile, error: profileError } = await supabase
+          const { data: profile } = await supabase
             .from('profiles')
             .select('is_admin')
             .eq('id', currentSession.user.id)
             .maybeSingle();
-          
-          if (!profileError && profile) {
-            setIsAdmin(!!profile.is_admin);
-          } else {
-            setIsAdmin(false);
-          }
+          setIsAdmin(!!profile?.is_admin);
         }
       } catch (err) {
-        console.error("AEVO Auth Engine: Initialization failure.", err);
+        console.error("AEVO Auth: Init failed", err);
       } finally {
         setIsAuthLoading(false);
+        if (authTimeoutRef.current) clearTimeout(authTimeoutRef.current);
       }
     };
 
-    checkUser();
+    initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
       setSession(newSession);
       setUser(newSession?.user ?? null);
       if (newSession?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', newSession.user.id)
-          .maybeSingle();
+        const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', newSession.user.id).maybeSingle();
         setIsAdmin(!!profile?.is_admin);
       } else {
         setIsAdmin(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      if (authTimeoutRef.current) clearTimeout(authTimeoutRef.current);
+    };
   }, []);
 
-  // Initial local load
+  // 2. Initial Local Storage Load
   useEffect(() => {
     const cachedProducts = localStorage.getItem(`${LOCAL_STORAGE_KEY}_products`);
     const cachedBanners = localStorage.getItem(`${LOCAL_STORAGE_KEY}_banners`);
@@ -136,49 +136,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsLoading(false);
   }, []);
 
+  // 3. Centralized Data Sync
   const fetchData = useCallback(async () => {
     if (!isConfigValid()) {
       setConnectionStatus('invalid_config');
       return;
     }
 
-    // Throttle fetches to avoid excessive DB calls during rapid state changes
-    if (Date.now() - lastWriteTime.current < 2000) return;
+    if (Date.now() - lastWriteTime.current < 1500) return;
 
     setConnectionStatus('connecting');
     try {
-      // Fetch products (Public access)
+      // Products
       const pRes = await supabase.from('products').select('*').order('created_at', { ascending: false });
-      if (pRes.data && pRes.data.length > 0) {
-        const transformedProducts = pRes.data.map(p => ({
-          ...p,
-          colors: parseColors(p.colors)
-        }));
-        setProducts(transformedProducts);
-        localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(transformedProducts));
+      if (!pRes.error && pRes.data) {
+        const transformed = pRes.data.map(p => ({ ...p, colors: parseColors(p.colors) }));
+        setProducts(transformed);
+        localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(transformed));
       }
 
-      // Fetch banners (Public access)
+      // Banners
       const bRes = await supabase.from('banners').select('*').order('display_order', { ascending: true });
-      if (bRes.data && bRes.data.length > 0) {
+      if (!bRes.error && bRes.data) {
         setBanners(bRes.data);
         localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(bRes.data));
       }
 
-      // Fetch categories (Public access)
+      // Categories
       const cRes = await supabase.from('categories').select('*').order('name', { ascending: true });
-      if (cRes.data && cRes.data.length > 0) {
+      if (!cRes.error && cRes.data) {
         setCategories(cRes.data);
         localStorage.setItem(`${LOCAL_STORAGE_KEY}_categories`, JSON.stringify(cRes.data));
       }
 
-      // Fetch orders (Private access - might fail if not admin)
+      // Orders
       const oRes = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-      if (oRes.data) setOrders(oRes.data);
+      if (!oRes.error && oRes.data) setOrders(oRes.data);
       
       setConnectionStatus('online');
     } catch (err: any) {
-      console.warn("AEVO Sync Engine: Remote partially disconnected.", err.message);
+      console.warn("AEVO Sync: Connection interrupted", err.message);
       setConnectionStatus('offline');
     }
   }, []);
@@ -187,6 +184,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     fetchData();
   }, [fetchData]);
 
+  // Actions
   const upsertProduct = async (p: Product) => {
     lastWriteTime.current = Date.now();
     setProducts(prev => {
@@ -196,32 +194,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updated;
     });
 
-    if (!isConfigValid()) return false;
-
     const dbPayload = {
+      ...p,
       id: String(p.id),
-      name: p.name,
-      description: p.description,
-      price: Number(p.price),
+      colors: stringifyColors(p.colors || []),
       original_price: p.original_price ? Number(p.original_price) : null,
-      category: p.category,
-      images: p.images || [],
-      colors: stringifyColors(p.colors || []), 
-      specs: p.specs || {},
-      key_features: p.key_features || [],
-      tag: p.tag || 'None',
-      stock: Number(p.stock) || 0,
-      rating: Number(p.rating) || 5,
-      reviews_count: Number(p.reviews_count) || 0,
-      created_at: p.created_at || new Date().toISOString()
+      price: Number(p.price),
+      stock: Number(p.stock)
     };
 
-    try {
-      const { error } = await supabase.from('products').upsert(dbPayload);
-      return !error;
-    } catch (err) {
-      return false;
-    }
+    const { error } = await supabase.from('products').upsert(dbPayload);
+    return !error;
   };
 
   const deleteProduct = async (id: string) => {
@@ -238,8 +221,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const upsertCategory = async (c: Category) => {
     lastWriteTime.current = Date.now();
     setCategories(prev => {
-      const exists = prev.find(item => item.id === c.id);
-      const updated = exists ? prev.map(item => item.id === c.id ? c : item) : [...prev, c];
+      const updated = prev.find(item => item.id === c.id) ? prev.map(item => item.id === c.id ? c : item) : [...prev, c];
       localStorage.setItem(`${LOCAL_STORAGE_KEY}_categories`, JSON.stringify(updated));
       return updated;
     });
