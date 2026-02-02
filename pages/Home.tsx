@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-// Use star import to resolve named export issues in some environments
 import * as ReactRouterDOM from 'react-router-dom';
 const { useNavigate } = ReactRouterDOM;
 import { useStore } from '../store';
@@ -9,7 +8,7 @@ import SEO from '../components/SEO';
 import { ProductTag } from '../types';
 
 const Home: React.FC = () => {
-  const { banners, products, isLoading } = useStore();
+  const { banners, products, isLoading, connectionStatus } = useStore();
   const [activeBanner, setActiveBanner] = useState(0);
   const [activeTab, setActiveTab] = useState<ProductTag | 'All'>('All');
   const navigate = useNavigate();
@@ -30,19 +29,8 @@ const Home: React.FC = () => {
 
   const tabs: (ProductTag | 'All')[] = ['All', 'Latest', 'Best Seller', 'Offer'];
 
-  const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "AEVO Atelier",
-    "url": "https://aevo.luxury",
-    "logo": "https://aevo.luxury/logo.png",
-    "description": "Artisanal Geneva-born atelier crafting luxury clocks and instruments of time.",
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "telephone": "+41-22-000-0000",
-      "contactType": "customer service"
-    }
-  };
+  // If connected and DB is empty, we show empty state, NOT demo data
+  const isRegistryEmpty = connectionStatus === 'online' && products.length === 0;
 
   if (isLoading && products.length === 0) {
     return (
@@ -57,7 +45,6 @@ const Home: React.FC = () => {
       <SEO 
         title="Artisanal Timepieces & Luxury Clocks" 
         description="AEVO Atelier offers a curated collection of artisanal timepieces, Geneva-born engineering, and minimalist luxury wall clocks."
-        schema={organizationSchema}
       />
 
       {/* Hero Showcase */}
@@ -67,39 +54,34 @@ const Home: React.FC = () => {
             key={banner.id}
             className={`absolute inset-0 transition-all duration-[2s] ease-in-out ${index === activeBanner ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-105 z-0'}`}
           >
-            {/* Visual Fix: Increased Opacity and simplified overlays */}
-            <img src={banner.image_url} alt={banner.title} className="w-full h-full object-cover opacity-60 transition-opacity duration-1000" />
-            
-            {/* Scrim for text readability without washing out the image */}
+            <img src={banner.image_url} alt={banner.title} className="w-full h-full object-cover opacity-60" />
             <div className="absolute inset-0 bg-black/30" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#FCFCFA] via-transparent to-black/10" />
 
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-8">
-              <span className="text-[10px] font-black uppercase tracking-[0.8em] mb-6 text-white animate-fadeInUp drop-shadow-md">
+              <span className="text-[10px] font-black uppercase tracking-[0.8em] mb-6 text-white animate-fadeInUp">
                 {banner.tag_label}
               </span>
-              <h1 className="text-4xl sm:text-6xl md:text-8xl font-serif mb-8 max-w-5xl leading-[1.1] text-white animate-fadeInUp drop-shadow-xl" style={{ animationDelay: '0.2s' }}>
+              <h1 className="text-4xl sm:text-6xl md:text-8xl font-serif mb-8 max-w-5xl leading-[1.1] text-white animate-fadeInUp">
                 {banner.title}
               </h1>
-              <p className="text-white/80 text-sm md:text-lg font-light italic mb-10 max-w-lg animate-fadeInUp drop-shadow-lg" style={{ animationDelay: '0.4s' }}>
+              <p className="text-white/80 text-sm md:text-lg font-light italic mb-10 max-w-lg animate-fadeInUp">
                 {banner.subtitle}
               </p>
               <button 
                 onClick={() => navigate('/shop')}
-                className="group relative px-12 py-4 bg-[#A68E74] text-white rounded-full uppercase text-[9px] font-black tracking-[0.3em] transition-all hover:scale-105 active:scale-95 animate-fadeInUp shadow-2xl" 
-                style={{ animationDelay: '0.6s' }}
+                className="px-12 py-4 bg-[#A68E74] text-white rounded-full uppercase text-[9px] font-black tracking-[0.3em] transition-all hover:scale-105 active:scale-95 animate-fadeInUp shadow-2xl" 
               >
                 Browse Archive
               </button>
             </div>
           </div>
         )) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#FDFBF7]">
-            <span className="font-serif italic text-black/20 text-xl">Atelier Gallery Loading...</span>
+          <div className="absolute inset-0 flex items-center justify-center bg-[#1F1A16]">
+            <span className="font-serif italic text-[#A68E74] text-xl opacity-30 tracking-widest animate-pulse">Initializing Showcase...</span>
           </div>
         )}
         
-        {/* Indicators */}
         {banners.length > 1 && (
           <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex space-x-3">
             {banners.map((_, i) => (
@@ -107,7 +89,6 @@ const Home: React.FC = () => {
                 key={i} 
                 onClick={() => setActiveBanner(i)}
                 className={`h-0.5 transition-all duration-700 ${i === activeBanner ? 'w-10 bg-white' : 'w-4 bg-white/30'}`}
-                aria-label={`Go to slide ${i + 1}`}
               />
             ))}
           </div>
@@ -119,30 +100,36 @@ const Home: React.FC = () => {
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center justify-between mb-16 space-y-8 md:space-y-0">
             <h2 className="text-2xl font-serif text-black/80">Curated Registry</h2>
-            <div className="flex space-x-8 md:space-x-12 overflow-x-auto no-scrollbar w-full md:w-auto pb-4 md:pb-0">
-              {tabs.map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`text-[10px] uppercase font-black tracking-[0.4em] transition-all relative pb-2 whitespace-nowrap
-                    ${activeTab === tab ? 'text-black' : 'text-black/20 hover:text-black/40'}`}
-                >
-                  {tab}
-                  {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-px bg-[#A68E74]" />}
-                </button>
-              ))}
+            {!isRegistryEmpty && (
+              <div className="flex space-x-8 md:space-x-12 overflow-x-auto no-scrollbar w-full md:w-auto pb-4 md:pb-0">
+                {tabs.map(tab => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`text-[10px] uppercase font-black tracking-[0.4em] transition-all relative pb-2 whitespace-nowrap
+                      ${activeTab === tab ? 'text-black' : 'text-black/20 hover:text-black/40'}`}
+                  >
+                    {tab}
+                    {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-px bg-[#A68E74]" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {isRegistryEmpty ? (
+            <div className="py-40 text-center border border-dashed border-black/10 rounded-[3rem] animate-fadeIn">
+               <span className="text-[#A68E74] uppercase text-[9px] font-black tracking-[0.5em] mb-6 block">Registry Sync Complete</span>
+               <h3 className="text-3xl font-serif text-black/20 italic mb-8">Live Registry is Empty</h3>
+               <p className="text-black/30 text-xs italic max-w-sm mx-auto leading-relaxed">
+                 The connection to Supabase is active, but no pieces have been cataloged in the live vault yet. Enroll pieces via the Atelier Portal.
+               </p>
             </div>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-10">
-            {filteredProducts.map((product, idx) => (
-              <ProductCard key={product.id} product={product} index={idx} />
-            ))}
-          </div>
-
-          {filteredProducts.length === 0 && !isLoading && (
-            <div className="py-20 text-center">
-              <p className="text-black/20 font-serif italic text-lg">No pieces currently listed in this category.</p>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-10">
+              {filteredProducts.map((product, idx) => (
+                <ProductCard key={product.id} product={product} index={idx} />
+              ))}
             </div>
           )}
         </div>

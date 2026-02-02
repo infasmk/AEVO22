@@ -31,9 +31,8 @@ const AdminLayout: React.FC = () => {
 
   const status = getStatusConfig(connectionStatus);
 
-  const handleTerminate = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    console.log('AEVO: Terminating Session...');
+  const handleTerminate = async () => {
+    console.log('AEVO: Initializing Termination Sequence...');
     await signOut();
   };
 
@@ -109,6 +108,7 @@ CREATE POLICY "Admin Full Access" ON public.banners FOR ALL USING (
 );
 
 -- 4. ARTISAN ELEVATION
+-- Run this AFTER you have logged in to the app at least once
 INSERT INTO public.profiles (id, is_admin) 
 VALUES ('${user?.id}', TRUE)
 ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
@@ -126,7 +126,10 @@ ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
          
          <div className="flex items-center space-x-3 md:space-x-8">
            <button 
-             onClick={() => fetchData()}
+             onClick={() => {
+                console.log('AEVO: Requesting Registry Refresh...');
+                fetchData();
+             }}
              className={`flex items-center space-x-2 px-3 py-1.5 rounded-full border transition-all duration-500 ${status.pillBg} ${status.borderColor} ${status.textColor} hover:scale-105 active:scale-95 shadow-sm`}
            >
               <div className={`w-1.5 h-1.5 rounded-full ${status.dotColor} ${status.isSyncing ? 'animate-spin' : 'animate-pulse'}`} />
@@ -241,6 +244,11 @@ ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
                               <p className="text-white/70 text-sm italic font-light leading-relaxed">Return here and click the **Registry Live** pill at the top of the screen.</p>
                             </li>
                           </ul>
+                        </div>
+                        <div className="p-8 bg-amber-900/10 border border-amber-900/20 rounded-3xl">
+                          <p className="text-amber-200/40 text-[10px] leading-relaxed italic">
+                            * Once synced, the demo clocks will vanish, allowing you to begin cataloging your collection in the live vault.
+                          </p>
                         </div>
                       </div>
                     </div>
