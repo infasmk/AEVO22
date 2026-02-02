@@ -61,8 +61,17 @@ const PublicLayout: React.FC = () => {
 // Protected Admin Route Handler
 const ProtectedAdminRoute: React.FC = () => {
   const { session, isAuthLoading } = useStore();
+  const [showLoader, setShowLoader] = useState(true);
+
+  // Sync internal loader with store loading, but add a small buffer for smooth UI
+  useEffect(() => {
+    if (!isAuthLoading) {
+      const timer = setTimeout(() => setShowLoader(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthLoading]);
   
-  if (isAuthLoading) {
+  if (showLoader) {
     return <LoadingScreen />;
   }
   

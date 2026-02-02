@@ -67,20 +67,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return colors.map(c => `${c.name}:${c.hex}`);
   };
 
-  // Auth Listener
+  // Auth Listener with Failsafe
   useEffect(() => {
+    // 5-second Failsafe for Mobile Networks
+    const failsafe = setTimeout(() => {
+      if (isAuthLoading) {
+        console.warn("AEVO Auth Engine: Resolution timed out. Force-resolving loader.");
+        setIsAuthLoading(false);
+      }
+    }, 5000);
+
     const checkUser = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
-        setUser(session?.user ?? null);
+        const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
         
-        if (session?.user) {
+        if (sessionError) throw sessionError;
+
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        
+        if (currentSession?.user) {
           const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('is_admin')
-            .eq('id', session.user.id)
-            .single();
+            .eq('id', currentSession.user.id)
+            .maybeSingle();
           
           if (!profileError && profile) {
             setIsAdmin(!!profile.is_admin);
@@ -90,27 +101,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         console.error("AEVO Auth Engine: Initialization failure.", err);
       } finally {
         setIsAuthLoading(false);
+        clearTimeout(failsafe);
       }
     };
 
     checkUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
+      if (newSession?.user) {
         const { data: profile } = await supabase
           .from('profiles')
           .select('is_admin')
-          .eq('id', session.user.id)
-          .single();
+          .eq('id', newSession.user.id)
+          .maybeSingle();
         setIsAdmin(!!profile?.is_admin);
       } else {
         setIsAdmin(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(failsafe);
+    };
   }, []);
 
   useEffect(() => {
