@@ -46,7 +46,7 @@ Please guide me through the acquisition process.`;
       <div className="container mx-auto px-6 max-w-7xl">
         {/* Navigation Bar */}
         <div className="flex items-center justify-between mb-8 md:mb-12">
-           <button onClick={() => navigate(-1)} className="text-black/30 hover:text-black flex items-center space-x-2 text-[10px] uppercase tracking-widest transition-colors">
+           <button onClick={() => navigate(-1)} className="text-[#A68E74] hover:text-black flex items-center space-x-2 text-[10px] uppercase tracking-widest transition-colors font-black">
              <ChevronLeft className="w-4 h-4" />
              <span className="hidden sm:inline">Back to Archive</span>
              <span className="sm:hidden">Back</span>
@@ -54,11 +54,11 @@ Please guide me through the acquisition process.`;
            <div className="flex space-x-6">
               <button 
                 onClick={() => toggleWishlist(product.id)} 
-                className={`transition-all active:scale-90 ${isWishlisted ? 'text-[#A68E74]' : 'text-black/20 hover:text-black/40'}`}
+                className={`transition-all active:scale-90 ${isWishlisted ? 'text-black' : 'text-[#A68E74] hover:text-black'}`}
               >
                 <Heart fill={isWishlisted ? 'currentColor' : 'none'} className="w-5 h-5" />
               </button>
-              <button onClick={() => {}} className="text-black/20 hover:text-black/40 transition-colors active:scale-90">
+              <button onClick={() => {}} className="text-[#A68E74] hover:text-black transition-colors active:scale-90">
                 <Share className="w-5 h-5" />
               </button>
            </div>
@@ -97,7 +97,7 @@ Please guide me through the acquisition process.`;
             </h1>
             
             <div className="flex items-center space-x-6 mb-8 md:mb-12">
-               <span className="text-2xl md:text-3xl font-light text-black/70 tracking-tighter italic">₹{product.price.toLocaleString('en-IN')}</span>
+               <span className="text-2xl md:text-3xl font-light text-[#A68E74] tracking-tighter italic font-serif">₹{product.price.toLocaleString('en-IN')}</span>
                <div className="h-4 w-px bg-black/10" />
                <div className="flex text-[#A68E74] space-x-1">
                  {[1,2,3,4,5].map(s => <Star key={s} className="w-3.5 h-3.5" />)}
@@ -110,7 +110,7 @@ Please guide me through the acquisition process.`;
 
             {/* CINEMATIC SWATCH SELECTION */}
             {product.colors && product.colors.length > 0 && (
-              <div className="mb-10 md:mb-16">
+              <div className="mb-10 md:mb-16 border-t border-black/5 pt-10">
                 <div className="flex items-center justify-between mb-6 md:mb-8">
                   <span className="text-[9px] uppercase tracking-[0.4em] text-black/30 font-black">Atelier Colorway</span>
                   {selectedColor && (
@@ -143,16 +143,6 @@ Please guide me through the acquisition process.`;
                 </div>
               </div>
             )}
-
-            {/* Specifications Grid */}
-            <div className="grid grid-cols-2 gap-6 md:gap-12 mb-10 md:mb-16 border-y border-black/5 py-10 md:py-12">
-              {Object.entries(product.specs).map(([k, v]) => (
-                <div key={k} className="space-y-2">
-                  <span className="text-[9px] uppercase tracking-widest text-black/20 font-black">{k}</span>
-                  <p className="text-black/80 font-serif italic text-base md:text-lg">{v}</p>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
         
@@ -178,11 +168,11 @@ Please guide me through the acquisition process.`;
           <div className="max-w-md mx-auto px-4">
             <button 
               onClick={handleAcquire}
-              className="w-full bg-black text-white py-6 md:py-8 rounded-full text-[11px] md:text-[12px] font-black uppercase tracking-[0.5em] hover:scale-[1.02] active:scale-95 transition-all shadow-2xl flex items-center justify-center space-x-4 shadow-black/20"
+              className="w-full bg-[#A68E74] text-white py-6 md:py-8 rounded-full text-[11px] md:text-[12px] font-black uppercase tracking-[0.5em] hover:scale-[1.02] active:scale-95 transition-all shadow-2xl flex items-center justify-center space-x-4 shadow-[#A68E74]/20"
             >
               <span>Secure Acquisition</span>
             </button>
-            <p className="mt-6 text-[8px] md:text-[9px] uppercase tracking-[0.3em] text-black/30 font-black">Direct line to the AEVO Artisan Concierge</p>
+            <p className="mt-6 text-[8px] md:text-[9px] uppercase tracking-[0.3em] text-[#A68E74]/60 font-black">Direct line to the AEVO Artisan Concierge</p>
           </div>
         </div>
       </div>

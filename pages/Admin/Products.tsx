@@ -102,7 +102,7 @@ const AdminProducts: React.FC = () => {
         <input 
           type="text" 
           placeholder="Search the archive..."
-          className="w-full pl-16 pr-8 py-5 md:py-6 bg-white border border-black/10 rounded-2xl md:rounded-3xl text-[10px] md:text-[11px] uppercase tracking-[0.2em] font-black outline-none focus:border-[#A68E74] shadow-sm transition-all focus:shadow-xl focus:shadow-black/5"
+          className="w-full pl-12 sm:pl-16 pr-8 py-4 sm:py-6 bg-white border border-black/10 rounded-2xl md:rounded-3xl text-[10px] md:text-[11px] uppercase tracking-[0.2em] font-black outline-none focus:border-[#A68E74] shadow-sm transition-all focus:shadow-xl focus:shadow-black/5"
           value={searchTerm} 
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -137,49 +137,49 @@ const AdminProducts: React.FC = () => {
 
       {/* Product Configurator Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-0 sm:p-6 lg:p-12">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-0 sm:p-6 lg:p-12 overflow-hidden">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md animate-fadeIn" onClick={() => setIsModalOpen(false)} />
           <div className="relative bg-[#FCFCFA] w-full h-full sm:h-auto sm:max-h-[92vh] sm:max-w-6xl sm:rounded-[3rem] shadow-2xl flex flex-col overflow-hidden animate-scaleIn">
             
-            <div className="px-6 sm:px-12 py-6 sm:py-10 border-b border-black/[0.05] bg-[#FCFCFA] flex justify-between items-center z-20">
+            <div className="px-6 sm:px-12 py-5 sm:py-10 border-b border-black/[0.05] bg-[#FCFCFA] flex justify-between items-center z-20">
               <div className="min-w-0">
-                <h2 className="text-2xl sm:text-3xl font-serif italic text-black truncate">{editingProduct ? 'Refine Masterpiece' : 'Enroll New Piece'}</h2>
-                <p className="text-[9px] uppercase tracking-[0.4em] text-[#A68E74] font-black mt-1.5 truncate">Atelier Registry Protocol v15</p>
+                <h2 className="text-xl sm:text-3xl font-serif italic text-black truncate">{editingProduct ? 'Refine Masterpiece' : 'Enroll New Piece'}</h2>
+                <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.4em] text-[#A68E74] font-black mt-1 truncate">Atelier Registry Protocol v15</p>
               </div>
               <button onClick={() => setIsModalOpen(false)} className="p-3 sm:p-4 bg-black/5 rounded-full hover:bg-black hover:text-white transition-all active:scale-90"><X className="w-5 h-5" /></button>
             </div>
             
-            <form id="productForm" onSubmit={handleSaveProduct} className="flex-1 overflow-y-auto px-6 sm:px-16 py-10 sm:py-16 space-y-12 sm:space-y-20 no-scrollbar">
+            <form id="productForm" onSubmit={handleSaveProduct} className="flex-1 overflow-y-auto px-6 sm:px-16 py-8 sm:py-16 space-y-10 sm:space-y-20 no-scrollbar">
                
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-20">
-                  <div className="space-y-8 sm:space-y-10">
-                    <div className="space-y-4">
-                      <label className="text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Piece Designation</label>
-                      <input className="w-full bg-white rounded-2xl p-5 sm:p-6 text-sm sm:text-lg font-bold border border-black/10 focus:border-[#A68E74] outline-none shadow-sm transition-all" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Aurelius Zenith" required />
+               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-20">
+                  <div className="space-y-6 sm:space-y-10">
+                    <div className="space-y-3 sm:space-y-4">
+                      <label className="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Piece Designation</label>
+                      <input className="w-full bg-white rounded-2xl p-4 sm:p-6 text-sm sm:text-lg font-bold border border-black/10 focus:border-[#A68E74] outline-none shadow-sm transition-all" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Aurelius Zenith" required />
                     </div>
-                    <div className="space-y-4">
-                      <label className="text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Archive Narrative</label>
-                      <textarea className="w-full bg-white rounded-3xl p-5 sm:p-6 text-sm sm:text-lg font-light italic leading-relaxed border border-black/10 h-32 sm:h-48 outline-none shadow-sm focus:border-[#A68E74] transition-all" value={formData.description || ''} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Philosophy behind this creation..." required />
+                    <div className="space-y-3 sm:space-y-4">
+                      <label className="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Archive Narrative</label>
+                      <textarea className="w-full bg-white rounded-3xl p-4 sm:p-6 text-sm sm:text-lg font-light italic leading-relaxed border border-black/10 h-24 sm:h-48 outline-none shadow-sm focus:border-[#A68E74] transition-all" value={formData.description || ''} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Philosophy behind this creation..." required />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-6 sm:gap-8">
-                    <div className="space-y-4">
-                      <label className="text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Investment (INR)</label>
-                      <input type="number" className="w-full bg-white rounded-2xl p-5 sm:p-6 text-sm sm:text-lg font-bold border border-black/10 focus:border-[#A68E74] outline-none shadow-sm" value={formData.price || 0} onChange={e => setFormData({...formData, price: Number(e.target.value)})} />
+                  <div className="grid grid-cols-2 gap-4 sm:gap-8">
+                    <div className="space-y-3 sm:space-y-4">
+                      <label className="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Investment (INR)</label>
+                      <input type="number" className="w-full bg-white rounded-2xl p-4 sm:p-6 text-sm sm:text-lg font-bold border border-black/10 focus:border-[#A68E74] outline-none shadow-sm" value={formData.price || 0} onChange={e => setFormData({...formData, price: Number(e.target.value)})} />
                     </div>
-                    <div className="space-y-4">
-                      <label className="text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Vault Count</label>
-                      <input type="number" className="w-full bg-white rounded-2xl p-5 sm:p-6 text-sm sm:text-lg font-bold border border-black/10 focus:border-[#A68E74] outline-none shadow-sm" value={formData.stock || 0} onChange={e => setFormData({...formData, stock: Number(e.target.value)})} />
+                    <div className="space-y-3 sm:space-y-4">
+                      <label className="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Vault Count</label>
+                      <input type="number" className="w-full bg-white rounded-2xl p-4 sm:p-6 text-sm sm:text-lg font-bold border border-black/10 focus:border-[#A68E74] outline-none shadow-sm" value={formData.stock || 0} onChange={e => setFormData({...formData, stock: Number(e.target.value)})} />
                     </div>
-                    <div className="col-span-2 space-y-4">
-                      <label className="text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Series Allocation</label>
-                      <select className="w-full bg-white rounded-2xl p-5 sm:p-6 text-[10px] uppercase font-black border border-black/10 focus:border-[#A68E74] outline-none shadow-sm cursor-pointer appearance-none" value={formData.category || ''} onChange={e => setFormData({...formData, category: e.target.value})}>
+                    <div className="col-span-2 space-y-3 sm:space-y-4">
+                      <label className="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Series Allocation</label>
+                      <select className="w-full bg-white rounded-2xl p-4 sm:p-6 text-[9px] sm:text-[10px] uppercase font-black border border-black/10 focus:border-[#A68E74] outline-none shadow-sm cursor-pointer appearance-none" value={formData.category || ''} onChange={e => setFormData({...formData, category: e.target.value})}>
                         {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                       </select>
                     </div>
-                    <div className="col-span-2 space-y-4">
-                      <label className="text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Tag Protocol</label>
-                      <select className="w-full bg-white rounded-2xl p-5 sm:p-6 text-[10px] uppercase font-black border border-black/10 focus:border-[#A68E74] outline-none shadow-sm cursor-pointer appearance-none" value={formData.tag || 'None'} onChange={e => setFormData({...formData, tag: e.target.value as ProductTag})}>
+                    <div className="col-span-2 space-y-3 sm:space-y-4">
+                      <label className="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Tag Protocol</label>
+                      <select className="w-full bg-white rounded-2xl p-4 sm:p-6 text-[9px] sm:text-[10px] uppercase font-black border border-black/10 focus:border-[#A68E74] outline-none shadow-sm cursor-pointer appearance-none" value={formData.tag || 'None'} onChange={e => setFormData({...formData, tag: e.target.value as ProductTag})}>
                         <option value="None">Standard Collection</option>
                         <option value="Latest">Latest</option>
                         <option value="Best Seller">High Velocity</option>
@@ -190,12 +190,12 @@ const AdminProducts: React.FC = () => {
                   </div>
                </div>
 
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-20 border-t border-black/[0.03] pt-12 sm:pt-20">
+               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-20 border-t border-black/[0.03] pt-10 sm:pt-20">
                  {/* VISUAL COLORWAY CONFIGURATION */}
-                 <div className="space-y-8">
+                 <div className="space-y-6 sm:space-y-8">
                     <div className="flex items-center justify-between">
-                      <label className="text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Atelier Colorways</label>
-                      <button type="button" onClick={() => setColors([...colors, { name: 'New Finish', hex: '#FFFFFF' }])} className="text-[10px] font-black uppercase tracking-widest text-[#A68E74] hover:text-black transition-colors">+ Add Finish</button>
+                      <label className="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Atelier Colorways</label>
+                      <button type="button" onClick={() => setColors([...colors, { name: 'New Finish', hex: '#FFFFFF' }])} className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#A68E74] hover:text-black transition-colors">+ Add Finish</button>
                     </div>
                     <div className="space-y-4">
                       {colors.map((color, i) => (
@@ -208,7 +208,7 @@ const AdminProducts: React.FC = () => {
                                />
                                <input 
                                  placeholder="Finish Name (e.g. Obsidian)" 
-                                 className="flex-1 bg-transparent text-[11px] font-black uppercase tracking-widest outline-none border-b border-black/5 focus:border-[#A68E74] pb-1" 
+                                 className="flex-1 bg-transparent text-[10px] sm:text-[11px] font-black uppercase tracking-widest outline-none border-b border-black/5 focus:border-[#A68E74] pb-1" 
                                  value={color.name} 
                                  onChange={e => {
                                    const newColors = [...colors]; 
@@ -221,7 +221,7 @@ const AdminProducts: React.FC = () => {
                                <span className="text-[8px] font-black text-black/20 uppercase tracking-widest">HEX:</span>
                                <input 
                                  placeholder="#FFFFFF" 
-                                 className="flex-1 bg-transparent text-[10px] font-mono outline-none border-b border-black/5 focus:border-[#A68E74] pb-1" 
+                                 className="flex-1 bg-transparent text-[9px] sm:text-[10px] font-mono outline-none border-b border-black/5 focus:border-[#A68E74] pb-1" 
                                  value={color.hex} 
                                  onChange={e => {
                                    const newColors = [...colors]; 
@@ -234,26 +234,25 @@ const AdminProducts: React.FC = () => {
                           <button type="button" onClick={() => setColors(colors.filter((_, idx) => idx !== i))} className="text-black/10 hover:text-red-500 transition-colors p-2 active:scale-90"><Trash2 className="w-5 h-5" /></button>
                         </div>
                       ))}
-                      {colors.length === 0 && <p className="text-[11px] italic text-black/20 font-serif">No finishes registered.</p>}
                     </div>
                  </div>
 
-                 <div className="space-y-8">
+                 <div className="space-y-6 sm:space-y-8">
                     <div className="flex items-center justify-between">
-                      <label className="text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Anatomy of Excellence</label>
-                      <button type="button" onClick={() => setFeatures([...features, {title: '', description: ''}])} className="text-[10px] font-black uppercase tracking-widest text-[#A68E74] hover:text-black transition-colors">+ Architect Feature</button>
+                      <label className="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Anatomy of Excellence</label>
+                      <button type="button" onClick={() => setFeatures([...features, {title: '', description: ''}])} className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#A68E74] hover:text-black transition-colors">+ Architect Feature</button>
                     </div>
-                    <div className="space-y-6">
+                    <div className="space-y-4 sm:space-y-6">
                         {features.map((feature, i) => (
-                          <div key={i} className="p-6 sm:p-8 bg-white border border-black/5 rounded-[2rem] relative shadow-sm group hover:border-[#A68E74]/30 transition-all">
-                            <button type="button" onClick={() => setFeatures(features.filter((_, idx) => idx !== i))} className="absolute top-6 right-6 text-black/10 hover:text-red-500 transition-colors"><Trash2 className="w-5 h-5" /></button>
-                            <div className="space-y-5 pr-8">
-                              <input placeholder="Feature Milestone" className="w-full bg-transparent text-[11px] font-black uppercase tracking-[0.2em] border-b border-black/5 pb-3 outline-none focus:border-[#A68E74]" value={feature.title} onChange={e => {
+                          <div key={i} className="p-5 sm:p-8 bg-white border border-black/5 rounded-[1.5rem] sm:rounded-[2rem] relative shadow-sm group hover:border-[#A68E74]/30 transition-all">
+                            <button type="button" onClick={() => setFeatures(features.filter((_, idx) => idx !== i))} className="absolute top-5 right-5 text-black/10 hover:text-red-500 transition-colors"><Trash2 className="w-5 h-5" /></button>
+                            <div className="space-y-3 sm:space-y-5 pr-8">
+                              <input placeholder="Feature Milestone" className="w-full bg-transparent text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] border-b border-black/5 pb-2 sm:pb-3 outline-none focus:border-[#A68E74]" value={feature.title} onChange={e => {
                                 const newFeatures = [...features]; 
                                 newFeatures[i].title = e.target.value; 
                                 setFeatures(newFeatures);
                               }} />
-                              <textarea placeholder="Descriptive detail..." className="w-full bg-transparent text-sm italic font-light text-black/50 outline-none resize-none h-16 no-scrollbar" value={feature.description} onChange={e => {
+                              <textarea placeholder="Descriptive detail..." className="w-full bg-transparent text-xs sm:text-sm italic font-light text-black/50 outline-none resize-none h-12 sm:h-16 no-scrollbar" value={feature.description} onChange={e => {
                                 const newFeatures = [...features]; 
                                 newFeatures[i].description = e.target.value; 
                                 setFeatures(newFeatures);
@@ -265,21 +264,21 @@ const AdminProducts: React.FC = () => {
                  </div>
                </div>
 
-               <div className="space-y-10 sm:space-y-12 border-t border-black/[0.03] pt-12 sm:pt-20">
+               <div className="space-y-8 border-t border-black/[0.03] pt-10 sm:pt-20">
                  <div className="flex items-center justify-between">
-                   <label className="text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Visual Assets</label>
-                   <button type="button" onClick={() => setImageUrls([...imageUrls, ''])} className="text-[10px] font-black uppercase tracking-widest text-[#A68E74] hover:text-black transition-colors">+ Enlist Perspective</button>
+                   <label className="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Visual Assets</label>
+                   <button type="button" onClick={() => setImageUrls([...imageUrls, ''])} className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#A68E74] hover:text-black transition-colors">+ Enlist Perspective</button>
                  </div>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                    {imageUrls.map((url, i) => (
-                     <div key={i} className="flex flex-col gap-4 bg-white p-5 rounded-[2rem] border border-black/5 shadow-sm group hover:border-[#A68E74]/20 transition-all">
-                       <div className="aspect-[4/5] bg-[#F9F7F5] rounded-[1.5rem] overflow-hidden border border-black/5 relative shadow-inner">
+                     <div key={i} className="flex flex-col gap-3 sm:gap-4 bg-white p-4 sm:p-5 rounded-[1.5rem] sm:rounded-[2rem] border border-black/5 shadow-sm group hover:border-[#A68E74]/20 transition-all">
+                       <div className="aspect-[4/5] bg-[#F9F7F5] rounded-[1.2rem] sm:rounded-[1.5rem] overflow-hidden border border-black/5 relative shadow-inner">
                          {url ? <img src={url} className="w-full h-full object-cover mix-blend-multiply opacity-80" alt={`Perspective ${i+1}`} /> : (
-                           <div className="w-full h-full flex flex-col items-center justify-center space-y-3 text-black/10"><ImageIcon className="w-10 h-10" /><span className="text-[9px] uppercase tracking-[0.3em] font-black">Empty Slot</span></div>
+                           <div className="w-full h-full flex flex-col items-center justify-center space-y-2 text-black/10"><ImageIcon className="w-8 h-8" /><span className="text-[8px] uppercase tracking-[0.3em] font-black">Empty Slot</span></div>
                          )}
-                         <button type="button" onClick={() => setImageUrls(imageUrls.filter((_, idx) => idx !== i))} className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-md rounded-full shadow-lg text-red-500 hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 active:scale-90"><X className="w-4 h-4" /></button>
+                         <button type="button" onClick={() => setImageUrls(imageUrls.filter((_, idx) => idx !== i))} className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-md rounded-full shadow-lg text-red-500 hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 active:scale-90"><X className="w-4 h-4" /></button>
                        </div>
-                       <input className="w-full bg-transparent text-[10px] font-mono p-3 border border-black/5 rounded-xl outline-none focus:border-[#A68E74] truncate" value={url} onChange={e => {
+                       <input className="w-full bg-transparent text-[8px] sm:text-[10px] font-mono p-2 sm:p-3 border border-black/5 rounded-xl outline-none focus:border-[#A68E74] truncate" value={url} onChange={e => {
                          const newUrls = [...imageUrls]; 
                          newUrls[i] = e.target.value; 
                          setImageUrls(newUrls);
@@ -289,12 +288,12 @@ const AdminProducts: React.FC = () => {
                  </div>
                </div>
 
-               <div className="h-24 sm:h-32" />
+               <div className="h-20 sm:h-32" />
             </form>
 
-            <div className="px-6 sm:px-16 py-8 sm:py-12 border-t border-black/[0.05] bg-[#FCFCFA] flex flex-col sm:flex-row items-center justify-between gap-6 z-20">
-               <button type="button" onClick={() => setIsModalOpen(false)} className="text-[10px] uppercase font-black tracking-[0.5em] text-black/20 hover:text-black transition-colors order-2 sm:order-1 active:scale-95">Abort Changes</button>
-               <button type="submit" form="productForm" className="w-full sm:w-auto bg-black text-white px-12 sm:px-20 py-5 sm:py-7 rounded-full text-[11px] font-black uppercase tracking-[0.6em] shadow-2xl hover:scale-105 active:scale-95 transition-all shadow-black/20">Memorialize Piece</button>
+            <div className="px-6 sm:px-16 py-6 sm:py-12 border-t border-black/[0.05] bg-[#FCFCFA] flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 z-20">
+               <button type="button" onClick={() => setIsModalOpen(false)} className="text-[9px] sm:text-[10px] uppercase font-black tracking-[0.4em] text-black/20 hover:text-black transition-colors order-2 sm:order-1 active:scale-95">Abort Changes</button>
+               <button type="submit" form="productForm" className="w-full sm:w-auto bg-black text-white px-10 sm:px-20 py-4 sm:py-7 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-[0.6em] shadow-2xl hover:scale-105 active:scale-95 transition-all shadow-black/20">Memorialize Piece</button>
             </div>
           </div>
         </div>
