@@ -100,6 +100,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const upsertProduct = async (p: Product) => {
     lastWriteTime.current = Date.now();
     
+    // Update local state immediately for responsiveness
     setProducts(prev => {
       const exists = prev.find(item => item.id === p.id);
       const updated = exists ? prev.map(item => item.id === p.id ? p : item) : [p, ...prev];
@@ -109,21 +110,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (!isConfigValid()) return false;
 
+    // Explicit payload mapping to ensure type safety with Postgres
     const dbPayload = {
       id: String(p.id),
       name: p.name,
       description: p.description,
-      price: p.price,
-      original_price: p.original_price,
+      price: Number(p.price),
+      original_price: p.original_price ? Number(p.original_price) : null,
       category: p.category,
-      images: p.images,
-      colors: p.colors || [], // New persistence
-      specs: p.specs,
+      images: p.images || [],
+      colors: p.colors || [], 
+      specs: p.specs || {},
       key_features: p.key_features || [],
-      tag: p.tag,
-      stock: p.stock,
-      rating: p.rating,
-      reviews_count: p.reviews_count,
+      tag: p.tag || 'None',
+      stock: Number(p.stock) || 0,
+      rating: Number(p.rating) || 5,
+      reviews_count: Number(p.reviews_count) || 0,
       created_at: p.created_at || new Date().toISOString()
     };
 
@@ -131,12 +133,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const { error } = await supabase.from('products').upsert(dbPayload);
       if (error) {
         console.group("🔴 Sync Failure");
-        console.error("Supabase says:", error.message);
+        console.error("Supabase Error Code:", error.code);
+        console.error("Supabase Error Message:", error.message);
+        console.error("Failed Payload:", dbPayload);
         console.groupEnd();
         return false;
       }
       return true;
     } catch (err) {
+      console.error("Unexpected sync error:", err);
       return false;
     }
   };
