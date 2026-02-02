@@ -34,7 +34,7 @@ interface AppState {
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'aevo_v22_final';
+const LOCAL_STORAGE_KEY = 'aevo_v23_live';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -76,6 +76,61 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  // Registry Synchronizer - accessible to all (Public Read)
+  const fetchData = useCallback(async () => {
+    if (!isConfigValid()) {
+      setConnectionStatus('invalid_config');
+      return;
+    }
+
+    setConnectionStatus('connecting');
+    try {
+      // Re-check admin status if session exists
+      const { data: { session: activeSession } } = await supabase.auth.getSession();
+      if (activeSession?.user) await verifyAdmin(activeSession.user.id);
+
+      const [pRes, bRes, cRes, oRes] = await Promise.all([
+        supabase.from('products').select('*').order('created_at', { ascending: false }),
+        supabase.from('banners').select('*').order('display_order', { ascending: true }),
+        supabase.from('categories').select('*').order('name', { ascending: true }),
+        supabase.from('orders').select('*').order('created_at', { ascending: false })
+      ]);
+
+      // Update products state with live DB data
+      if (!pRes.error) {
+        const liveProducts = pRes.data || [];
+        if (liveProducts.length > 0) {
+          const transformed = liveProducts.map(p => ({ ...p, colors: parseColors(p.colors) }));
+          setProducts(transformed);
+          localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(transformed));
+        } else if (activeSession) {
+          // If logged in but DB is empty, show empty registry
+          setProducts([]);
+        }
+      }
+
+      // Update banners state with live DB data
+      if (!bRes.error) {
+        const liveBanners = bRes.data || [];
+        if (liveBanners.length > 0) {
+          setBanners(liveBanners);
+          localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(liveBanners));
+        } else if (activeSession) {
+          setBanners([]);
+        }
+      }
+
+      if (!cRes.error) setCategories(cRes.data || []);
+      if (!oRes.error) setOrders(oRes.data || []);
+      
+      setConnectionStatus('online');
+    } catch (err: any) {
+      console.error('AEVO Registry Sync Error:', err);
+      setConnectionStatus('offline');
+    }
+  }, []);
+
+  // Auth Lifecycle
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -91,77 +146,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      console.log('AEVO Auth Event:', event);
       if (event === 'SIGNED_OUT') {
         setUser(null);
         setSession(null);
         setIsAdmin(false);
+        // Refresh to public state
+        fetchData();
         return;
       }
       setSession(newSession);
       setUser(newSession?.user ?? null);
       if (newSession?.user) await verifyAdmin(newSession.user.id);
+      fetchData();
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [fetchData]);
 
-  const fetchData = useCallback(async () => {
-    if (!isConfigValid()) {
-      setConnectionStatus('invalid_config');
-      return;
-    }
-
-    setConnectionStatus('connecting');
-    try {
-      if (user) await verifyAdmin(user.id);
-
-      const [pRes, bRes, cRes, oRes] = await Promise.all([
-        supabase.from('products').select('*').order('created_at', { ascending: false }),
-        supabase.from('banners').select('*').order('display_order', { ascending: true }),
-        supabase.from('categories').select('*').order('name', { ascending: true }),
-        supabase.from('orders').select('*').order('created_at', { ascending: false })
-      ]);
-
-      if (!pRes.error) {
-        const transformed = (pRes.data || []).map(p => ({ ...p, colors: parseColors(p.colors) }));
-        setProducts(transformed);
-        localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(transformed));
-      }
-
-      if (!bRes.error) {
-        setBanners(bRes.data || []);
-        localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(bRes.data || []));
-      }
-
-      if (!cRes.error) setCategories(cRes.data || []);
-      if (!oRes.error) setOrders(oRes.data || []);
-      
-      setConnectionStatus('online');
-    } catch (err: any) {
-      console.error('AEVO Registry Sync Error:', err);
-      setConnectionStatus('offline');
-    }
-  }, [user]);
-
+  // Global Hydration Strategy
   useEffect(() => {
     const cachedProducts = localStorage.getItem(`${LOCAL_STORAGE_KEY}_products`);
     const cachedBanners = localStorage.getItem(`${LOCAL_STORAGE_KEY}_banners`);
     const cachedWishlist = localStorage.getItem(`${LOCAL_STORAGE_KEY}_wishlist`);
 
-    if (!session && !cachedProducts) {
-      setProducts(INITIAL_PRODUCTS);
-      setBanners(INITIAL_BANNERS);
+    // Load from cache or show initial demo data immediately
+    if (cachedProducts) {
+      setProducts(JSON.parse(cachedProducts));
     } else {
-      if (cachedProducts) setProducts(JSON.parse(cachedProducts));
-      if (cachedBanners) setBanners(JSON.parse(cachedBanners));
+      setProducts(INITIAL_PRODUCTS);
     }
 
-    if (cachedWishlist) setWishlist(JSON.parse(cachedWishlist));
+    if (cachedBanners) {
+      setBanners(JSON.parse(cachedBanners));
+    } else {
+      setBanners(INITIAL_BANNERS);
+    }
 
-    if (session) fetchData();
-    setIsLoading(false);
-  }, [session, fetchData]);
+    if (cachedWishlist) {
+      setWishlist(JSON.parse(cachedWishlist));
+    }
+
+    // Trigger live fetch for everyone
+    fetchData().finally(() => setIsLoading(false));
+  }, [fetchData]);
 
   const upsertProduct = async (p: Product) => {
     const dbPayload = {
@@ -181,7 +208,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteProduct = async (id: string) => {
     const { error } = await supabase.from('products').delete().eq('id', id);
     if (!error) {
-      setProducts(prev => prev.filter(p => p.id !== id));
+      await fetchData();
       return true;
     }
     return false;
@@ -199,7 +226,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteBanner = async (id: string) => {
     const { error } = await supabase.from('banners').delete().eq('id', id);
     if (!error) {
-      setBanners(prev => prev.filter(b => b.id !== id));
+      await fetchData();
       return true;
     }
     return false;
@@ -244,12 +271,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       await supabase.auth.signOut();
     } finally {
-      // Force state wipe and refresh regardless of Supabase response
       localStorage.clear();
       sessionStorage.clear();
-      setUser(null);
-      setSession(null);
-      setIsAdmin(false);
       window.location.replace('/');
     }
   };
