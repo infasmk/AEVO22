@@ -26,7 +26,7 @@ interface AppState {
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'aevo_vault_v12';
+const LOCAL_STORAGE_KEY = 'aevo_vault_v13';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -81,17 +81,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       if (pRes.error) throw pRes.error;
 
-      if (pRes.data) setProducts(pRes.data.length > 0 ? pRes.data : INITIAL_PRODUCTS);
-      if (bRes.data) setBanners(bRes.data.length > 0 ? bRes.data : INITIAL_BANNERS);
-      if (oRes.data) setOrders(oRes.data.length > 0 ? oRes.data : []);
-      if (cRes.data) setCategories(cRes.data.length > 0 ? cRes.data : categories);
+      // Only set from DB if we actually have remote data
+      if (pRes.data && pRes.data.length > 0) setProducts(pRes.data);
+      if (bRes.data && bRes.data.length > 0) setBanners(bRes.data);
+      if (oRes.data && oRes.data.length > 0) setOrders(oRes.data);
+      if (cRes.data && cRes.data.length > 0) setCategories(cRes.data);
       
       setConnectionStatus('online');
     } catch (err: any) {
-      console.warn("AEVO Sync Status:", err.message);
+      console.warn("AEVO Sync Engine: Remote disconnected. Local vault remains active.", err.message);
       setConnectionStatus('offline');
     }
-  }, [categories]);
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -100,7 +101,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const upsertProduct = async (p: Product) => {
     lastWriteTime.current = Date.now();
     
-    // 1. Update UI immediately (Offline-first)
+    // UI Update (Optimistic)
     setProducts(prev => {
       const exists = prev.find(item => item.id === p.id);
       const updated = exists ? prev.map(item => item.id === p.id ? p : item) : [p, ...prev];
@@ -110,9 +111,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (!isConfigValid()) return false;
 
-    // Payload exactly matching the latest SQL schema
+    // Strict schema mapping
     const dbPayload = {
-      id: p.id,
+      id: String(p.id), // Ensure it's a string
       name: p.name,
       description: p.description,
       price: p.price,
@@ -123,20 +124,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       key_features: p.key_features || [],
       tag: p.tag,
       stock: p.stock,
-      rating: p.rating || 5,
-      reviews_count: p.reviews_count || 0,
+      rating: p.rating,
+      reviews_count: p.reviews_count,
       created_at: p.created_at || new Date().toISOString()
     };
 
     try {
       const { error } = await supabase.from('products').upsert(dbPayload);
       if (error) {
-        console.group("🔴 Supabase Sync Error");
-        console.error("Message:", error.message);
-        if (error.message.includes('column "key_features" of relation "products" does not exist')) {
-          console.error("FIX REQUIRED: Run the SQL REPAIR SCRIPT in your Supabase SQL Editor to add the 'key_features' column.");
-        } else if (error.message.includes('relation "products" does not exist')) {
-          console.error("FIX REQUIRED: Table 'products' is missing. Run the full SQL setup script.");
+        console.group("🔴 Sync Failure");
+        console.error("Supabase says:", error.message);
+        if (error.message.includes('invalid input syntax for type uuid')) {
+          console.error("CRITICAL: Your 'products' table 'id' column is a UUID type. It MUST be TEXT. Please run the provided DROP/CREATE SQL script.");
         }
         console.groupEnd();
         return false;
@@ -166,7 +165,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.setItem(`${LOCAL_STORAGE_KEY}_categories`, JSON.stringify(updated));
       return updated;
     });
-    const { error } = await supabase.from('categories').upsert(c);
+    const { error } = await supabase.from('categories').upsert({ id: String(c.id), name: c.name });
     return !error;
   };
 
@@ -188,7 +187,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(updated));
       return updated;
     });
-    const { error } = await supabase.from('banners').upsert(b);
+    const { error } = await supabase.from('banners').upsert({ ...b, id: String(b.id) });
     return !error;
   };
 
