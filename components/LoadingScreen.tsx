@@ -6,7 +6,7 @@ const LoadingScreen: React.FC = () => {
 
   useEffect(() => {
     const startTime = Date.now();
-    const duration = 2500;
+    const duration = 1200; // Reduced from 2500 for faster perceived performance
 
     const updateProgress = () => {
       const elapsed = Date.now() - startTime;

@@ -28,16 +28,21 @@ const ScrollToTop = () => {
 
 // Layout for Public Pages
 const PublicLayout: React.FC = () => {
+  const { isLoading } = useStore();
   const [appLoading, setAppLoading] = useState(true);
   const [exitAnimation, setExitAnimation] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setExitAnimation(true);
-      setTimeout(() => setAppLoading(false), 800);
-    }, 2000); // Reduced delay for better UX
-    return () => clearTimeout(timer);
-  }, []);
+    // We wait for at least 800ms for the animation, or until data is loaded
+    const minTimer = setTimeout(() => {
+      if (!isLoading) {
+        setExitAnimation(true);
+        setTimeout(() => setAppLoading(false), 600);
+      }
+    }, 800);
+
+    return () => clearTimeout(minTimer);
+  }, [isLoading]);
 
   if (appLoading) {
     return <LoadingScreen key="public-loader" />;
