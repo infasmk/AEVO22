@@ -290,12 +290,12 @@ const AdminProducts: React.FC = () => {
                </div>
 
                <div className="h-20 sm:h-32" />
-            </form>
 
-            <div className="px-6 sm:px-16 py-6 sm:py-12 border-t border-black/[0.05] bg-[#FCFCFA] flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 z-20">
-               <button type="button" onClick={() => setIsModalOpen(false)} className="text-[9px] sm:text-[10px] uppercase font-black tracking-[0.4em] text-black/20 hover:text-black transition-colors order-2 sm:order-1 active:scale-95">Abort Changes</button>
-               <button type="submit" form="productForm" className="w-full sm:w-auto bg-black text-white px-10 sm:px-20 py-4 sm:py-7 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-[0.6em] shadow-2xl hover:scale-105 active:scale-95 transition-all shadow-black/20">Memorialize Piece</button>
-            </div>
+               <div className="px-6 sm:px-16 py-6 sm:py-12 border-t border-black/[0.05] bg-[#FCFCFA] flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 z-20">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="text-[9px] sm:text-[10px] uppercase font-black tracking-[0.4em] text-black/20 hover:text-black transition-colors order-2 sm:order-1 active:scale-95">Abort Changes</button>
+                  <button type="submit" className="w-full sm:w-auto bg-black text-white px-10 sm:px-20 py-4 sm:py-7 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-[0.6em] shadow-2xl hover:scale-105 active:scale-95 transition-all shadow-black/20">Memorialize Piece</button>
+               </div>
+            </form>
           </div>
         </div>
       )}

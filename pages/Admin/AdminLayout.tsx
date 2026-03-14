@@ -3,12 +3,12 @@ import React, { useState } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 const { Link, useLocation, Outlet, useNavigate } = ReactRouterDOM;
 import { useStore } from '../../store';
-import { ShoppingBag, Star, Shield, Menu, X, Info, ChevronRight, Edit3, TrendingUp } from '../../components/Icons';
+import { ShoppingBag, Star, Shield, Menu, X, Info, ChevronRight, Edit3, TrendingUp, MoreHorizontal } from '../../components/Icons';
 
 const AdminLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const { connectionStatus, signOut, user, isAdmin, fetchData } = useStore();
 
@@ -31,8 +31,8 @@ const AdminLayout: React.FC = () => {
 
   const status = getStatusConfig(connectionStatus);
 
-  const handleTerminate = async () => {
-    await signOut();
+  const handleTerminate = () => {
+    navigate('/admin/products');
   };
 
   const fullSetupSQL = `-- 1. ATELIER REGISTRY SYSTEM INITIALIZATION
@@ -118,7 +118,7 @@ ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
       <div className="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-black/5 z-[110] flex items-center justify-between px-4 lg:px-10">
          <div className="flex items-center space-x-3 md:space-x-6">
            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 text-[#A68E74] hover:bg-black/5 rounded-full transition-colors active:scale-90">
-             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+             {sidebarOpen ? <X className="w-5 h-5" /> : <MoreHorizontal className="w-5 h-5" />}
            </button>
            <Link to="/" className="font-serif text-lg md:text-xl tracking-tighter truncate max-w-[120px]">AEVO Atelier</Link>
          </div>
@@ -148,10 +148,10 @@ ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
       </div>
 
       {/* Sidebar Navigation */}
-      <aside className={`fixed inset-y-0 left-0 w-72 bg-white border-r border-black/[0.05] flex flex-col z-[120] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${sidebarOpen ? 'translate-x-0 shadow-2xl lg:shadow-none' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 left-0 w-72 bg-white border-r border-black/[0.05] flex flex-col z-[120] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
         <div className="p-8 border-b border-black/[0.03] flex items-center justify-between">
           <Link to="/" className="text-xl font-serif text-black tracking-tighter">AEVO <span className="text-[7px] uppercase tracking-widest text-[#A68E74] ml-2 font-black">Atelier</span></Link>
-          <button className="lg:hidden text-black/20 hover:text-black transition-colors" onClick={() => setSidebarOpen(false)}><X className="w-5 h-5" /></button>
+          <button className="text-black/20 hover:text-black transition-colors" onClick={() => setSidebarOpen(false)}><X className="w-5 h-5" /></button>
         </div>
         <nav className="flex-1 p-6 space-y-2 overflow-y-auto no-scrollbar">
           {links.map(link => (
@@ -172,7 +172,7 @@ ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
 
       {sidebarOpen && <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[115] lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      <main className={`flex-1 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${sidebarOpen ? 'lg:ml-72' : 'ml-0'} min-h-screen pt-24 pb-20 px-4 md:px-10 lg:px-16`}>
+      <main className={`flex-1 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] min-h-screen pt-24 pb-20 px-4 md:px-10 lg:px-16`}>
         <div className="max-w-7xl mx-auto">
           
           {/* SETUP GUIDE FOR NEW REGISTRIES */}
