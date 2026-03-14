@@ -192,57 +192,90 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       price: Number(p.price),
       stock: Number(p.stock)
     };
+    
+    // Optimistic update
+    const oldProducts = [...products];
+    setProducts(prev => {
+      const exists = prev.find(item => item.id === p.id);
+      if (exists) return prev.map(item => item.id === p.id ? p : item);
+      return [p, ...prev];
+    });
+
     const { error } = await supabase.from('products').upsert(dbPayload);
-    if (!error) {
-      await fetchData();
-      return true;
+    if (error) {
+      setProducts(oldProducts);
+      return false;
     }
-    return false;
+    return true;
   };
 
   const deleteProduct = async (id: string) => {
+    // Optimistic update
+    const oldProducts = [...products];
+    setProducts(prev => prev.filter(p => p.id !== id));
+
     const { error } = await supabase.from('products').delete().eq('id', id);
-    if (!error) {
-      await fetchData();
-      return true;
+    if (error) {
+      setProducts(oldProducts);
+      return false;
     }
-    return false;
+    return true;
   };
 
   const upsertBanner = async (b: Banner) => {
+    const oldBanners = [...banners];
+    setBanners(prev => {
+      const exists = prev.find(item => item.id === b.id);
+      if (exists) return prev.map(item => item.id === b.id ? b : item);
+      return [...prev, b].sort((x, y) => (x.display_order || 0) - (y.display_order || 0));
+    });
+
     const { error } = await supabase.from('banners').upsert(b);
-    if (!error) {
-      await fetchData();
-      return true;
+    if (error) {
+      setBanners(oldBanners);
+      return false;
     }
-    return false;
+    return true;
   };
 
   const deleteBanner = async (id: string) => {
+    const oldBanners = [...banners];
+    setBanners(prev => prev.filter(b => b.id !== id));
+
     const { error } = await supabase.from('banners').delete().eq('id', id);
-    if (!error) {
-      await fetchData();
-      return true;
+    if (error) {
+      setBanners(oldBanners);
+      return false;
     }
-    return false;
+    return true;
   };
 
   const upsertCategory = async (c: Category) => {
+    const oldCategories = [...categories];
+    setCategories(prev => {
+      const exists = prev.find(item => item.id === c.id);
+      if (exists) return prev.map(item => item.id === c.id ? c : item).sort((x, y) => x.name.localeCompare(y.name));
+      return [...prev, c].sort((x, y) => x.name.localeCompare(y.name));
+    });
+
     const { error } = await supabase.from('categories').upsert(c);
-    if (!error) {
-      await fetchData();
-      return true;
+    if (error) {
+      setCategories(oldCategories);
+      return false;
     }
-    return false;
+    return true;
   };
 
   const deleteCategory = async (id: string) => {
+    const oldCategories = [...categories];
+    setCategories(prev => prev.filter(c => c.id !== id));
+
     const { error } = await supabase.from('categories').delete().eq('id', id);
-    if (!error) {
-      await fetchData();
-      return true;
+    if (error) {
+      setCategories(oldCategories);
+      return false;
     }
-    return false;
+    return true;
   };
 
   const updateOrderStatus = async (id: string, status: Order['status']) => {
@@ -263,12 +296,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const signOut = async () => {
+    // Immediate UI feedback
+    setSession(null);
+    setUser(null);
+    setIsAdmin(false);
+    
     try {
-      await supabase.auth.signOut();
-    } finally {
+      // Background sign out
+      supabase.auth.signOut().catch(console.error);
+      
+      // Immediate cleanup and redirect
       localStorage.clear();
       sessionStorage.clear();
-      window.location.replace('/');
+      window.location.href = '/';
+    } catch (e) {
+      window.location.href = '/';
     }
   };
 
