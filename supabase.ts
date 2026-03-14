@@ -1,17 +1,17 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://qznujzgqcmirchkwhzxu.supabase.co';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://qdlnnqadljkvfkcbrvgl.supabase.co';
 
 /**
  * 🔗 DATABASE AUTHENTICATED
- * Using the verified Supabase Anon Key.
+ * Using the provided Supabase Publishable Key.
  */
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6bnVqemdxY21pcmNoa3doenh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NjU5MjEsImV4cCI6MjA4NTU0MTkyMX0.0PxfII9ZPyUs6Fa1ASiN5I57J3F7uZzlvpzKN-Za-BA';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_avInPHQ_8it5nqz8zaHqZQ_7wLz5Pn0';
 
 // Helper to check if configuration is valid
 export const isConfigValid = () => {
-  return supabaseAnonKey.startsWith('eyJ') && supabaseUrl.includes('.supabase.co');
+  return (supabaseAnonKey.startsWith('eyJ') || supabaseAnonKey.startsWith('sb_publishable_')) && supabaseUrl.includes('.supabase.co');
 };
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
