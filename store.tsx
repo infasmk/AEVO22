@@ -144,6 +144,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     initApp();
 
+    // Safety timeout: Ensure loading screen eventually disappears even if network is slow
+    const safetyTimeout = setTimeout(() => {
+      setIsLoading(false);
+      setIsAuthLoading(false);
+    }, 5000);
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
       setSession(newSession);
       setUser(newSession?.user ?? null);
@@ -162,7 +168,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       fetchData();
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(safetyTimeout);
+    };
   }, [fetchData]);
 
   // Load from Cache (Strictly internal state, cleared on logout)

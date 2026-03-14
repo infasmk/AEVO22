@@ -31,8 +31,8 @@ const AdminLayout: React.FC = () => {
 
   const status = getStatusConfig(connectionStatus);
 
-  const handleTerminate = () => {
-    navigate('/admin/products');
+  const handleTerminate = async () => {
+    await signOut();
   };
 
   const fullSetupSQL = `-- 1. ATELIER REGISTRY SYSTEM INITIALIZATION

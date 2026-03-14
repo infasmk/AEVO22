@@ -33,15 +33,13 @@ const PublicLayout: React.FC = () => {
   const [exitAnimation, setExitAnimation] = useState(false);
 
   useEffect(() => {
-    // We wait for at least 800ms for the animation, or until data is loaded
-    const minTimer = setTimeout(() => {
-      if (!isLoading) {
+    if (!isLoading) {
+      const timer = setTimeout(() => {
         setExitAnimation(true);
         setTimeout(() => setAppLoading(false), 600);
-      }
-    }, 800);
-
-    return () => clearTimeout(minTimer);
+      }, 400); // Small buffer for animation
+      return () => clearTimeout(timer);
+    }
   }, [isLoading]);
 
   if (appLoading) {
