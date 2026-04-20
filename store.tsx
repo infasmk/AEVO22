@@ -159,25 +159,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  const hashValue = async (val: string) => {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(val);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const atelierProtocol = (input: string) => {
+    return input.split('').map(c => (c.charCodeAt(0) + 13).toString(16)).join('');
   };
 
   const signIn = async (email: string, pass: string) => {
-    // Encrypted (Hashed) credential validation
-    // Hashes of "aevo@gmail.com" and "aevo@1313" using SHA-256
-    const emailHash = 'c16886e3798939c087f94119853907a38a06316235889758d45f3c15392ef65e';
-    const passHash = 'c6b4f738b58418045610d4022a101f2f8426027ab087e5898f060d4b94f57c8d';
+    // Obfuscated credential validation (Atelier Protocol v17)
+    // Encoded versions of "aevo@gmail.com" and "aevo@1313"
+    const registryKey = '6e72837c4d747a6e76793b707c7a';
+    const accessKey = '6e72837c4d3e403e40';
 
-    const inputEmailHash = await hashValue(email);
-    const inputPassHash = await hashValue(pass);
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPass = pass.trim();
 
-    if (inputEmailHash === emailHash && inputPassHash === passHash) {
-      const u = { email, id: 'admin-1' };
+    if (atelierProtocol(normalizedEmail) === registryKey && atelierProtocol(normalizedPass) === accessKey) {
+      const u = { email: normalizedEmail, id: 'admin-1' };
       setUser(u);
       setIsAdmin(true);
       localStorage.setItem(`${LOCAL_STORAGE_KEY}_user`, JSON.stringify(u));
