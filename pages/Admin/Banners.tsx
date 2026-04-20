@@ -21,6 +21,23 @@ const AdminBanners: React.FC = () => {
     display_order: 0
   });
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      setToast({ message: "Asset too large (Max 2MB for Registry)", type: 'error' });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData({ ...formData, image_url: reader.result as string });
+      setToast({ message: "Hero Asset Encoded", type: 'success' });
+    };
+    reader.readAsDataURL(file);
+  };
+
   const openModal = (b?: Banner) => {
     if (b) {
       setEditingBanner(b);
@@ -176,15 +193,33 @@ const AdminBanners: React.FC = () => {
 
               {/* Data Inputs */}
               <div className="space-y-6">
-                <div className="space-y-3">
-                  <label className="text-[9px] uppercase tracking-[0.4em] text-black/40 font-black">Visual Asset URL</label>
-                  <input 
-                    className="w-full bg-white rounded-2xl p-4 md:p-5 text-[11px] font-mono border border-black/10 focus:border-[#A68E74] outline-none shadow-sm transition-all"
-                    value={formData.image_url}
-                    onChange={e => setFormData({...formData, image_url: e.target.value})}
-                    placeholder="https://images.unsplash.com/..."
-                    required
-                  />
+                <div className="space-y-4">
+                  <label className="text-[9px] uppercase tracking-[0.4em] text-black/40 font-black">Visual Asset</label>
+                  <div className="flex flex-col gap-3">
+                    <input 
+                      className="w-full bg-white rounded-2xl p-4 md:p-5 text-[11px] font-mono border border-black/10 focus:border-[#A68E74] outline-none shadow-sm transition-all"
+                      value={formData.image_url}
+                      onChange={e => setFormData({...formData, image_url: e.target.value})}
+                      placeholder="Paste Visual URL or Upload from Device..."
+                      required
+                    />
+                    <div className="relative">
+                      <input 
+                        type="file" 
+                        id="bannerFileUpload"
+                        className="hidden" 
+                        accept="image/*" 
+                        onChange={handleImageUpload} 
+                      />
+                      <label 
+                        htmlFor="bannerFileUpload"
+                        className="flex items-center justify-center gap-2 w-full py-4 bg-black text-white text-[10px] uppercase tracking-widest font-black rounded-2xl cursor-pointer hover:bg-[#A68E74] transition-all active:scale-95 shadow-xl shadow-black/10"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Upload Hero Image from Device</span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

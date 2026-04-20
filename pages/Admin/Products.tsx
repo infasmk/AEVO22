@@ -24,6 +24,25 @@ const AdminProducts: React.FC = () => {
   const [imageUrls, setImageUrls] = useState<string[]>(['']);
   const [newCatName, setNewCatName] = useState('');
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 1.5 * 1024 * 1024) {
+      setToast({ message: "Masterpiece too large (Max 1.5MB for Registry)", type: 'error' });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const newUrls = [...imageUrls];
+      newUrls[index] = reader.result as string;
+      setImageUrls(newUrls);
+      setToast({ message: "Visual Asset Encoded", type: 'success' });
+    };
+    reader.readAsDataURL(file);
+  };
+
   const openModal = (p?: Product) => {
     if (p) {
       setEditingProduct(p);
@@ -38,7 +57,6 @@ const AdminProducts: React.FC = () => {
         name: '', price: 0, original_price: 0, category: categories.length > 0 ? categories[0].name : 'Luxury Series',
         tag: 'Latest', description: '', stock: 10, images: []
       });
-      // Removed default Movement/Material specs as requested
       setSpecs([]); 
       setFeatures([{ title: '', description: '' }]);
       setColors([{ name: 'Obsidian', hex: '#1a1a1a' }]);
@@ -80,6 +98,8 @@ const AdminProducts: React.FC = () => {
     if (success) { 
       setNewCatName(''); 
       setToast({ message: "Series Registered", type: 'success' }); 
+    } else {
+      setToast({ message: "Failed to Register Series", type: 'error' });
     }
   };
 
@@ -115,7 +135,7 @@ const AdminProducts: React.FC = () => {
           <div key={product.id} className="bg-white border border-black/5 rounded-[2.5rem] p-6 lg:p-8 shadow-sm hover:shadow-2xl transition-all group overflow-hidden flex flex-col">
             <div className="flex flex-row sm:flex-col lg:flex-row gap-6 lg:gap-8 items-center sm:items-start lg:items-center">
               <div className="w-24 h-28 sm:w-full sm:h-56 lg:w-24 lg:h-28 bg-[#F9F7F5] rounded-[2rem] overflow-hidden border border-black/5 flex-shrink-0 relative group-hover:shadow-lg transition-all">
-                <img src={product.images[0]} className="w-full h-full object-cover mix-blend-multiply opacity-80 group-hover:scale-110 transition-transform duration-[2s]" alt={product.name} />
+                <img src={product.images[0]} className="w-full h-full object-cover mix-blend-multiply opacity-80 group-hover:scale-110 transition-transform duration-[2s]" alt={product.name} referrerPolicy="no-referrer" />
               </div>
               <div className="flex-1 min-w-0">
                 <span className="text-[8px] uppercase tracking-[0.5em] text-[#A68E74] font-black mb-2 block truncate">{product.category}</span>
@@ -136,7 +156,7 @@ const AdminProducts: React.FC = () => {
         ))}
       </div>
 
-      {/* Product Configurator Modal - High z-index to overlay Sidebar/Burger Menu */}
+      {/* Product Configurator Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-0 sm:p-6 lg:p-12 overflow-hidden">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md animate-fadeIn" onClick={() => setIsModalOpen(false)} />
@@ -145,7 +165,7 @@ const AdminProducts: React.FC = () => {
             <div className="px-6 sm:px-12 py-5 sm:py-10 border-b border-black/[0.05] bg-[#FCFCFA] flex justify-between items-center z-20">
               <div className="min-w-0">
                 <h2 className="text-xl sm:text-3xl font-serif italic text-black truncate">{editingProduct ? 'Refine Masterpiece' : 'Enroll New Piece'}</h2>
-                <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.4em] text-[#A68E74] font-black mt-1 truncate">Atelier Registry Protocol v15</p>
+                <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.4em] text-[#A68E74] font-black mt-1 truncate">Atelier Registry Protocol v16</p>
               </div>
               <button onClick={() => setIsModalOpen(false)} className="p-3 sm:p-4 bg-black/5 rounded-full hover:bg-black hover:text-white transition-all active:scale-90"><X className="w-5 h-5" /></button>
             </div>
@@ -216,7 +236,7 @@ const AdminProducts: React.FC = () => {
                                    newColors[i].name = e.target.value; 
                                    setColors(newColors);
                                  }} 
-                               />
+                                />
                              </div>
                              <div className="flex items-center gap-3">
                                <span className="text-[8px] font-black text-black/20 uppercase tracking-widest">HEX:</span>
@@ -229,7 +249,7 @@ const AdminProducts: React.FC = () => {
                                    newColors[i].hex = e.target.value; 
                                    setColors(newColors);
                                  }} 
-                               />
+                                />
                              </div>
                           </div>
                           <button type="button" onClick={() => setColors(colors.filter((_, idx) => idx !== i))} className="text-black/10 hover:text-red-500 transition-colors p-2 active:scale-90"><Trash2 className="w-5 h-5" /></button>
@@ -274,16 +294,36 @@ const AdminProducts: React.FC = () => {
                    {imageUrls.map((url, i) => (
                      <div key={i} className="flex flex-col gap-3 sm:gap-4 bg-white p-4 sm:p-5 rounded-[1.5rem] sm:rounded-[2rem] border border-black/5 shadow-sm group hover:border-[#A68E74]/20 transition-all">
                        <div className="aspect-[4/5] bg-[#F9F7F5] rounded-[1.2rem] sm:rounded-[1.5rem] overflow-hidden border border-black/5 relative shadow-inner">
-                         {url ? <img src={url} className="w-full h-full object-cover mix-blend-multiply opacity-80" alt={`Perspective ${i+1}`} /> : (
+                         {url ? <img src={url} className="w-full h-full object-cover mix-blend-multiply opacity-80" alt={`Perspective ${i+1}`} referrerPolicy="no-referrer" /> : (
                            <div className="w-full h-full flex flex-col items-center justify-center space-y-2 text-black/10"><ImageIcon className="w-8 h-8" /><span className="text-[8px] uppercase tracking-[0.3em] font-black">Empty Slot</span></div>
                          )}
                          <button type="button" onClick={() => setImageUrls(imageUrls.filter((_, idx) => idx !== i))} className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-md rounded-full shadow-lg text-red-500 hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 active:scale-90"><X className="w-4 h-4" /></button>
                        </div>
-                       <input className="w-full bg-transparent text-[8px] sm:text-[10px] font-mono p-2 sm:p-3 border border-black/5 rounded-xl outline-none focus:border-[#A68E74] truncate" value={url} onChange={e => {
-                         const newUrls = [...imageUrls]; 
-                         newUrls[i] = e.target.value; 
-                         setImageUrls(newUrls);
-                       }} placeholder="Paste Visual URL..." />
+                       
+                       <div className="space-y-4">
+                         <input className="w-full bg-transparent text-[8px] sm:text-[10px] font-mono p-2 sm:p-3 border border-black/5 rounded-xl outline-none focus:border-[#A68E74] truncate" value={url} onChange={e => {
+                           const newUrls = [...imageUrls]; 
+                           newUrls[i] = e.target.value; 
+                           setImageUrls(newUrls);
+                         }} placeholder="Paste Visual URL..." />
+                         
+                         <div className="relative">
+                           <input 
+                             type="file" 
+                             id={`file-${i}`}
+                             className="hidden" 
+                             accept="image/*" 
+                             onChange={(e) => handleImageUpload(e, i)} 
+                           />
+                           <label 
+                             htmlFor={`file-${i}`}
+                             className="flex items-center justify-center gap-2 w-full py-3 bg-black text-white text-[8px] uppercase tracking-widest font-black rounded-xl cursor-pointer hover:bg-[#A68E74] transition-all active:scale-95 shadow-lg shadow-black/10"
+                           >
+                             <Plus className="w-3 h-3" />
+                             <span>Upload from Device</span>
+                           </label>
+                         </div>
+                       </div>
                      </div>
                    ))}
                  </div>
@@ -300,6 +340,7 @@ const AdminProducts: React.FC = () => {
         </div>
       )}
 
+      {/* Category Manager Modal */}
       {isCategoryModalOpen && (
         <div className="fixed inset-0 z-[250] flex items-center justify-center p-6 sm:p-0">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-xl animate-fadeIn" onClick={() => setIsCategoryModalOpen(false)} />

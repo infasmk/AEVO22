@@ -31,7 +31,6 @@ const Footer: React.FC = () => {
             <ul className="space-y-3 text-black/50 text-xs">
               <li><Link to="#" className="hover:text-black transition-colors">Bespoke Inquiry</Link></li>
               <li><Link to="#" className="hover:text-black transition-colors">Our Story</Link></li>
-              <li><Link to="/admin" className="text-[#B88E4B] font-bold">Atelier Portal</Link></li>
             </ul>
           </div>
 

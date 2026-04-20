@@ -1,14 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
-const { Link, useLocation } = ReactRouterDOM;
+const { Link, useLocation, useNavigate } = ReactRouterDOM;
 import { useStore } from '../store';
 import { Search, Menu, X, Heart, Star } from './Icons';
 
 const Header: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoClicks, setLogoClicks] = useState(0);
   const { wishlist } = useStore();
 
   useEffect(() => {
@@ -21,8 +23,22 @@ const Header: React.FC = () => {
     { name: 'The Archive', path: '/shop', number: '01' },
     { name: 'Heritage', path: '/about', number: '02' },
     { name: 'The Vault', path: '/wishlist', number: '03' },
-    { name: 'Atelier Portal', path: '/admin', number: '04', highlight: true },
   ];
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const newCount = logoClicks + 1;
+    setLogoClicks(newCount);
+    
+    if (newCount === 5) {
+      setLogoClicks(0);
+      navigate('/admin');
+    } else {
+      // Still navigate home on single click if needed, but the user said "only open when click 5 times"
+      // to imply the admin portal. Let's just navigate home if it's not the 5th click to keep standard behavior.
+      if (location.pathname !== '/') navigate('/');
+    }
+  };
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${isScrolled ? 'glass-effect border-b border-black/5 py-3 shadow-sm' : 'bg-transparent py-6'}`}>
@@ -39,7 +55,7 @@ const Header: React.FC = () => {
         </nav>
 
         {/* Logo - Signature Gold */}
-        <Link to="/" className="text-2xl font-serif tracking-tighter absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 text-[#A68E74] transition-transform hover:scale-105 active:scale-95">
+        <Link to="/" onClick={handleLogoClick} className="text-2xl font-serif tracking-tighter absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 text-[#A68E74] transition-transform hover:scale-105 active:scale-95 select-none">
           AEVO
         </Link>
 
@@ -52,10 +68,6 @@ const Header: React.FC = () => {
           <button className="hidden sm:block p-2 text-[#A68E74] hover:text-black transition-all">
             <Search className="w-4 h-4" />
           </button>
-          <Link to="/admin" className="hidden md:flex items-center space-x-2 text-[8px] uppercase tracking-[0.3em] font-black text-black border border-black/20 px-5 py-2 rounded-full hover:bg-[#A68E74] hover:text-white hover:border-[#A68E74] transition-all">
-            <Star className="w-3 h-3" />
-            <span>Atelier</span>
-          </Link>
         </div>
       </div>
 
@@ -84,7 +96,7 @@ const Header: React.FC = () => {
                 style={{ transitionDelay: `${idx * 100}ms` }}
               >
                 <span className="text-[10px] font-black tracking-widest text-[#A68E74] mb-2">{link.number}</span>
-                <span className={`text-4xl font-serif italic ${link.highlight ? 'text-white' : 'text-[#A68E74]'} group-hover:text-white transition-colors`}>
+                <span className={`text-4xl font-serif italic text-[#A68E74] group-hover:text-white transition-colors`}>
                   {link.name}
                 </span>
               </Link>

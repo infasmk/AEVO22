@@ -18,7 +18,7 @@ const AdminLogin: React.FC = () => {
     const success = await signIn(email, password);
 
     if (!success) {
-      setError("Invalid credentials. Enter at least 4 characters for passkey.");
+      setError("Invalid Registry ID or Passkey. Access Denied.");
       setLoading(false);
     }
   };
