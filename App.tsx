@@ -59,15 +59,15 @@ const PublicLayout: React.FC = () => {
 
 // Resilient Protected Admin Route Handler
 const ProtectedAdminRoute: React.FC = () => {
-  const { session, isAuthLoading } = useStore();
+  const { user, isAuthLoading } = useStore();
   
   // If still loading auth, show a brief loader
-  if (isAuthLoading && !session) {
+  if (isAuthLoading && !user) {
     return <LoadingScreen key="admin-auth-loader" />;
   }
   
-  // If no session after loading, show login
-  if (!session) {
+  // If no user after loading, show login
+  if (!user) {
     return <AdminLogin />;
   }
 

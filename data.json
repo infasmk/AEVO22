@@ -1,0 +1,40 @@
+{
+  "products": [
+    {
+      "id": "p-1",
+      "name": "Chronos Obsidian",
+      "description": "A masterwork of temporal engineering, carved from deep-earth obsidian.",
+      "price": 125000,
+      "category": "Elite Series",
+      "images": [
+        "https://picsum.photos/seed/clock1/800/1000"
+      ],
+      "specs": {
+        "Movement": "Atomic Resonance",
+        "Material": "Polished Obsidian"
+      },
+      "key_features": [
+        { "title": "Precision", "description": "Accurate to within 0.1s per millennium." }
+      ],
+      "tag": "Latest",
+      "stock": 5,
+      "rating": 5,
+      "reviews_count": 12
+    }
+  ],
+  "banners": [
+    {
+      "id": "b-1",
+      "title": "The Eternity Collection",
+      "subtitle": "Timeless elegance redefined.",
+      "image_url": "https://picsum.photos/seed/banner1/1920/1080",
+      "tag_label": "Exclusive",
+      "display_order": 1
+    }
+  ],
+  "categories": [
+    { "id": "cat-1", "name": "Elite Series" },
+    { "id": "cat-2", "name": "Minimalist" }
+  ],
+  "orders": []
+}

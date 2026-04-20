@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
-import { supabase } from '../../supabase';
+import { useStore } from '../../store';
 import { Star, Shield, ChevronRight } from '../../components/Icons';
 
 const AdminLogin: React.FC = () => {
+  const { signIn } = useStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -14,13 +15,10 @@ const AdminLogin: React.FC = () => {
     setLoading(true);
     setError(null);
     
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const success = await signIn(email, password);
 
-    if (error) {
-      setError(error.message);
+    if (!success) {
+      setError("Invalid credentials. Enter at least 4 characters for passkey.");
       setLoading(false);
     }
   };

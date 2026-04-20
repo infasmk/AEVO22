@@ -1,8 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Product, Banner, Order, Category, ColorOption } from './types';
-import { supabase, isConfigValid } from './supabase';
-import { Session, User } from '@supabase/supabase-js';
+import initialData from './data.json';
 
 interface AppState {
   products: Product[];
@@ -11,15 +10,12 @@ interface AppState {
   categories: Category[];
   wishlist: string[];
   isLoading: boolean;
-  connectionStatus: 'online' | 'offline' | 'connecting' | 'invalid_config';
   
-  // Auth State
-  user: User | null;
-  session: Session | null;
+  // Auth State (Local)
+  user: { email: string; id: string } | null;
   isAdmin: boolean;
   isAuthLoading: boolean;
   
-  fetchData: () => Promise<void>;
   upsertProduct: (p: Product) => Promise<boolean>;
   deleteProduct: (id: string) => Promise<boolean>;
   upsertBanner: (b: Banner) => Promise<boolean>;
@@ -28,12 +24,18 @@ interface AppState {
   deleteCategory: (id: string) => Promise<boolean>;
   updateOrderStatus: (id: string, status: Order['status']) => Promise<boolean>;
   toggleWishlist: (id: string) => void;
+  signIn: (email: string, pass: string) => Promise<boolean>;
   signOut: () => Promise<void>;
+  
+  // JSON Portability
+  exportData: () => string;
+  importData: (json: string) => boolean;
+  loadData: (forceServer?: boolean) => Promise<void>;
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'aevo_v27_final_strict';
+const LOCAL_STORAGE_KEY = 'aevo_v27_json_mode';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -42,249 +44,111 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [categories, setCategories] = useState<Category[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'connecting' | 'invalid_config'>('connecting');
   
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<{ email: string; id: string } | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
-  const parseColors = (colors: any[]): ColorOption[] => {
-    if (!colors || !Array.isArray(colors)) return [];
-    return colors.map(c => {
-      const parts = String(c).split(':');
-      return { name: parts[0] || 'Unknown', hex: parts[1] || '#000000' };
-    });
-  };
-
-  const stringifyColors = (colors: ColorOption[]): string[] => {
-    if (!colors) return [];
-    return colors.map(c => `${c.name}:${c.hex}`);
-  };
-
-  const verifyAdmin = async (userId: string) => {
+  // Load Initial State
+  const loadData = useCallback(async (forceServer = false) => {
+    setIsLoading(true);
     try {
-      const { data, error } = await supabase.from('profiles').select('is_admin').eq('id', userId).maybeSingle();
-      if (!error && data) {
-        setIsAdmin(!!data.is_admin);
-        return !!data.is_admin;
-      }
-      setIsAdmin(false);
-      return false;
-    } catch (e) {
-      setIsAdmin(false);
-      return false;
-    }
-  };
+      const DATA_URL = import.meta.env.VITE_DATA_URL;
+      let serverData = initialData;
 
-  const fetchData = useCallback(async () => {
-    if (!isConfigValid()) {
-      setConnectionStatus('invalid_config');
-      return;
-    }
-
-    setConnectionStatus('connecting');
-    try {
-      // Parallel fetch with error suppression for missing tables (Postgres error 42P01)
-      const [pRes, bRes, cRes, oRes] = await Promise.all([
-        supabase.from('products').select('*').order('created_at', { ascending: false }),
-        supabase.from('banners').select('*').order('display_order', { ascending: true }),
-        supabase.from('categories').select('*').order('name', { ascending: true }),
-        supabase.from('orders').select('*').order('created_at', { ascending: false })
-      ]);
-
-      // Handle table results. If error is 42P01 (relation does not exist), treat as empty [].
-      const processRes = (res: any) => {
-        if (res.error) {
-          if (res.error.code === '42P01') return [];
-          throw res.error;
+      if (DATA_URL) {
+        try {
+          const res = await fetch(DATA_URL);
+          if (res.ok) serverData = await res.json();
+        } catch (err) {
+          console.warn("Could not fetch remote data, falling back to local bundle.");
         }
-        return res.data || [];
-      };
+      }
 
-      const liveProducts = processRes(pRes);
-      const transformed = liveProducts.map((p: any) => ({ ...p, colors: parseColors(p.colors) }));
-      setProducts(transformed);
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(transformed));
-
-      const liveBanners = processRes(bRes);
-      setBanners(liveBanners);
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_banners`, JSON.stringify(liveBanners));
-
-      setCategories(processRes(cRes));
-      setOrders(processRes(oRes));
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      const data = (saved && !forceServer) ? JSON.parse(saved) : serverData;
       
-      setConnectionStatus('online');
-    } catch (err: any) {
-      console.error("Critical Registry Sync Error:", err);
-      setConnectionStatus('offline');
-    }
-  }, []);
+      setProducts(data.products || []);
+      setBanners(data.banners || []);
+      setCategories(data.categories || []);
+      setOrders(data.orders || []);
+      
+      const savedWishlist = localStorage.getItem(`${LOCAL_STORAGE_KEY}_wishlist`);
+      if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
 
-  // Strict Initialization Lifecycle
-  useEffect(() => {
-    const initApp = async () => {
-      try {
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
-        setSession(initialSession);
-        setUser(initialSession?.user ?? null);
-        
-        if (initialSession?.user) {
-          await verifyAdmin(initialSession.user.id);
-        }
-        
-        await fetchData();
-      } catch (e) {
-        setConnectionStatus('offline');
-      } finally {
-        setIsAuthLoading(false);
-        setIsLoading(false);
+      const savedUser = localStorage.getItem(`${LOCAL_STORAGE_KEY}_user`);
+      if (savedUser) {
+        const u = JSON.parse(savedUser);
+        setUser(u);
+        setIsAdmin(true);
       }
-    };
-
-    initApp();
-
-    // Safety timeout: Ensure loading screen eventually disappears even if network is slow
-    const safetyTimeout = setTimeout(() => {
+    } catch (e) {
+      console.error("Data Load Error:", e);
+      setProducts(initialData.products as Product[]);
+      setBanners(initialData.banners as Banner[]);
+      setCategories(initialData.categories as Category[]);
+    } finally {
       setIsLoading(false);
       setIsAuthLoading(false);
-    }, 5000);
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      setSession(newSession);
-      setUser(newSession?.user ?? null);
-      
-      if (event === 'SIGNED_OUT') {
-        setIsAdmin(false);
-        setProducts([]);
-        setBanners([]);
-        setOrders([]);
-        localStorage.removeItem(`${LOCAL_STORAGE_KEY}_products`);
-        localStorage.removeItem(`${LOCAL_STORAGE_KEY}_banners`);
-      } else if (newSession?.user) {
-        await verifyAdmin(newSession.user.id);
-      }
-      
-      fetchData();
-    });
-
-    return () => {
-      subscription.unsubscribe();
-      clearTimeout(safetyTimeout);
-    };
-  }, [fetchData]);
-
-  // Load from Cache (Strictly internal state, cleared on logout)
-  useEffect(() => {
-    const cachedProducts = localStorage.getItem(`${LOCAL_STORAGE_KEY}_products`);
-    const cachedBanners = localStorage.getItem(`${LOCAL_STORAGE_KEY}_banners`);
-    const cachedWishlist = localStorage.getItem(`${LOCAL_STORAGE_KEY}_wishlist`);
-
-    if (cachedProducts) setProducts(JSON.parse(cachedProducts));
-    if (cachedBanners) setBanners(JSON.parse(cachedBanners));
-    if (cachedWishlist) setWishlist(JSON.parse(cachedWishlist));
+    }
   }, []);
 
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // Sync to LocalStorage whenever state changes
+  useEffect(() => {
+    if (isLoading) return;
+    const data = { products, banners, categories, orders };
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+  }, [products, banners, categories, orders, isLoading]);
+
   const upsertProduct = async (p: Product) => {
-    const dbPayload = {
-      ...p,
-      colors: stringifyColors(p.colors || []),
-      price: Number(p.price),
-      stock: Number(p.stock)
-    };
-    
-    // Optimistic update
-    const oldProducts = [...products];
     setProducts(prev => {
       const exists = prev.find(item => item.id === p.id);
       if (exists) return prev.map(item => item.id === p.id ? p : item);
       return [p, ...prev];
     });
-
-    const { error } = await supabase.from('products').upsert(dbPayload);
-    if (error) {
-      setProducts(oldProducts);
-      return false;
-    }
     return true;
   };
 
   const deleteProduct = async (id: string) => {
-    // Optimistic update
-    const oldProducts = [...products];
     setProducts(prev => prev.filter(p => p.id !== id));
-
-    const { error } = await supabase.from('products').delete().eq('id', id);
-    if (error) {
-      setProducts(oldProducts);
-      return false;
-    }
     return true;
   };
 
   const upsertBanner = async (b: Banner) => {
-    const oldBanners = [...banners];
     setBanners(prev => {
       const exists = prev.find(item => item.id === b.id);
       if (exists) return prev.map(item => item.id === b.id ? b : item);
       return [...prev, b].sort((x, y) => (x.display_order || 0) - (y.display_order || 0));
     });
-
-    const { error } = await supabase.from('banners').upsert(b);
-    if (error) {
-      setBanners(oldBanners);
-      return false;
-    }
     return true;
   };
 
   const deleteBanner = async (id: string) => {
-    const oldBanners = [...banners];
     setBanners(prev => prev.filter(b => b.id !== id));
-
-    const { error } = await supabase.from('banners').delete().eq('id', id);
-    if (error) {
-      setBanners(oldBanners);
-      return false;
-    }
     return true;
   };
 
   const upsertCategory = async (c: Category) => {
-    const oldCategories = [...categories];
     setCategories(prev => {
       const exists = prev.find(item => item.id === c.id);
       if (exists) return prev.map(item => item.id === c.id ? c : item).sort((x, y) => x.name.localeCompare(y.name));
       return [...prev, c].sort((x, y) => x.name.localeCompare(y.name));
     });
-
-    const { error } = await supabase.from('categories').upsert(c);
-    if (error) {
-      setCategories(oldCategories);
-      return false;
-    }
     return true;
   };
 
   const deleteCategory = async (id: string) => {
-    const oldCategories = [...categories];
     setCategories(prev => prev.filter(c => c.id !== id));
-
-    const { error } = await supabase.from('categories').delete().eq('id', id);
-    if (error) {
-      setCategories(oldCategories);
-      return false;
-    }
     return true;
   };
 
   const updateOrderStatus = async (id: string, status: Order['status']) => {
-    const { error } = await supabase.from('orders').update({ status }).eq('id', id);
-    if (!error) {
-      setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
-      return true;
-    }
-    return false;
+    setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
+    return true;
   };
 
   const toggleWishlist = (id: string) => {
@@ -295,31 +159,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
+  const signIn = async (email: string, pass: string) => {
+    // Basic local auth simulation
+    if (pass.length >= 4) {
+      const u = { email, id: 'admin-1' };
+      setUser(u);
+      setIsAdmin(true);
+      localStorage.setItem(`${LOCAL_STORAGE_KEY}_user`, JSON.stringify(u));
+      return true;
+    }
+    return false;
+  };
+
   const signOut = async () => {
-    // Immediate UI feedback
-    setSession(null);
     setUser(null);
     setIsAdmin(false);
-    
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_user`);
+    window.location.href = '/';
+  };
+
+  const exportData = () => {
+    const data = { products, banners, categories, orders };
+    return JSON.stringify(data, null, 2);
+  };
+
+  const importData = (json: string) => {
     try {
-      // Background sign out
-      supabase.auth.signOut().catch(console.error);
-      
-      // Immediate cleanup and redirect
-      localStorage.clear();
-      sessionStorage.clear();
-      window.location.href = '/';
+      const data = JSON.parse(json);
+      if (data.products) setProducts(data.products);
+      if (data.banners) setBanners(data.banners);
+      if (data.categories) setCategories(data.categories);
+      if (data.orders) setOrders(data.orders);
+      return true;
     } catch (e) {
-      window.location.href = '/';
+      console.error("Import Error:", e);
+      return false;
     }
   };
 
   return (
     <AppContext.Provider value={{
-      products, banners, orders, wishlist, isLoading, categories, connectionStatus,
-      user, session, isAdmin, isAuthLoading,
-      fetchData, upsertProduct, deleteProduct, upsertBanner, deleteBanner, 
-      upsertCategory, deleteCategory, updateOrderStatus, toggleWishlist, signOut
+      products, banners, orders, wishlist, isLoading, categories,
+      user, isAdmin, isAuthLoading,
+      upsertProduct, deleteProduct, upsertBanner, deleteBanner, 
+      upsertCategory, deleteCategory, updateOrderStatus, toggleWishlist, 
+      signIn, signOut, exportData, importData, loadData
     }}>
       {children}
     </AppContext.Provider>

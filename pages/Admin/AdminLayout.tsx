@@ -4,13 +4,26 @@ import * as ReactRouterDOM from 'react-router-dom';
 const { Link, useLocation, Outlet, useNavigate } = ReactRouterDOM;
 import { useStore } from '../../store';
 import { ShoppingBag, Star, Shield, Menu, X, Info, ChevronRight, Edit3, TrendingUp, MoreHorizontal } from '../../components/Icons';
+import Toast from '../../components/Toast';
 
 const AdminLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
-  const { connectionStatus, signOut, user, isAdmin, fetchData } = useStore();
+  const { signOut, user, isAdmin, exportData, importData, loadData } = useStore();
+  const [showJsonPortal, setShowJsonPortal] = useState(false);
+  const [jsonInput, setJsonInput] = useState('');
+  const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+
+  const handleDiscardDraft = async () => {
+    if (confirm("Are you sure? This will discard all local changes and sync with the latest server data.")) {
+      localStorage.removeItem('aevo_v27_json_mode');
+      await loadData(true);
+      setToast({ message: "Registry Reverted to Server State", type: 'success' });
+      setShowJsonPortal(false);
+    }
+  };
 
   const links = [
     { name: 'Insights', path: '/admin', icon: <TrendingUp className="w-4 h-4" /> },
@@ -18,99 +31,26 @@ const AdminLayout: React.FC = () => {
     { name: 'Showcase', path: '/admin/banners', icon: <Shield className="w-4 h-4" /> },
   ];
 
-  const getStatusConfig = (status: string) => {
-    switch (status) {
-      case 'online':
-        return { label: 'Registry Live', dotColor: 'bg-emerald-500', pillBg: 'bg-emerald-50/50', textColor: 'text-emerald-700', borderColor: 'border-emerald-100', isSyncing: false };
-      case 'connecting':
-        return { label: 'Syncing...', dotColor: 'bg-blue-500', pillBg: 'bg-blue-50/50', textColor: 'text-blue-700', borderColor: 'border-blue-100', isSyncing: true };
-      default:
-        return { label: 'Disconnected', dotColor: 'bg-red-500', pillBg: 'bg-red-50/50', textColor: 'text-red-700', borderColor: 'border-red-100', isSyncing: false };
-    }
-  };
-
-  const status = getStatusConfig(connectionStatus);
-
   const handleTerminate = async () => {
     await signOut();
   };
 
-  const fullSetupSQL = `-- 1. ATELIER REGISTRY SYSTEM INITIALIZATION
--- Run this script in your Supabase SQL Editor
+  const handleExport = () => {
+    const data = exportData();
+    navigator.clipboard.writeText(data);
+    setToast({ message: "Registry Code Copied", type: 'success' });
+  };
 
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- Create Core Tables
-CREATE TABLE IF NOT EXISTS public.profiles (
-  id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
-  is_admin BOOLEAN DEFAULT FALSE,
-  full_name TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS public.categories (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS public.products (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  description TEXT,
-  price NUMERIC NOT NULL,
-  original_price NUMERIC,
-  category TEXT,
-  images TEXT[],
-  colors TEXT[],
-  stock INTEGER DEFAULT 10,
-  rating NUMERIC DEFAULT 5,
-  reviews_count INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS public.banners (
-  id TEXT PRIMARY KEY,
-  title TEXT NOT NULL,
-  subtitle TEXT,
-  image_url TEXT,
-  tag_label TEXT,
-  display_order INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 2. SECURITY & PERMISSIONS (RLS)
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.banners ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
-
--- 3. ACCESS POLICIES
-DROP POLICY IF EXISTS "Public Read Access" ON public.products;
-CREATE POLICY "Public Read Access" ON public.products FOR SELECT USING (true);
-
-DROP POLICY IF EXISTS "Public Read Access" ON public.banners;
-CREATE POLICY "Public Read Access" ON public.banners FOR SELECT USING (true);
-
-DROP POLICY IF EXISTS "Public Read Access" ON public.profiles;
-CREATE POLICY "Public Read Access" ON public.profiles FOR SELECT USING (true);
-
-DROP POLICY IF EXISTS "Admin Full Access" ON public.products;
-CREATE POLICY "Admin Full Access" ON public.products FOR ALL USING (
-  EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
-);
-
-DROP POLICY IF EXISTS "Admin Full Access" ON public.banners;
-CREATE POLICY "Admin Full Access" ON public.banners FOR ALL USING (
-  EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
-);
-
--- 4. ARTISAN ELEVATION
--- Run this AFTER you have logged in to the app at least once
-INSERT INTO public.profiles (id, is_admin) 
-VALUES ('${user?.id}', TRUE)
-ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
+  const handleImport = () => {
+    const success = importData(jsonInput);
+    if (success) {
+      setToast({ message: "Registry Updated Successfully", type: 'success' });
+      setJsonInput('');
+      setShowJsonPortal(false);
+    } else {
+      setToast({ message: "Invalid Protocol Format", type: 'error' });
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-[#FCFCFA] text-black overflow-x-hidden">
@@ -125,11 +65,11 @@ ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
          
          <div className="flex items-center space-x-4 md:space-x-8">
            <button 
-             onClick={() => fetchData()}
-             className={`flex items-center space-x-2 px-3 py-1.5 rounded-full border transition-all duration-500 ${status.pillBg} ${status.borderColor} ${status.textColor} hover:scale-105 active:scale-95 shadow-sm`}
+             onClick={() => setShowJsonPortal(true)}
+             className={`flex items-center space-x-2 px-3 py-1.5 rounded-full border transition-all duration-500 bg-[#A68E74]/5 border-[#A68E74]/20 text-[#A68E74] hover:scale-105 active:scale-95 shadow-sm`}
            >
-              <div className={`w-1.5 h-1.5 rounded-full ${status.dotColor} ${status.isSyncing ? 'animate-spin' : 'animate-pulse'}`} />
-              <span className="text-[8px] md:text-[9px] uppercase tracking-[0.2em] font-black whitespace-nowrap">{status.label}</span>
+              <Edit3 className="w-3 h-3" />
+              <span className="text-[8px] md:text-[9px] uppercase tracking-[0.2em] font-black whitespace-nowrap">JSON Portal</span>
            </button>
            
            <div className="hidden sm:flex flex-col items-end border-l border-black/5 pl-6">
@@ -174,98 +114,81 @@ ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;`;
 
       <main className={`flex-1 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] min-h-screen pt-24 pb-20 px-4 md:px-10 lg:px-16`}>
         <div className="max-w-7xl mx-auto">
-          
-          {/* SETUP GUIDE FOR NEW REGISTRIES */}
-          {!isAdmin && user && (
-            <div className="mb-12 animate-fadeInDown">
-              <div className="bg-amber-50 border border-amber-200 rounded-[2.5rem] p-8 md:p-12 flex flex-col md:flex-row gap-10 items-start md:items-center shadow-lg">
-                <div className="w-20 h-20 bg-amber-100 rounded-3xl flex items-center justify-center text-amber-600 flex-shrink-0 border-b-4 border-amber-200 shadow-inner">
-                  <Shield className="w-10 h-10" />
-                </div>
-                <div className="flex-1 space-y-4">
-                  <h4 className="text-amber-900 font-serif text-3xl italic">Administrative Credentials Required</h4>
-                  <p className="text-amber-800/60 text-[10px] md:text-[12px] font-medium uppercase tracking-[0.15em] leading-relaxed max-w-2xl">
-                    Session established for <span className="text-amber-900 font-black">{user.email}</span>. 
-                    Your database profile is uninitialized. Demo data has been purged. Enroll your pieces to see them in the live registry.
-                  </p>
-                  <button 
-                    onClick={() => setShowGuide(!showGuide)}
-                    className="flex items-center space-x-3 text-[10px] font-black uppercase tracking-widest text-white bg-amber-700 px-8 py-3 rounded-full hover:bg-amber-800 transition-all active:scale-95 shadow-xl shadow-amber-900/20"
-                  >
-                    <span>{showGuide ? 'Hide Initialization Protocol' : 'Complete Registry Setup'}</span>
-                    <ChevronRight className={`w-4 h-4 transition-transform ${showGuide ? 'rotate-90' : ''}`} />
-                  </button>
-                </div>
-              </div>
-
-              {showGuide && (
-                <div className="mt-8 bg-[#1F1A16] rounded-[3rem] p-10 md:p-16 border border-white/5 animate-fadeInUp shadow-[0_40px_100px_rgba(0,0,0,0.5)]">
-                  <div className="space-y-12">
-                    <div className="flex items-center space-x-6">
-                      <div className="w-14 h-14 rounded-2xl bg-[#A68E74]/10 flex items-center justify-center text-[#A68E74] border border-[#A68E74]/20">
-                        <Edit3 className="w-7 h-7" />
-                      </div>
-                      <div>
-                        <h5 className="text-white text-2xl font-serif italic">Atelier Setup Protocol</h5>
-                        <p className="text-[#A68E74] text-[8px] uppercase tracking-[0.4em] font-black mt-1">Registry Schema v4.0</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-16">
-                      <div className="space-y-6">
-                        <div className="space-y-4">
-                          <label className="text-[9px] uppercase tracking-[0.5em] text-[#A68E74] font-black block ml-2">1. Master Initialization SQL</label>
-                          <div className="bg-black rounded-3xl p-8 border border-white/10 relative group overflow-hidden">
-                            <pre className="text-[10px] md:text-[11px] font-mono text-emerald-400 whitespace-pre-wrap leading-relaxed max-h-[400px] overflow-y-auto thin-scrollbar relative z-10 pr-4">
-                              {fullSetupSQL}
-                            </pre>
-                            <button 
-                              onClick={() => {
-                                navigator.clipboard.writeText(fullSetupSQL);
-                                alert("Setup script copied. Proceed to Supabase SQL Editor.");
-                              }}
-                              className="absolute top-6 right-6 text-[9px] font-black text-white bg-emerald-500/20 hover:bg-emerald-500 px-4 py-2 rounded-lg transition-all uppercase tracking-widest"
-                            >
-                              Copy Protocol
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-12 py-4">
-                        <div className="space-y-6">
-                          <h6 className="text-[10px] uppercase tracking-[0.4em] font-black text-white/30">Action Protocol:</h6>
-                          <ul className="space-y-8">
-                            <li className="flex items-start space-x-6">
-                              <span className="text-xl font-serif italic text-[#A68E74] opacity-40">01</span>
-                              <p className="text-white/70 text-sm italic font-light leading-relaxed">Log into <a href="https://supabase.com/dashboard" target="_blank" rel="noreferrer" className="text-emerald-400 underline underline-offset-4 ml-2">Supabase</a> and open the SQL Editor.</p>
-                            </li>
-                            <li className="flex items-start space-x-6">
-                              <span className="text-xl font-serif italic text-[#A68E74] opacity-40">02</span>
-                              <p className="text-white/70 text-sm italic font-light leading-relaxed">Paste and execute the script. Ensure all commands succeed.</p>
-                            </li>
-                            <li className="flex items-start space-x-6">
-                              <span className="text-xl font-serif italic text-[#A68E74] opacity-40">03</span>
-                              <p className="text-white/70 text-sm italic font-light leading-relaxed">Return here and click the **Registry Live** pill at the top of the screen.</p>
-                            </li>
-                          </ul>
-                        </div>
-                        <div className="p-8 bg-amber-900/10 border border-amber-900/20 rounded-3xl">
-                          <p className="text-amber-200/40 text-[10px] leading-relaxed italic">
-                            * Once synced, you can begin cataloging your collection in the live vault. Demo data has been permanently disabled.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-          
           <Outlet />
         </div>
       </main>
+
+      {/* JSON Portal Modal */}
+      {showJsonPortal && (
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-6 sm:p-12">
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-2xl animate-fadeIn" onClick={() => setShowJsonPortal(false)} />
+          <div className="relative bg-[#FCFCFA] w-full max-w-4xl rounded-[3rem] shadow-2xl flex flex-col overflow-hidden animate-scaleIn border border-black/5">
+            <div className="p-10 border-b border-black/[0.05] flex justify-between items-center">
+              <div>
+                <h2 className="text-3xl font-serif italic text-black">Registry Data Protocol</h2>
+                <p className="text-[9px] uppercase tracking-[0.4em] text-[#A68E74] font-black mt-2">Export/Import Protocol Interface</p>
+              </div>
+              <button onClick={() => setShowJsonPortal(false)} className="p-4 bg-black/5 rounded-full hover:bg-black hover:text-white transition-all"><X className="w-6 h-6" /></button>
+            </div>
+            
+            <div className="p-10 space-y-12 overflow-y-auto no-scrollbar max-h-[70vh]">
+              {/* Instructions Section */}
+              <div className="bg-[#A68E74]/5 border border-[#A68E74]/10 rounded-3xl p-8 space-y-4">
+                <h3 className="text-[10px] uppercase tracking-[0.4em] font-black text-[#A68E74]">Post to Server Protocol</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {[
+                    { step: '01', title: 'Extract Code', desc: 'Copy the Registry Code from the section below.' },
+                    { step: '02', title: 'Update Source', desc: 'Open data.json in the project code editor.' },
+                    { step: '03', title: 'Deploy', desc: 'Paste the code, save, and redeploy to update all users.' }
+                  ].map((item, i) => (
+                    <div key={i} className="space-y-2">
+                       <span className="text-xl font-serif italic text-[#A68E74]/30">{item.step}</span>
+                       <h4 className="text-[9px] font-black uppercase tracking-widest">{item.title}</h4>
+                       <p className="text-[10px] text-black/40 italic leading-relaxed">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="flex justify-between items-center px-4">
+                  <h3 className="text-[10px] uppercase tracking-[0.4em] font-black text-black/30">Current Registry State</h3>
+                  <div className="flex gap-4">
+                    <button onClick={handleDiscardDraft} className="text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-700 transition-all">Discard Local Edits</button>
+                    <button onClick={handleExport} className="text-[10px] font-black uppercase tracking-widest text-[#A68E74] bg-[#A68E74]/5 px-6 py-2 rounded-full hover:bg-black hover:text-white transition-all">Copy Registry Code</button>
+                  </div>
+                </div>
+                <div className="bg-black/5 p-8 rounded-3xl border border-black/10">
+                  <pre className="text-[10px] font-mono text-black/60 whitespace-pre-wrap leading-relaxed max-h-40 overflow-y-auto thin-scrollbar">
+                    {exportData()}
+                  </pre>
+                </div>
+              </div>
+
+              <div className="space-y-6 border-t border-black/5 pt-12">
+                <div className="px-4">
+                   <h3 className="text-[10px] uppercase tracking-[0.4em] font-black text-black/30">Synchronize Registry</h3>
+                   <p className="text-[11px] font-serif italic text-black/50 mt-2">Paste valid JSON protocol to update the archive state immediately.</p>
+                </div>
+                <textarea 
+                  className="w-full h-48 bg-white border border-black/10 rounded-3xl p-8 text-[11px] font-mono text-black outline-none focus:border-[#A68E74] shadow-inner transition-all resize-none"
+                  placeholder='Paste data here: { "products": [...], ... }'
+                  value={jsonInput}
+                  onChange={(e) => setJsonInput(e.target.value)}
+                />
+                <button 
+                  onClick={handleImport}
+                  className="w-full bg-black text-white py-6 rounded-2xl text-[10px] font-black uppercase tracking-[0.5em] shadow-xl hover:scale-[1.01] active:scale-95 transition-all"
+                >
+                  Apply Master Protocol
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };

@@ -7,7 +7,7 @@ import { ShoppingBag, Star, TrendingUp, Shield } from '../../components/Icons';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 const AdminDashboard: React.FC = () => {
-  const { orders, products, connectionStatus } = useStore();
+  const { orders, products } = useStore();
 
   const totalSales = useMemo(() => orders.reduce((acc, o) => acc + (o.total_amount || 0), 0), [orders]);
   const totalOrders = orders.length;
@@ -62,7 +62,6 @@ const AdminDashboard: React.FC = () => {
         </div>
         <div className="flex w-full md:w-auto gap-4">
           <Link to="/admin/products" className="flex-1 md:flex-none text-center bg-white border border-black/10 px-6 lg:px-10 py-4 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all">Inventory Vault</Link>
-          <button className="flex-1 md:flex-none bg-black text-white px-6 lg:px-10 py-4 rounded-2xl text-[9px] font-black uppercase tracking-widest shadow-2xl hover:-translate-y-1 transition-all">Sync Registry</button>
         </div>
       </div>
 
