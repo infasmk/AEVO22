@@ -65,23 +65,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
 
-      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-      const data = (saved && !forceServer) ? JSON.parse(saved) : serverData;
-      
-      setProducts(data.products || []);
-      setBanners(data.banners || []);
-      setCategories(data.categories || []);
-      setOrders(data.orders || []);
-      
-      const savedWishlist = localStorage.getItem(`${LOCAL_STORAGE_KEY}_wishlist`);
-      if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
-
+      // Check auth state immediately to decide on data source
       const savedUser = localStorage.getItem(`${LOCAL_STORAGE_KEY}_user`);
+      const isUserAdmin = !!savedUser;
+      
       if (savedUser) {
         const u = JSON.parse(savedUser);
         setUser(u);
         setIsAdmin(true);
       }
+
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      
+      // LOGIC: 
+      // 1. Regular users (not admin) ALWAYS see latest serverData
+      // 2. Admins see saved data (Draft) unless they force a server refresh
+      const data = (saved && isUserAdmin && !forceServer) ? JSON.parse(saved) : serverData;
+      
+      setProducts(data.products || []);
+      setBanners(data.banners || []);
+      setCategories(data.categories || []);
+      
+      // Orders are handled locally per user unless we want to sync them too
+      // If we want orders to persist across reloads for regular users, we load them separately
+      const savedOrders = localStorage.getItem(`${LOCAL_STORAGE_KEY}_orders`);
+      if (savedOrders) {
+        const oContent = JSON.parse(savedOrders);
+        setOrders(oContent.orders || data.orders || []);
+      } else {
+        setOrders(data.orders || []);
+      }
+      
+      const savedWishlist = localStorage.getItem(`${LOCAL_STORAGE_KEY}_wishlist`);
+      if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
     } catch (e) {
       console.error("Data Load Error:", e);
       setProducts(initialData.products as Product[]);
@@ -100,9 +116,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Sync to LocalStorage whenever state changes
   useEffect(() => {
     if (isLoading) return;
-    const data = { products, banners, categories, orders };
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
-  }, [products, banners, categories, orders, isLoading]);
+    
+    // Always persist orders locally for the current user
+    const ordersData = { orders };
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_orders`, JSON.stringify(ordersData));
+
+    // ONLY persist catalog changes if the user is an admin (Managing artifacts)
+    // Regular users will always fetch the updated data.json from the server on reload
+    if (isAdmin) {
+      const catalogData = { products, banners, categories };
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(catalogData));
+    }
+  }, [products, banners, categories, orders, isLoading, isAdmin]);
 
   const upsertProduct = async (p: Product) => {
     setProducts(prev => {
@@ -186,6 +211,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setUser(null);
     setIsAdmin(false);
     localStorage.removeItem(`${LOCAL_STORAGE_KEY}_user`);
+    localStorage.removeItem(LOCAL_STORAGE_KEY); // Clear catalog draft on sign out
     window.location.href = '/';
   };
 
