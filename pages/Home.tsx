@@ -7,8 +7,11 @@ import ProductCard from '../components/ProductCard';
 import SEO from '../components/SEO';
 import { ProductTag } from '../types';
 
+import CountdownTimer from '../components/CountdownTimer';
+import { ArrowRight, Star } from '../components/Icons';
+
 const Home: React.FC = () => {
-  const { banners, products, isLoading, connectionStatus } = useStore();
+  const { banners, products, isLoading, connectionStatus, offer } = useStore();
   const [activeBanner, setActiveBanner] = useState(0);
   const [activeTab, setActiveTab] = useState<ProductTag | 'All'>('All');
   const navigate = useNavigate();
@@ -136,6 +139,57 @@ const Home: React.FC = () => {
           )}
         </div>
       </section>
+
+      {/* Promotion Section */}
+      {offer && offer.is_active && (
+        <section className="py-10 md:py-20">
+          <div className="container mx-auto px-6">
+             <div className="relative overflow-hidden bg-black rounded-[3rem] p-10 md:p-24 flex flex-col md:flex-row items-center justify-between gap-12 group">
+                <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none overflow-hidden">
+                   <div className="absolute -top-1/2 -right-1/4 w-[800px] h-[800px] bg-[#A68E74] rounded-full blur-[120px] transition-transform duration-[3s] group-hover:scale-110" />
+                </div>
+                
+                <div className="relative z-10 space-y-6 text-center md:text-left max-w-xl">
+                  <div className="flex items-center justify-center md:justify-start space-x-4">
+                     <div className="w-10 h-10 border border-[#A68E74]/30 rounded-full flex items-center justify-center text-[#A68E74]">
+                        <Star className="w-4 h-4 fill-[#A68E74]" />
+                     </div>
+                     <span className="text-[10px] uppercase tracking-[0.6em] font-black text-[#A68E74]">{offer.percentage}% Exclusive Advantage</span>
+                  </div>
+                  <h2 className="text-4xl md:text-7xl font-serif italic text-white leading-tight">
+                    {offer.heading}
+                  </h2>
+                  <p className="text-white/60 text-sm md:text-xl font-light italic max-w-md">
+                    {offer.paragraph}
+                  </p>
+                  
+                  <div className="pt-8">
+                     <button 
+                       onClick={() => navigate(offer.button_link || '/shop')}
+                       className="group flex items-center space-x-6 text-white"
+                     >
+                        <div className="w-16 h-16 bg-[#A68E74] rounded-full flex items-center justify-center transition-all group-hover:scale-110">
+                           <ArrowRight className="w-6 h-6 text-black" />
+                        </div>
+                        <span className="text-[10px] uppercase font-black tracking-[0.4em] group-hover:text-[#A68E74] transition-colors">
+                          {offer.button_text}
+                        </span>
+                     </button>
+                  </div>
+                </div>
+
+                <div className="relative z-10 flex flex-col items-center space-y-10 md:min-w-[400px]">
+                   <span className="text-[10px] uppercase tracking-[0.4em] font-black text-white/30 italic">Protocol Access Remaining</span>
+                   <CountdownTimer 
+                      endTime={offer.end_time || ''} 
+                      variant="elaborate"
+                      className="text-white"
+                   />
+                </div>
+             </div>
+          </div>
+        </section>
+      )}
       
       {/* Narrative Section */}
       <section className="py-24 md:py-40 bg-[#F9F7F5] border-y border-black/[0.03] text-center">

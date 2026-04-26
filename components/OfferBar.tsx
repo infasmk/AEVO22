@@ -5,35 +5,11 @@ import { Clock, ArrowRight, X, Percent } from './Icons';
 import * as ReactRouterDOM from 'react-router-dom';
 const { Link } = ReactRouterDOM;
 
+import CountdownTimer from './CountdownTimer';
+
 const OfferBar: React.FC = () => {
   const { offer } = useStore();
-  const [timeLeft, setTimeLeft] = useState<{ d: number, h: number, m: number, s: number } | null>(null);
   const [isVisible, setIsVisible] = useState(true);
-
-  useEffect(() => {
-    if (!offer?.is_active || !offer?.end_time) {
-      setTimeLeft(null);
-      return;
-    }
-
-    const calculateTime = () => {
-      const difference = +new Date(offer.end_time) - +new Date();
-      if (difference > 0) {
-        setTimeLeft({
-          d: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          h: Math.floor((difference / (1000 * 60 * 60)) % 24),
-          m: Math.floor((difference / 1000 / 60) % 60),
-          s: Math.floor((difference / 1000) % 60),
-        });
-      } else {
-        setTimeLeft(null);
-      }
-    };
-
-    calculateTime();
-    const timer = setInterval(calculateTime, 1000);
-    return () => clearInterval(timer);
-  }, [offer]);
 
   if (!offer || !offer.is_active || !isVisible) return null;
 
@@ -61,18 +37,13 @@ const OfferBar: React.FC = () => {
           {offer.paragraph}
         </p>
 
-        {timeLeft && (
+        {offer.end_time && (
           <div className="flex items-center space-x-3 bg-white/5 px-4 py-1.5 rounded-full border border-white/10">
             <Clock className="w-3 h-3 text-[#A68E74]" />
-            <div className="flex items-center space-x-2 text-[9px] md:text-[10px] font-mono font-bold tracking-tighter">
-              <span className="text-white">{timeLeft.d}D</span>
-              <span className="text-white/30">:</span>
-              <span className="text-white">{timeLeft.h}H</span>
-              <span className="text-white/30">:</span>
-              <span className="text-white">{timeLeft.m}M</span>
-              <span className="text-white/30">:</span>
-              <span className="text-[#A68E74]">{timeLeft.s}S</span>
-            </div>
+            <CountdownTimer 
+              endTime={offer.end_time} 
+              className="text-[9px] md:text-[10px] text-white"
+            />
           </div>
         )}
 

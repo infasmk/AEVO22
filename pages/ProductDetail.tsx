@@ -3,14 +3,15 @@ import React, { useState } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 const { useParams, useNavigate } = ReactRouterDOM;
 import { useStore } from '../store';
-import { Star, Share, ChevronLeft, Heart, Compass, Feather, Shield, Diamond } from '../components/Icons';
+import { Star, Share, ChevronLeft, Heart, Compass, Feather, Shield, Diamond, Clock } from '../components/Icons';
 import SEO from '../components/SEO';
 import { ColorOption } from '../types';
+import CountdownTimer from '../components/CountdownTimer';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { products, wishlist, toggleWishlist } = useStore();
+  const { products, wishlist, toggleWishlist, offer } = useStore();
   const [activeImage, setActiveImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState<ColorOption | null>(null);
 
@@ -96,6 +97,28 @@ Please guide me through the acquisition process.`;
               {product.name}
             </h1>
             
+            {/* Active Offer Countdown */}
+            {offer && offer.is_active && (
+              <div className="mb-8 p-6 bg-black rounded-3xl border border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6 group animate-fadeIn">
+                 <div className="flex items-center space-x-4">
+                    <div className="w-10 h-10 bg-[#A68E74] text-black rounded-full flex items-center justify-center animate-pulse">
+                       <span className="text-[10px] font-black">{offer.percentage}%</span>
+                    </div>
+                    <div>
+                       <p className="text-[9px] uppercase tracking-widest text-[#A68E74] font-black">Limited Event Advantage</p>
+                       <p className="text-white text-xs font-serif italic">{offer.heading}</p>
+                    </div>
+                 </div>
+                 <div className="flex items-center space-x-3 bg-white/5 px-4 py-2 rounded-full border border-white/10">
+                    <Clock className="w-3 h-3 text-[#A68E74]" />
+                    <CountdownTimer 
+                       endTime={offer.end_time || ''} 
+                       className="text-[10px] text-white"
+                    />
+                 </div>
+              </div>
+            )}
+
             <div className="flex items-center space-x-6 mb-8 md:mb-12">
                <span className="text-2xl md:text-3xl font-light text-[#A68E74] tracking-tighter italic font-serif">₹{product.price.toLocaleString('en-IN')}</span>
                <div className="h-4 w-px bg-black/10" />
