@@ -121,5 +121,15 @@
       "name": "Minimalist"
     }
   ],
-  "orders": []
+  "orders": [],
+  "offer": {
+    "id": "offer-1",
+    "is_active": true,
+    "heading": "offer soon",
+    "paragraph": "hfjvjv gf jfgjh cyur  hggfb ytf ",
+    "percentage": 12,
+    "end_time": "2026-04-27T17:24:00.000Z",
+    "button_text": "",
+    "button_link": ""
+  }
 }
