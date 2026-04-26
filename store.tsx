@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Product, Banner, Order, Category, ColorOption } from './types';
+import { Product, Banner, Order, Category, ColorOption, PromotionalOffer } from './types';
 import initialData from './data.json';
 
 interface AppState {
@@ -8,6 +8,7 @@ interface AppState {
   banners: Banner[];
   orders: Order[];
   categories: Category[];
+  offer: PromotionalOffer | null;
   wishlist: string[];
   isLoading: boolean;
   
@@ -22,6 +23,7 @@ interface AppState {
   deleteBanner: (id: string) => Promise<boolean>;
   upsertCategory: (c: Category) => Promise<boolean>;
   deleteCategory: (id: string) => Promise<boolean>;
+  upsertOffer: (o: PromotionalOffer) => Promise<boolean>;
   updateOrderStatus: (id: string, status: Order['status']) => Promise<boolean>;
   toggleWishlist: (id: string) => void;
   signIn: (email: string, pass: string) => Promise<boolean>;
@@ -42,6 +44,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [banners, setBanners] = useState<Banner[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [offer, setOffer] = useState<PromotionalOffer | null>(null);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -85,6 +88,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setProducts(data.products || []);
       setBanners(data.banners || []);
       setCategories(data.categories || []);
+      setOffer(data.offer || null);
       
       // Orders are handled locally per user unless we want to sync them too
       // If we want orders to persist across reloads for regular users, we load them separately
@@ -124,10 +128,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // ONLY persist catalog changes if the user is an admin (Managing artifacts)
     // Regular users will always fetch the updated data.json from the server on reload
     if (isAdmin) {
-      const catalogData = { products, banners, categories };
+      const catalogData = { products, banners, categories, offer };
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(catalogData));
     }
-  }, [products, banners, categories, orders, isLoading, isAdmin]);
+  }, [products, banners, categories, offer, orders, isLoading, isAdmin]);
 
   const upsertProduct = async (p: Product) => {
     setProducts(prev => {
@@ -168,6 +172,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const deleteCategory = async (id: string) => {
     setCategories(prev => prev.filter(c => c.id !== id));
+    return true;
+  };
+  
+  const upsertOffer = async (o: PromotionalOffer) => {
+    setOffer(o);
     return true;
   };
 
@@ -216,7 +225,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const exportData = () => {
-    const data = { products, banners, categories, orders };
+    const data = { products, banners, categories, orders, offer };
     return JSON.stringify(data, null, 2);
   };
 
@@ -227,6 +236,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (data.banners) setBanners(data.banners);
       if (data.categories) setCategories(data.categories);
       if (data.orders) setOrders(data.orders);
+      if (data.offer) setOffer(data.offer);
       return true;
     } catch (e) {
       console.error("Import Error:", e);
@@ -236,10 +246,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <AppContext.Provider value={{
-      products, banners, orders, wishlist, isLoading, categories,
+      products, banners, orders, wishlist, isLoading, categories, offer,
       user, isAdmin, isAuthLoading,
       upsertProduct, deleteProduct, upsertBanner, deleteBanner, 
-      upsertCategory, deleteCategory, updateOrderStatus, toggleWishlist, 
+      upsertCategory, deleteCategory, upsertOffer, updateOrderStatus, toggleWishlist, 
       signIn, signOut, exportData, importData, loadData
     }}>
       {children}

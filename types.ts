@@ -61,3 +61,14 @@ export interface Category {
   id: string;
   name: string;
 }
+
+export interface PromotionalOffer {
+  id: string;
+  is_active: boolean;
+  heading: string;
+  paragraph: string;
+  percentage?: number;
+  end_time?: string;
+  button_text?: string;
+  button_link?: string;
+}

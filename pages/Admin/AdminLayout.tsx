@@ -29,6 +29,7 @@ const AdminLayout: React.FC = () => {
     { name: 'Insights', path: '/admin', icon: <TrendingUp className="w-4 h-4" /> },
     { name: 'Inventory', path: '/admin/products', icon: <ShoppingBag className="w-4 h-4" /> },
     { name: 'Showcase', path: '/admin/banners', icon: <Shield className="w-4 h-4" /> },
+    { name: 'Promotions', path: '/admin/promotions', icon: <Star className="w-4 h-4" /> },
   ];
 
   const handleTerminate = async () => {

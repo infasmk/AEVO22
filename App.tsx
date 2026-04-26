@@ -5,6 +5,7 @@ const { BrowserRouter: Router, Routes, Route, useLocation, Navigate, Outlet } = 
 import { AppProvider, useStore } from './store';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import OfferBar from './components/OfferBar';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
 import ProductDetail from './pages/ProductDetail';
@@ -16,6 +17,7 @@ import AdminLayout from './pages/Admin/AdminLayout';
 import AdminDashboard from './pages/Admin/Dashboard';
 import AdminProducts from './pages/Admin/Products';
 import AdminBanners from './pages/Admin/Banners';
+import AdminPromotions from './pages/Admin/Promotions';
 import AdminLogin from './pages/Admin/Login';
 
 const ScrollToTop = () => {
@@ -48,6 +50,7 @@ const PublicLayout: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen animate-fadeIn">
+      <OfferBar />
       <Header />
       <div className="flex-grow">
         <Outlet />
@@ -94,6 +97,7 @@ const App: React.FC = () => {
             <Route index element={<AdminDashboard />} />
             <Route path="products" element={<AdminProducts />} />
             <Route path="banners" element={<AdminBanners />} />
+            <Route path="promotions" element={<AdminPromotions />} />
             <Route path="*" element={<Navigate to="/admin" replace />} />
           </Route>
 
