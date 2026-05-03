@@ -29,20 +29,12 @@
   ],
   "banners": [
     {
-      "id": "b-1",
-      "title": "The Eternity Collection",
-      "subtitle": "Timeless elegance redefined.",
-      "image_url": "https://picsum.photos/seed/banner1/1920/1080",
-      "tag_label": "Exclusive",
-      "display_order": 1
-    },
-    {
-      "title": "vgdfxhb bfdxhxfb  ncfdrthj",
-      "subtitle": "fdxcfxnbfdbv sdexgcvbcvbf",
-      "image_url": "https://picsum.photos/seed/clock1/800/1000",
-      "tag_label": "Limited Release",
-      "display_order": 2,
-      "id": "a543ubxhr"
+      "title": "Timeless Craft. Designed to Be Seen.",
+      "subtitle": "Unique wooden designs crafted to stand out — the perfect blend of decor and function for every moment.",
+      "image_url": "https://i.ibb.co/sJzMYTZs/Gemini-Generated-Image-hlmxichlmxichlmx.png",
+      "tag_label": "New Arrival",
+      "display_order": 1,
+      "id": "9ku5f4mqo"
     }
   ],
   "categories": [
