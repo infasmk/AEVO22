@@ -104,7 +104,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
         <h3 className="font-serif text-base md:text-lg text-black/70 group-hover:text-[#A68E74] transition-colors mb-2 line-clamp-1">{product.name}</h3>
         
         <div className="flex justify-between items-center pt-2.5 border-t border-black/[0.05]">
-          <span className="text-sm md:text-base font-medium text-black/50">₹{product.price.toLocaleString('en-IN')}</span>
+          <span className="text-sm md:text-base font-medium text-black/50">₹{(product.price || 0).toLocaleString('en-IN')}</span>
           <div className="w-7 h-7 rounded-full bg-white/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
             <ShoppingBag className="w-3 h-3 text-black/30" />
           </div>

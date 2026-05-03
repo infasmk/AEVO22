@@ -121,15 +121,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     if (isLoading) return;
     
-    // Always persist orders locally for the current user
-    const ordersData = { orders };
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_orders`, JSON.stringify(ordersData));
+    try {
+      // Always persist orders locally for the current user
+      const ordersData = { orders };
+      localStorage.setItem(`${LOCAL_STORAGE_KEY}_orders`, JSON.stringify(ordersData));
 
-    // ONLY persist catalog changes if the user is an admin (Managing artifacts)
-    // Regular users will always fetch the updated data.json from the server on reload
-    if (isAdmin) {
-      const catalogData = { products, banners, categories, offer };
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(catalogData));
+      // ONLY persist catalog changes if the user is an admin (Managing artifacts)
+      // Regular users will always fetch the updated data.json from the server on reload
+      if (isAdmin) {
+        const catalogData = { products, banners, categories, offer };
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(catalogData));
+      }
+    } catch (e) {
+      console.error("Storage Error: Registry size might exceed browser limits. Consider using remote URLs for high-resolution assets.", e);
     }
   }, [products, banners, categories, offer, orders, isLoading, isAdmin]);
 

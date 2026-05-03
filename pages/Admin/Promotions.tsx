@@ -119,7 +119,17 @@ const AdminPromotions: React.FC = () => {
                     type="datetime-local" 
                     className="w-full bg-[#F9F7F5] pl-16 pr-6 py-6 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-black/5 focus:border-[#A68E74] outline-none shadow-inner transition-all cursor-pointer" 
                     value={formData.end_time?.slice(0, 16) || ''} 
-                    onChange={e => setFormData({...formData, end_time: new Date(e.target.value).toISOString()})} 
+                    onChange={e => {
+                      if (!e.target.value) {
+                        setFormData({...formData, end_time: ''});
+                        return;
+                      }
+                      try {
+                        setFormData({...formData, end_time: new Date(e.target.value).toISOString()});
+                      } catch (err) {
+                        setFormData({...formData, end_time: ''});
+                      }
+                    }} 
                   />
                 </div>
               </div>

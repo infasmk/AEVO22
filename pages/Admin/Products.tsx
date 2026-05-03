@@ -131,7 +131,7 @@ const AdminProducts: React.FC = () => {
 
       {/* Grid Display */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 lg:gap-8">
-        {products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())).map(product => (
+        {products.filter(p => (p.name || '').toLowerCase().includes(searchTerm.toLowerCase())).map(product => (
           <div key={product.id} className="bg-white border border-black/5 rounded-[2.5rem] p-6 lg:p-8 shadow-sm hover:shadow-2xl transition-all group overflow-hidden flex flex-col">
             <div className="flex flex-row sm:flex-col lg:flex-row gap-6 lg:gap-8 items-center sm:items-start lg:items-center">
               <div className="w-24 h-28 sm:w-full sm:h-56 lg:w-24 lg:h-28 bg-[#F9F7F5] rounded-[2rem] overflow-hidden border border-black/5 flex-shrink-0 relative group-hover:shadow-lg transition-all">
@@ -140,7 +140,7 @@ const AdminProducts: React.FC = () => {
               <div className="flex-1 min-w-0">
                 <span className="text-[8px] uppercase tracking-[0.5em] text-[#A68E74] font-black mb-2 block truncate">{product.category}</span>
                 <h3 className="font-serif text-xl text-black truncate italic leading-tight group-hover:text-[#A68E74] transition-colors">{product.name}</h3>
-                <p className="text-sm font-serif text-black/40 mt-2 italic">₹{product.price.toLocaleString('en-IN')}</p>
+                <p className="text-sm font-serif text-black/40 mt-2 italic">₹{(product.price || 0).toLocaleString('en-IN')}</p>
               </div>
             </div>
             <div className="mt-8 pt-8 border-t border-black/5 flex justify-between items-center">

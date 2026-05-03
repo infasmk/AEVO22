@@ -32,7 +32,7 @@ const ProductDetail: React.FC = () => {
     
 Piece: ${product.name}
 ID: ${product.id}
-Price: ₹${product.price.toLocaleString('en-IN')}
+Price: ₹${(product.price || 0).toLocaleString('en-IN')}
 ${colorText}
 
 Please guide me through the acquisition process.`;
@@ -120,7 +120,7 @@ Please guide me through the acquisition process.`;
             )}
 
             <div className="flex items-center space-x-6 mb-8 md:mb-12">
-               <span className="text-2xl md:text-3xl font-light text-[#A68E74] tracking-tighter italic font-serif">₹{product.price.toLocaleString('en-IN')}</span>
+               <span className="text-2xl md:text-3xl font-light text-[#A68E74] tracking-tighter italic font-serif">₹{(product.price || 0).toLocaleString('en-IN')}</span>
                <div className="h-4 w-px bg-black/10" />
                <div className="flex text-[#A68E74] space-x-1">
                  {[1,2,3,4,5].map(s => <Star key={s} className="w-3.5 h-3.5" />)}
