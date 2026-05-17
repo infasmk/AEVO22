@@ -1,6 +1,32 @@
 {
   "products": [
     {
+      "name": "ASCEND",
+      "price": 4999,
+      "original_price": 0,
+      "category": "Minimalist",
+      "tag": "Latest",
+      "description": "A MODERN WOODEN WALL CLOCK CRAFTED FROM VERTICALLY STAGGERED SOLID WOOD PANELS IN ARICH MAHOGANY FINISH. ITS CLEAN WHITE NUMERALS AND SLEEK METALLIC HANDS OFFER CLEAR READABILITY, WHILE THE INTEGRATED MINI SHELF AND THREE METAL HOOKS ADD PRACTICAL FUNCTION. A REFINED BLEND OF TIMEKEEPING AND UTILITY, DESIGNED TO ELEVATE CONTEMPORARY INTERIORS.",
+      "stock": 100,
+      "images": [
+        "https://i.ibb.co/27cnQcmL/1st-image-jpg-1.jpg",
+        "https://i.ibb.co/wNvc9VNv/MODEL-ASCEND-INFO-jpg.jpg",
+        "https://i.ibb.co/mVCrqrSZ/MODEL-ASCEND-IMAGE-2-jpg.jpg"
+      ],
+      "colors": [],
+      "specs": {},
+      "key_features": [
+        {
+          "title": " SLEEK METALLIC",
+          "description": "DESIGNED TO ELEVATE CONTEMPORARY INTERIORS."
+        }
+      ],
+      "id": "p-1779033705270",
+      "rating": 5,
+      "reviews_count": 0,
+      "created_at": "2026-05-17T16:01:45.270Z"
+    },
+    {
       "name": "LEVITATE",
       "price": 5999,
       "original_price": 0,
