@@ -164,38 +164,54 @@ Please guide me through the acquisition process.`;
                     );
                   })}
                 </div>
+
+                {/* Call to Action - Moved Up */}
+                <div className="mt-12 md:mt-16">
+                  <button 
+                    onClick={handleAcquire}
+                    className="w-full bg-[#A68E74] text-white py-6 md:py-8 rounded-full text-[11px] md:text-[12px] font-black uppercase tracking-[0.5em] hover:scale-[1.02] active:scale-95 transition-all shadow-2xl flex items-center justify-center space-x-4 shadow-[#A68E74]/20"
+                  >
+                    <span>Secure Acquisition</span>
+                  </button>
+                  <p className="mt-6 text-[8px] md:text-[9px] uppercase tracking-[0.3em] text-[#A68E74]/60 font-black">Direct line to the AEVO Artisan Concierge</p>
+                </div>
+              </div>
+            )}
+            
+            {/* Fallback button if no colors */}
+            {(!product.colors || product.colors.length === 0) && (
+              <div className="mt-8">
+                <button 
+                  onClick={handleAcquire}
+                  className="w-full bg-[#A68E74] text-white py-6 md:py-8 rounded-full text-[11px] md:text-[12px] font-black uppercase tracking-[0.5em] hover:scale-[1.02] active:scale-95 transition-all shadow-2xl flex items-center justify-center space-x-4 shadow-[#A68E74]/20"
+                >
+                  <span>Secure Acquisition</span>
+                </button>
+                <p className="mt-6 text-[8px] md:text-[9px] uppercase tracking-[0.3em] text-[#A68E74]/60 font-black">Direct line to the AEVO Artisan Concierge</p>
               </div>
             )}
           </div>
         </div>
         
         {/* Anatomy of Excellence Section */}
-        <div className="pt-20 lg:pt-32 border-t border-black/5 text-center mb-16 md:mb-24">
-          <h2 className="text-[#A68E74] uppercase text-[9px] md:text-[10px] font-black tracking-[0.8em] mb-12 md:mb-20 block">Anatomy of Excellence</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 text-left mb-16 md:mb-32">
+        <div className="pt-16 md:pt-24 border-t border-black/5 mb-16 md:mb-24">
+          <h2 className="text-[#A68E74] uppercase text-[9px] font-black tracking-[0.8em] mb-10 md:mb-16 text-center">Anatomy of Excellence</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10 max-w-5xl mx-auto px-4">
               {(product.key_features || []).map((item, idx) => (
-                <div key={idx} className="p-10 md:p-12 bg-white rounded-[2.5rem] md:rounded-[3rem] border border-black/5 space-y-6 group hover:border-[#A68E74]/30 transition-all shadow-sm">
-                  <div className="w-14 h-14 md:w-16 md:h-16 bg-[#FDFBF7] rounded-2xl flex items-center justify-center text-[#A68E74] group-hover:scale-110 transition-transform">
-                    {React.cloneElement(getIcon(idx), { className: 'w-7 h-7 md:w-8 md:h-8' })}
+                <div key={idx} className="flex gap-6 items-start group">
+                  <div className="w-10 h-10 bg-[#FDFBF7] rounded-xl flex items-center justify-center text-[#A68E74]/60 group-hover:text-[#A68E74] group-hover:scale-110 transition-all border border-black/[0.03] shrink-0">
+                    {React.cloneElement(getIcon(idx), { className: 'w-5 h-5' })}
                   </div>
-                  <h3 className="text-black/80 text-xl md:text-2xl font-serif italic">{item.title}</h3>
-                  <p className="text-black/40 text-sm italic font-light leading-relaxed">{item.description}</p>
+                  <div className="space-y-1.5">
+                    <h3 className="text-black/80 text-base md:text-lg font-serif italic leading-none">{item.title}</h3>
+                    <p className="text-black/40 text-xs md:text-[13px] italic font-light leading-relaxed">{item.description}</p>
+                  </div>
                 </div>
               ))}
               {(!product.key_features || product.key_features.length === 0) && (
-                <div className="col-span-full text-center py-10 opacity-20 italic font-serif">Registry archives for this piece are in preparation.</div>
+                <div className="col-span-full text-center py-10 opacity-20 italic font-serif text-sm">Registry archives for this piece are in preparation.</div>
               )}
-          </div>
-
-          {/* Call to Action */}
-          <div className="max-w-md mx-auto px-4">
-            <button 
-              onClick={handleAcquire}
-              className="w-full bg-[#A68E74] text-white py-6 md:py-8 rounded-full text-[11px] md:text-[12px] font-black uppercase tracking-[0.5em] hover:scale-[1.02] active:scale-95 transition-all shadow-2xl flex items-center justify-center space-x-4 shadow-[#A68E74]/20"
-            >
-              <span>Secure Acquisition</span>
-            </button>
-            <p className="mt-6 text-[8px] md:text-[9px] uppercase tracking-[0.3em] text-[#A68E74]/60 font-black">Direct line to the AEVO Artisan Concierge</p>
           </div>
         </div>
       </div>

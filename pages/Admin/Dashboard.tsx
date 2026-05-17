@@ -7,11 +7,19 @@ import { ShoppingBag, Star, TrendingUp, Shield } from '../../components/Icons';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 const AdminDashboard: React.FC = () => {
-  const { orders, products } = useStore();
+  const { orders, products, categories } = useStore();
 
   const totalSales = useMemo(() => orders.reduce((acc, o) => acc + (o.total_amount || 0), 0), [orders]);
   const totalOrders = orders.length;
   const totalProducts = products.length;
+  const totalCollections = categories.length;
+
+  const collectionDistribution = useMemo(() => {
+    return categories.map(cat => ({
+      name: cat.name,
+      count: products.filter(p => p.category === cat.name).length
+    })).sort((a, b) => b.count - a.count);
+  }, [categories, products]);
 
   // Process real orders into monthly chart data
   const chartData = useMemo(() => {
@@ -66,12 +74,13 @@ const AdminDashboard: React.FC = () => {
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-8">
         {[
           { label: 'Registry Value', val: `₹${totalSales.toLocaleString('en-IN')}`, icon: <TrendingUp className="w-4 h-4" />, color: 'text-[#A68E74]' },
           { label: 'Commissions', val: totalOrders, icon: <ShoppingBag className="w-4 h-4" />, color: 'text-black' },
           { label: 'Avg investment', val: `₹${totalOrders > 0 ? (totalSales / totalOrders).toLocaleString('en-IN', { maximumFractionDigits: 0 }) : 0}`, icon: <Star className="w-4 h-4" />, color: 'text-[#A68E74]' },
           { label: 'Active pieces', val: totalProducts, icon: <Shield className="w-4 h-4" />, color: 'text-black' },
+          { label: 'Collections', val: totalCollections, icon: <TrendingUp className="w-4 h-4" />, color: 'text-[#A68E74]' },
         ].map((stat, i) => (
           <div key={i} className="bg-white p-8 lg:p-10 rounded-[2.5rem] border border-black/[0.03] shadow-sm hover:shadow-2xl transition-all duration-500 group">
             <div className="flex justify-between items-start mb-10">
@@ -125,6 +134,37 @@ const AdminDashboard: React.FC = () => {
             </ResponsiveContainer>
           </div>
         </div>
+      </div>
+
+      {/* Collection Distribution List */}
+      <div className="bg-white p-8 lg:p-12 rounded-[3.5rem] border border-black/[0.04] shadow-sm">
+         <div className="flex justify-between items-center mb-16">
+            <div>
+              <h3 className="text-[10px] font-black uppercase tracking-[0.6em] text-black/30">Curation Balance</h3>
+              <p className="text-[11px] font-serif italic text-[#A68E74] mt-2">Distribution of pieces across official collections.</p>
+            </div>
+            <Link to="/admin/collections" className="text-[9px] uppercase tracking-widest font-black p-4 bg-black/5 rounded-full hover:bg-black hover:text-white transition-all">Manage Taxonomy</Link>
+         </div>
+         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {collectionDistribution.map((col, i) => (
+              <div key={i} className="flex flex-col space-y-4 p-8 bg-[#FDFBF9] rounded-[2.5rem] border border-black/[0.02] hover:border-[#A68E74]/20 transition-all group">
+                <div className="flex justify-between items-center">
+                  <span className="text-[8px] font-black uppercase tracking-widest text-[#A68E74]">Collection {i+1}</span>
+                  <span className="text-[10px] font-mono font-bold text-black group-hover:scale-125 transition-transform">{col.count}</span>
+                </div>
+                <h4 className="text-xl font-serif italic text-black/70 truncate">{col.name}</h4>
+                <div className="h-0.5 bg-black/[0.03] w-full rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-[#A68E74] transition-all duration-1000" 
+                    style={{ width: `${totalProducts > 0 ? (col.count/totalProducts)*100 : 0}%` }} 
+                  />
+                </div>
+              </div>
+            ))}
+            {collectionDistribution.length === 0 && (
+              <div className="col-span-full py-12 text-center opacity-20 italic">Taxonomy uninitialized.</div>
+            )}
+         </div>
       </div>
     </div>
   );

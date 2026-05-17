@@ -11,7 +11,7 @@ import CountdownTimer from '../components/CountdownTimer';
 import { ArrowRight, Star } from '../components/Icons';
 
 const Home: React.FC = () => {
-  const { banners, products, isLoading, connectionStatus, offer } = useStore();
+  const { banners, products, isLoading, connectionStatus, offer, categories } = useStore();
   const [activeBanner, setActiveBanner] = useState(0);
   const [activeTab, setActiveTab] = useState<ProductTag | 'All'>('All');
   const navigate = useNavigate();
@@ -99,7 +99,7 @@ const Home: React.FC = () => {
           </div>
         )}
       </section>
-
+      
       {/* Grid Showcase */}
       <section className="py-20 md:py-32">
         <div className="container mx-auto px-6">
@@ -139,6 +139,62 @@ const Home: React.FC = () => {
           )}
         </div>
       </section>
+
+      {/* Dynamic Collections Section - Moved & Redesigned */}
+      {!isSyncInProgress && categories.length > 0 && (
+        <section className="py-20 md:py-32 bg-[#FDFBF9] border-y border-black/[0.02]">
+          <div className="container mx-auto px-6">
+            <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-6">
+              <div className="space-y-4">
+                <span className="text-[#A68E74] uppercase text-[8px] font-black tracking-[0.8em] block">Official Taxonomy</span>
+                <h2 className="text-2xl md:text-4xl font-serif text-black italic">Atelier Series</h2>
+              </div>
+              <button 
+                onClick={() => navigate('/shop')}
+                className="text-[9px] uppercase font-black tracking-[0.4em] text-black/30 hover:text-[#A68E74] transition-colors flex items-center gap-3 group"
+              >
+                <span>View Full Registry</span>
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-2 transition-transform" />
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+              {categories.slice(0, 4).map((cat, i) => (
+                <div 
+                  key={cat.id} 
+                  onClick={() => navigate(`/shop?category=${cat.name}`)}
+                  className="group relative h-[250px] md:h-[300px] rounded-[2rem] md:rounded-[2.5rem] overflow-hidden cursor-pointer bg-white border border-black/[0.03] shadow-sm hover:shadow-xl transition-all duration-500"
+                >
+                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/50 to-transparent z-10" />
+                  
+                  {/* Find first product in this category for background image */}
+                  {products.find(p => p.category === cat.name)?.images[0] ? (
+                    <img 
+                      src={products.find(p => p.category === cat.name)?.images[0]} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3s] group-hover:opacity-60 grayscale group-hover:grayscale-0" 
+                      alt={cat.name} 
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-[#F9F7F5]">
+                       <span className="text-[8px] uppercase tracking-widest font-black text-black/5 italic">Pending Enrollment</span>
+                    </div>
+                  )}
+                  
+                  <div className="absolute inset-0 z-20 p-6 md:p-8 flex flex-col justify-end">
+                    <h3 className="text-xl md:text-2xl font-serif italic text-white leading-tight group-hover:text-[#A68E74] transition-colors">{cat.name}</h3>
+                    <div className="mt-4 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">
+                      <div className="w-6 h-6 rounded-full border border-white/20 flex items-center justify-center text-white">
+                        <ArrowRight className="w-3 h-3" />
+                      </div>
+                      <span className="text-[8px] uppercase tracking-widest font-black text-white">View Series</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Promotion Section */}
       {offer && offer.is_active && (

@@ -1,5 +1,7 @@
 
 import React, { useState } from 'react';
+import * as ReactRouterDOM from 'react-router-dom';
+const { Link } = ReactRouterDOM;
 import { useStore } from '../../store';
 import { Product, ProductTag, KeyFeature, ColorOption } from '../../types';
 import { X, Search, Plus, Trash2, Edit3, Image as ImageIcon, Star } from '../../components/Icons';
@@ -7,10 +9,9 @@ import ConfirmDialog from '../../components/ConfirmDialog';
 import Toast from '../../components/Toast';
 
 const AdminProducts: React.FC = () => {
-  const { products, categories, upsertProduct, deleteProduct, upsertCategory, deleteCategory } = useStore();
+  const { products, categories, upsertProduct, deleteProduct } = useStore();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
   const [confirm, setConfirm] = useState<{ title: string, message: string, onConfirm: () => void } | null>(null);
 
@@ -22,7 +23,6 @@ const AdminProducts: React.FC = () => {
   const [features, setFeatures] = useState<KeyFeature[]>([]);
   const [colors, setColors] = useState<ColorOption[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>(['']);
-  const [newCatName, setNewCatName] = useState('');
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = e.target.files?.[0];
@@ -92,17 +92,6 @@ const AdminProducts: React.FC = () => {
     }
   };
 
-  const handleAddCategory = async () => {
-    if (!newCatName.trim()) return;
-    const success = await upsertCategory({ id: `cat-${Date.now()}`, name: newCatName });
-    if (success) { 
-      setNewCatName(''); 
-      setToast({ message: "Series Registered", type: 'success' }); 
-    } else {
-      setToast({ message: "Failed to Register Series", type: 'error' });
-    }
-  };
-
   return (
     <div className="space-y-8 lg:space-y-12 animate-fadeIn pb-24">
       {/* Header */}
@@ -112,7 +101,7 @@ const AdminProducts: React.FC = () => {
           <p className="text-[#A68E74] text-[9px] lg:text-[10px] uppercase tracking-[0.5em] font-black">Archive Management Portal</p>
         </div>
         <div className="flex w-full sm:w-auto gap-4">
-          <button onClick={() => setIsCategoryModalOpen(true)} className="flex-1 sm:flex-none px-6 lg:px-8 py-4 rounded-2xl text-[9px] font-black uppercase tracking-widest border border-black/10 bg-white hover:bg-black hover:text-white transition-all active:scale-95">Manage Series</button>
+          <Link to="/admin/collections" className="flex-1 sm:flex-none px-6 lg:px-8 py-4 rounded-2xl text-[9px] font-black uppercase tracking-widest border border-black/10 bg-white hover:bg-black hover:text-white transition-all active:scale-95 flex items-center justify-center">Manage Collections</Link>
           <button onClick={() => openModal()} className="flex-1 sm:flex-none bg-black text-white px-6 lg:px-10 py-4 rounded-2xl text-[9px] font-black uppercase tracking-widest shadow-2xl hover:shadow-black/20 hover:-translate-y-1 transition-all active:scale-95">Enroll Piece</button>
         </div>
       </div>
@@ -193,7 +182,7 @@ const AdminProducts: React.FC = () => {
                       <input type="number" className="w-full bg-white rounded-2xl p-4 sm:p-6 text-sm sm:text-lg font-bold border border-black/10 focus:border-[#A68E74] outline-none shadow-sm" value={formData.stock || 0} onChange={e => setFormData({...formData, stock: Number(e.target.value)})} />
                     </div>
                     <div className="col-span-2 space-y-3 sm:space-y-4">
-                      <label className="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Series Allocation</label>
+                      <label className="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Collection Allocation</label>
                       <select className="w-full bg-white rounded-2xl p-4 sm:p-6 text-[9px] sm:text-[10px] uppercase font-black border border-black/10 focus:border-[#A68E74] outline-none shadow-sm cursor-pointer appearance-none" value={formData.category || ''} onChange={e => setFormData({...formData, category: e.target.value})}>
                         {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                       </select>
@@ -336,33 +325,6 @@ const AdminProducts: React.FC = () => {
                   <button type="submit" className="w-full sm:w-auto bg-black text-white px-10 sm:px-20 py-4 sm:py-7 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-[0.6em] shadow-2xl hover:scale-105 active:scale-95 transition-all shadow-black/20">Memorialize Piece</button>
                </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* Category Manager Modal */}
-      {isCategoryModalOpen && (
-        <div className="fixed inset-0 z-[250] flex items-center justify-center p-6 sm:p-0">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-xl animate-fadeIn" onClick={() => setIsCategoryModalOpen(false)} />
-          <div className="relative bg-white w-full max-w-md rounded-[3rem] shadow-2xl p-10 lg:p-14 border border-black/5 animate-scaleIn">
-            <div className="flex justify-between items-center mb-12">
-              <h3 className="text-2xl font-serif italic text-black">Series Registry</h3>
-              <button onClick={() => setIsCategoryModalOpen(false)} className="p-3 hover:bg-black/5 rounded-full transition-colors active:scale-90"><X className="w-5 h-5 text-black/20" /></button>
-            </div>
-            <div className="space-y-10">
-              <div className="flex gap-3">
-                <input className="flex-1 bg-[#F9F7F5] rounded-2xl p-5 text-[11px] uppercase font-black border border-black/5 outline-none focus:border-[#A68E74] shadow-sm transition-all" placeholder="Series Label..." value={newCatName} onChange={e => setNewCatName(e.target.value)} />
-                <button onClick={handleAddCategory} className="bg-black text-white px-6 rounded-2xl text-[10px] font-black uppercase shadow-xl active:scale-95 transition-all">Enroll</button>
-              </div>
-              <div className="space-y-3 max-h-80 overflow-y-auto pr-2 no-scrollbar">
-                {categories.map(cat => (
-                  <div key={cat.id} className="flex justify-between items-center p-6 bg-[#F9F7F5] rounded-[1.5rem] border border-black/[0.03] group hover:border-[#A68E74]/30 transition-all">
-                    <span className="text-[11px] uppercase tracking-[0.3em] font-black text-black/60">{cat.name}</span>
-                    <button onClick={() => deleteCategory(cat.id)} className="text-black/10 hover:text-red-500 transition-colors p-2 active:scale-90"><Trash2 className="w-5 h-5" /></button>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       )}

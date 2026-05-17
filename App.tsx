@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
-const { BrowserRouter: Router, Routes, Route, useLocation, Navigate, Outlet } = ReactRouterDOM;
+const { HashRouter: Router, Routes, Route, useLocation, Navigate, Outlet } = ReactRouterDOM;
 import { AppProvider, useStore } from './store';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -18,6 +18,7 @@ import AdminDashboard from './pages/Admin/Dashboard';
 import AdminProducts from './pages/Admin/Products';
 import AdminBanners from './pages/Admin/Banners';
 import AdminPromotions from './pages/Admin/Promotions';
+import AdminCollections from './pages/Admin/Collections';
 import AdminLogin from './pages/Admin/Login';
 
 const ScrollToTop = () => {
@@ -98,6 +99,7 @@ const App: React.FC = () => {
             <Route path="products" element={<AdminProducts />} />
             <Route path="banners" element={<AdminBanners />} />
             <Route path="promotions" element={<AdminPromotions />} />
+            <Route path="collections" element={<AdminCollections />} />
             <Route path="*" element={<Navigate to="/admin" replace />} />
           </Route>
 

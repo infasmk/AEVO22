@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 const { Link, useLocation, Outlet, useNavigate } = ReactRouterDOM;
 import { useStore } from '../../store';
-import { ShoppingBag, Star, Shield, Menu, X, Info, ChevronRight, Edit3, TrendingUp, MoreHorizontal } from '../../components/Icons';
+import { ShoppingBag, Star, Shield, Menu, X, Info, ChevronRight, Edit3, TrendingUp, MoreHorizontal, LayoutGrid } from '../../components/Icons';
 import Toast from '../../components/Toast';
 
 const AdminLayout: React.FC = () => {
@@ -27,6 +27,7 @@ const AdminLayout: React.FC = () => {
 
   const links = [
     { name: 'Insights', path: '/admin', icon: <TrendingUp className="w-4 h-4" /> },
+    { name: 'Collections', path: '/admin/collections', icon: <LayoutGrid className="w-4 h-4" /> },
     { name: 'Inventory', path: '/admin/products', icon: <ShoppingBag className="w-4 h-4" /> },
     { name: 'Showcase', path: '/admin/banners', icon: <Shield className="w-4 h-4" /> },
     { name: 'Promotions', path: '/admin/promotions', icon: <Star className="w-4 h-4" /> },
