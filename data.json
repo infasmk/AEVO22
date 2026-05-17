@@ -50,7 +50,7 @@
   "orders": [],
   "offer": {
     "id": "offer-1",
-    "is_active": true,
+    "is_active": false,
     "heading": "offer soon",
     "paragraph": "hfjvjv gf jfgjh cyur  hggfb ytf ",
     "percentage": 12,
