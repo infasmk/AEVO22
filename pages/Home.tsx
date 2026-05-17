@@ -147,7 +147,7 @@ const Home: React.FC = () => {
             <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-6">
               <div className="space-y-4">
                 <span className="text-[#A68E74] uppercase text-[8px] font-black tracking-[0.8em] block">Official Taxonomy</span>
-                <h2 className="text-2xl md:text-4xl font-serif text-black italic">Atelier Series</h2>
+                <h2 className="text-2xl md:text-4xl font-serif text-black italic">Aevo Series</h2>
               </div>
               <button 
                 onClick={() => navigate('/shop')}
@@ -252,7 +252,7 @@ const Home: React.FC = () => {
         <div className="container mx-auto px-6">
           <span className="text-[#A68E74] uppercase text-[9px] font-black tracking-[0.8em] block mb-10">Heritage</span>
           <h2 className="text-3xl md:text-6xl font-serif italic text-black/60 max-w-4xl mx-auto leading-tight px-4">
-            "Artistry that honors the silence between seconds."
+            "Aevo that honors the silence between seconds."
           </h2>
           <div className="w-12 h-px bg-[#A68E74]/30 mx-auto mt-12" />
         </div>
