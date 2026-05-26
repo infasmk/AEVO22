@@ -11,7 +11,7 @@ const Shop: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [sortBy, setSortBy] = useState('latest');
   
-  const categories: string[] = ['Wall Clocks','Wooden Decor','Hanging Light', 'Key Holders'];
+  const categories: string[] = ['Men', 'Women', 'Wall Clocks', 'Smart Clocks', 'Luxury Series'];
   const activeCategory = searchParams.get('category');
 
   const filteredProducts = useMemo(() => {

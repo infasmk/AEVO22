@@ -48,8 +48,8 @@ const Home: React.FC = () => {
   return (
     <main className="min-h-screen bg-[#FCFCFA]">
       <SEO 
-        title="Artisanal Timepieces & Luxury Clocks" 
-        description="AEVO Atelier offers a curated collection of artisanal timepieces, Geneva-born engineering, and minimalist luxury wall clocks."
+        title="Premium Wall Clocks & Luxury Home Decor" 
+        description="Discover AEVO premium wall clocks, hanging clocks, and luxury home decor accessories designed for modern elegant interiors."
       />
 
       {/* Hero Showcase */}
@@ -140,14 +140,14 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Dynamic Collections Section - Moved & Redesigned */}
+      {/* Dynamic Collections Section - Redesigned into Compact 4/4 Grid */}
       {!isSyncInProgress && categories.length > 0 && (
-        <section className="py-20 md:py-32 bg-[#FDFBF9] border-y border-black/[0.02]">
+        <section className="py-16 md:py-24 bg-[#FDFBF9] border-y border-black/[0.02]">
           <div className="container mx-auto px-6">
-            <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-6">
-              <div className="space-y-4">
-                <span className="text-[#A68E74] uppercase text-[8px] font-black tracking-[0.8em] block">Official Taxonomy</span>
-                <h2 className="text-2xl md:text-4xl font-serif text-black italic">Aevo Series</h2>
+            <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-4">
+              <div className="space-y-3">
+                <span className="text-[#A68E74] uppercase text-[8px] font-black tracking-[0.8em] block">Official Collections</span>
+                <h2 className="text-xl md:text-3xl font-serif text-black italic">Atelier Series Taxonomy</h2>
               </div>
               <button 
                 onClick={() => navigate('/shop')}
@@ -158,36 +158,32 @@ const Home: React.FC = () => {
               </button>
             </div>
             
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+            {/* Clean compact 4/4 columns card layout */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {categories.slice(0, 4).map((cat, i) => (
                 <div 
                   key={cat.id} 
                   onClick={() => navigate(`/shop?category=${cat.name}`)}
-                  className="group relative h-[250px] md:h-[300px] rounded-[2rem] md:rounded-[2.5rem] overflow-hidden cursor-pointer bg-white border border-black/[0.03] shadow-sm hover:shadow-xl transition-all duration-500"
+                  className="group relative h-[160px] md:h-[210px] rounded-[1.5rem] md:rounded-[2rem] overflow-hidden cursor-pointer bg-white border border-black/[0.03] shadow-sm hover:shadow-lg transition-all duration-500"
                 >
-                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/50 to-transparent z-10" />
+                  <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10" />
                   
-                  {/* Find first product in this category for background image */}
+                  {/* Background image preview */}
                   {products.find(p => p.category === cat.name)?.images[0] ? (
                     <img 
                       src={products.find(p => p.category === cat.name)?.images[0]} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3s] group-hover:opacity-60 grayscale group-hover:grayscale-0" 
-                      alt={cat.name} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 opacity-60 group-hover:opacity-80 grayscale group-hover:grayscale-0" 
+                      alt={`${cat.name} - ${cat.name} Series`} 
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-[#F9F7F5]">
-                       <span className="text-[8px] uppercase tracking-widest font-black text-black/5 italic">Pending Enrollment</span>
+                       <span className="text-[7px] uppercase tracking-widest font-black text-black/5 italic">Awaiting Media</span>
                     </div>
                   )}
                   
-                  <div className="absolute inset-0 z-20 p-6 md:p-8 flex flex-col justify-end">
-                    <h3 className="text-xl md:text-2xl font-serif italic text-white leading-tight group-hover:text-[#A68E74] transition-colors">{cat.name}</h3>
-                    <div className="mt-4 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">
-                      <div className="w-6 h-6 rounded-full border border-white/20 flex items-center justify-center text-white">
-                        <ArrowRight className="w-3 h-3" />
-                      </div>
-                      <span className="text-[8px] uppercase tracking-widest font-black text-white">View Series</span>
-                    </div>
+                  <div className="absolute inset-0 z-20 p-5 md:p-6 flex flex-col justify-end">
+                    <span className="text-[#A68E74] text-[7px] uppercase tracking-[0.4em] font-black mb-1">Series 0{i+1}</span>
+                    <h3 className="text-base md:text-lg font-serif italic text-white leading-tight group-hover:text-[#A68E74] transition-colors">{cat.name}</h3>
                   </div>
                 </div>
               ))}
@@ -195,6 +191,51 @@ const Home: React.FC = () => {
           </div>
         </section>
       )}
+
+      {/* Editorial Curation & Strategic SEO Section */}
+      <section className="py-20 md:py-28 bg-white border-b border-black/[0.02]">
+        <div className="container mx-auto px-6 max-w-6xl">
+          <div className="text-center max-w-3xl mx-auto mb-16 md:mb-20 space-y-4">
+            <span className="text-[#A68E74] uppercase text-[8px] font-black tracking-[0.8em] block">Atelier Guide</span>
+            <h2 className="text-2xl md:text-4xl font-serif italic text-black leading-tight">Elevating Modern Luxury Interiors</h2>
+            <p className="text-black/40 text-xs md:text-[13px] italic font-light leading-relaxed">
+              Discover AEVO premium wall clocks, hanging clocks, and luxury home decor accessories designed for modern elegant interiors.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-14 text-left">
+            <div className="space-y-4">
+              <h3 className="text-lg font-serif text-black italic border-b border-[#A68E74]/10 pb-3 font-medium">Bespoke Wall Clocks</h3>
+              <p className="text-black/50 text-[12px] md:text-sm italic font-light leading-relaxed">
+                Timekeeping is the focal architectural statement in modern homes. To elevate modern luxury interiors, selecting the <strong className="font-semibold text-black/70">best luxury wall clocks</strong> is of pristine importance. AEVO is a <span className="text-[#A68E74] font-medium">premium decor brand</span> crafting authentic <strong className="font-semibold text-black/70">premium wall clocks</strong>, <strong className="font-semibold text-black/70">modern wall clocks</strong>, and magnificent <strong className="font-semibold text-black/70">designer wall clocks</strong>.
+              </p>
+              <p className="text-black/50 text-[12px] md:text-sm italic font-light leading-relaxed">
+                Whether you seek elegant <strong className="font-semibold text-black/70">wooden wall clocks</strong> to introduce warmth, industrial <strong className="font-semibold text-black/70">metal wall clocks</strong> for high structural precision, or majestic <strong className="font-semibold text-black/70">large wall clocks</strong> for a main living room divider, our collection offers timeless balance.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-serif text-black italic border-b border-[#A68E74]/10 pb-3 font-medium">Luxury Home Accessories</h3>
+              <p className="text-black/50 text-[12px] md:text-sm italic font-light leading-relaxed">
+                A highly unified aesthetic extends far beyond clock dials to encompass premium interior decor and exquisite <strong className="font-semibold text-black/70">home decoration items</strong>. We invite you to explore our custom-forged <strong className="font-semibold text-black/70">designer key holders</strong> that turn simple organization into a grand ritual of luxury lifestyle decor.
+              </p>
+              <p className="text-black/50 text-[12px] md:text-sm italic font-light leading-relaxed">
+                Curate your entrance lobbies with a bespoke <strong className="font-semibold text-black/70">wall mounted key holder</strong>, an aesthetic <strong className="font-semibold text-black/70">modern key holder</strong>, or a handmade companion like our structural <strong className="font-semibold text-black/70">wooden key holder</strong>. These pieces pair perfectly with minimal luxury decor.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-serif text-black italic border-b border-[#A68E74]/10 pb-3 font-medium">India's Curated Showcase</h3>
+              <p className="text-black/50 text-[12px] md:text-sm italic font-light leading-relaxed">
+                AEVO bridges world-class designs with doorside delivery in India. For patrons seeking refinement, we curate custom runs of <strong className="font-semibold text-black/70">luxury clocks Kerala</strong> loves, alongside exquisite <strong className="font-semibold text-black/70">designer clocks Kochi</strong> showcases.
+              </p>
+              <p className="text-black/50 text-[12px] md:text-sm italic font-light leading-relaxed">
+                Now you can effortlessly <strong className="font-semibold text-black/70">buy premium wall clocks online</strong>, secure a <strong className="font-semibold text-black/70">premium key holder online</strong>, and browse the ultimate collections of <strong className="font-semibold text-black/70">luxury home decor India</strong>. Experience premium interior decor crafted for modern wall clocks for living room arrangements and offices.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Promotion Section */}
       {offer && offer.is_active && (
@@ -252,7 +293,7 @@ const Home: React.FC = () => {
         <div className="container mx-auto px-6">
           <span className="text-[#A68E74] uppercase text-[9px] font-black tracking-[0.8em] block mb-10">Heritage</span>
           <h2 className="text-3xl md:text-6xl font-serif italic text-black/60 max-w-4xl mx-auto leading-tight px-4">
-            "Aevo that honors the silence between seconds."
+            "Artistry that honors the silence between seconds."
           </h2>
           <div className="w-12 h-px bg-[#A68E74]/30 mx-auto mt-12" />
         </div>

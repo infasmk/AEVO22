@@ -19,37 +19,37 @@ const Footer: React.FC = () => {
           <div className="space-y-6">
             <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-[#B88E4B]">Registry</h3>
             <ul className="space-y-3 text-black/50 text-xs">
-              <li><Link to="/shop" className="hover:text-black transition-colors">Wall Clocks</Link></li>
-              <li><Link to="/shop" className="hover:text-black transition-colors">Wooden Decor </Link></li>
-              <li><Link to="/shop" className="hover:text-black transition-colors">Hanging Lights </Link></li>
-              <li><Link to="/shop" className="hover:text-black transition-colors">Limited Edition </Link></li>
+              <li><Link to="/shop" className="hover:text-black transition-colors">Men's Series</Link></li>
+              <li><Link to="/shop" className="hover:text-black transition-colors">Women's Series</Link></li>
+              <li><Link to="/shop" className="hover:text-black transition-colors">Wall Series</Link></li>
+              <li><Link to="/shop" className="hover:text-black transition-colors">Limited Vault</Link></li>
             </ul>
           </div>
 
           <div className="space-y-6">
-            <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-[#B88E4B]">STUDIO</h3>
+            <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-[#B88E4B]">Concierge</h3>
             <ul className="space-y-3 text-black/50 text-xs">
-              <li><Link to="#" className="hover:text-black transition-colors">Custom Orders </Link></li>
-              <li><Link to="#" className="hover:text-black transition-colors">Our Craftmanship</Link></li>
+              <li><Link to="#" className="hover:text-black transition-colors">Bespoke Inquiry</Link></li>
+              <li><Link to="#" className="hover:text-black transition-colors">Our Story</Link></li>
             </ul>
           </div>
 
           <div className="space-y-6">
-            <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-[#B88E4B]">STAY CONNECTED</h3>
+            <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-[#B88E4B]">Updates</h3>
             <form className="flex border-b border-black/10 pb-2" onSubmit={(e) => e.preventDefault()}>
               <input 
                 type="email" 
                 placeholder="EMAIL ADDRESS" 
                 className="bg-transparent text-black/60 py-2 w-full focus:outline-none text-[8px] tracking-widest font-bold"
               />
-              <button className="uppercase text-[8px] font-black tracking-widest text-[#B88E4B]">SUBSCRIBE</button>
+              <button className="uppercase text-[8px] font-black tracking-widest text-[#B88E4B]">Join</button>
             </form>
           </div>
         </div>
 
         <div className="pt-10 border-t border-black/5 flex flex-col md:flex-row justify-between items-center text-[8px] text-black/30 uppercase tracking-[0.3em]">
           <div className="flex flex-col md:flex-row items-center md:space-x-4 space-y-2 md:space-y-0 text-center md:text-left">
-            <p>© 2026 AEVO Atelier </p>
+            <p>© 2024 AEVO Atelier Geneva.</p>
             <p className="hidden md:block opacity-20">|</p>
             <p>
               Created by <span className="text-[#A68E74] font-black">Infas.mk</span> || 
