@@ -5,5 +5,5 @@ Allow: /
 Disallow: /admin/
 Disallow: /admin/*
 
-# Point crawlers directly to the premium XML sitemap
-Sitemap: https://aevo.luxury/sitemap.xml
+# Point crawlers directly to the premium XML sitemap hosted on the live domain
+Sitemap: https://aevodesigns.in/sitemap.xml
