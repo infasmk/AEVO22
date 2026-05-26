@@ -74,39 +74,95 @@ const Header: React.FC = () => {
       {/* Editorial Side Drawer (Mobile Menu) */}
       <div className={`fixed inset-0 z-[100] transition-all duration-700 ${mobileMenuOpen ? 'visible' : 'invisible'}`}>
         <div 
-          className={`absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-700 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-700 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0'}`}
           onClick={() => setMobileMenuOpen(false)}
         />
         
-        <div className={`absolute top-0 left-0 bottom-0 w-[85%] max-w-sm bg-[#1F1A16] shadow-2xl transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-          <div className="flex justify-between items-center p-8 border-b border-white/5">
-            <span className="font-serif text-2xl tracking-tighter text-[#A68E74] italic">AEVO Atelier</span>
-            <button onClick={() => setMobileMenuOpen(false)} className="p-3 bg-white/5 rounded-full text-[#A68E74] hover:bg-white/10 transition-colors">
-              <X className="w-5 h-5" />
+        <div className={`absolute top-0 left-0 bottom-0 w-[90%] max-w-sm bg-[#FAF8F5] shadow-2xl transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} flex flex-col h-full`}>
+          {/* Menu Header */}
+          <div className="flex justify-between items-center px-8 py-6 border-b border-black/[0.03] shrink-0">
+            <span className="font-serif text-2xl tracking-tighter text-[#A68E74]">AEVO</span>
+            <button onClick={() => setMobileMenuOpen(false)} className="p-2.5 bg-black/[0.02] hover:bg-black/5 rounded-full text-black/40 hover:text-black transition-all">
+              <X className="w-4 h-4" />
             </button>
           </div>
           
-          <nav className="flex flex-col p-10 space-y-12">
-            {navLinks.map((link, idx) => (
-              <Link 
-                key={link.path}
-                to={link.path} 
-                onClick={() => setMobileMenuOpen(false)} 
-                className={`group flex items-end space-x-4 transition-all duration-500 ${mobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'}`}
-                style={{ transitionDelay: `${idx * 100}ms` }}
-              >
-                <span className="text-[10px] font-black tracking-widest text-[#A68E74] mb-2">{link.number}</span>
-                <span className={`text-4xl font-serif italic text-[#A68E74] group-hover:text-white transition-colors`}>
-                  {link.name}
-                </span>
-              </Link>
-            ))}
-          </nav>
+          {/* Scrollable Container */}
+          <div className="flex-1 overflow-y-auto no-scrollbar px-8 py-8 space-y-10">
+            {/* Handcrafted wooden décor headline */}
+            <p className="text-black/60 italic font-serif font-light text-[13px] md:text-sm leading-relaxed">
+              Handcrafted wooden décor inspired by modern living. Designed to bring warmth, simplicity, and timeless character into every space.
+            </p>
+            
+            {/* Collections Section */}
+            <div className="space-y-4">
+              <h3 className="text-[#A68E74] font-black uppercase text-[9px] tracking-[0.3em]">Collections</h3>
+              <ul className="space-y-3 font-serif italic text-base md:text-lg text-black/70 pl-0.5">
+                <li>
+                  <Link to="/shop?category=Wall%20Clocks" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors block py-0.5">Wall Clocks</Link>
+                </li>
+                <li>
+                  <Link to="/shop?category=Wooden%20D%C3%A9cor" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors block py-0.5">Wooden Décor</Link>
+                </li>
+                <li>
+                  <Link to="/shop?category=Hanging%20Lights" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors block py-0.5">Hanging Lights</Link>
+                </li>
+                <li>
+                  <Link to="/shop?category=Key%20Holders" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors block py-0.5">Key Holders</Link>
+                </li>
+                <li>
+                  <Link to="/shop?category=Limited%20Editions" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors block py-0.5">Limited Editions</Link>
+                </li>
+              </ul>
+            </div>
 
-          <div className="absolute bottom-12 left-10 right-10">
-            <div className="h-px w-12 bg-white/10 mb-8" />
-            <p className="text-[8px] uppercase tracking-[0.4em] text-white/30 font-black mb-2">Artisanal Support</p>
-            <a href="mailto:concierge@aevo.luxury" className="text-[10px] font-bold tracking-widest text-[#A68E74] hover:text-white transition-colors">concierge@aevo.luxury</a>
+            {/* Studio Section */}
+            <div className="space-y-4">
+              <h3 className="text-[#A68E74] font-black uppercase text-[9px] tracking-[0.3em]">Studio</h3>
+              <ul className="space-y-3 font-serif italic text-base md:text-lg text-black/70 pl-0.5">
+                <li>
+                  <a href="mailto:concierge@aevo.luxury" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors block py-0.5">Custom Orders</a>
+                </li>
+                <li>
+                  <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors block py-0.5">Our Craftsmanship</Link>
+                </li>
+                <li>
+                  <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors block py-0.5">About AEVO</Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Stay Connected Section */}
+            <div className="space-y-4 pt-2">
+              <h3 className="text-[#A68E74] font-black uppercase text-[9px] tracking-[0.3em]">Stay Connected</h3>
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  alert("Thank you to register in the AEVO artisan registry.");
+                  setMobileMenuOpen(false);
+                }}
+                className="flex border-b border-black/10 pb-2 mt-4 gap-4"
+              >
+                <input 
+                  type="email" 
+                  required
+                  placeholder="Enter your email" 
+                  className="bg-transparent text-black/80 py-1.5 w-full focus:outline-none text-xs font-light italic tracking-wide"
+                />
+                <button type="submit" className="uppercase text-[9px] font-black tracking-widest text-[#A68E74] hover:text-black transition-colors shrink-0">SUBSCRIBE</button>
+              </form>
+            </div>
+
+            {/* In-drawer Footer Details */}
+            <div className="pt-12 pb-6 border-t border-black/[0.03] text-center text-[8px] text-black/30 uppercase tracking-[0.3em] space-y-3">
+              <p>© 2024 AEVO ATELIER.</p>
+              <p>CREATED BY INFAS.MK || TEAM WEBBITS</p>
+              <div className="flex justify-center space-x-4 pt-1 text-[7px]">
+                <Link to="#" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">PRIVACY</Link>
+                <span>|</span>
+                <Link to="#" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">TERMS</Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>

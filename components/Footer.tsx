@@ -19,10 +19,11 @@ const Footer: React.FC = () => {
           <div className="space-y-6">
             <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-[#B88E4B]">Registry</h3>
             <ul className="space-y-3 text-black/50 text-xs">
-              <li><Link to="/shop" className="hover:text-black transition-colors">Men's Series</Link></li>
-              <li><Link to="/shop" className="hover:text-black transition-colors">Women's Series</Link></li>
-              <li><Link to="/shop" className="hover:text-black transition-colors">Wall Series</Link></li>
-              <li><Link to="/shop" className="hover:text-black transition-colors">Limited Vault</Link></li>
+              <li><Link to="/shop?category=Wall%20Clocks" className="hover:text-black transition-colors">Wall Clocks</Link></li>
+              <li><Link to="/shop?category=Wooden%20D%C3%A9cor" className="hover:text-black transition-colors">Wooden Décor</Link></li>
+              <li><Link to="/shop?category=Hanging%20Lights" className="hover:text-black transition-colors">Hanging Lights</Link></li>
+              <li><Link to="/shop?category=Key%20Holders" className="hover:text-black transition-colors">Key Holders</Link></li>
+              <li><Link to="/shop?category=Limited%20Editions" className="hover:text-black transition-colors">Limited Editions</Link></li>
             </ul>
           </div>
 

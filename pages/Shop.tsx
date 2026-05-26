@@ -7,11 +7,17 @@ import ProductCard from '../components/ProductCard';
 import SEO from '../components/SEO';
 
 const Shop: React.FC = () => {
-  const { products } = useStore();
+  const { products, categories: storeCategories } = useStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const [sortBy, setSortBy] = useState('latest');
   
-  const categories: string[] = ['Men', 'Women', 'Wall Clocks', 'Smart Clocks', 'Luxury Series'];
+  const categories = useMemo(() => {
+    if (storeCategories && storeCategories.length > 0) {
+      return storeCategories.map(c => c.name);
+    }
+    return ['Wall Clocks', 'Wooden Décor', 'Hanging Lights', 'Key Holders', 'Limited Editions'];
+  }, [storeCategories]);
+
   const activeCategory = searchParams.get('category');
 
   const filteredProducts = useMemo(() => {
