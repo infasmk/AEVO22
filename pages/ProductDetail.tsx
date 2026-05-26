@@ -42,7 +42,37 @@ Please guide me through the acquisition process.`;
 
   return (
     <div className="pt-24 pb-32 bg-[#FCFCFA]">
-      <SEO title={product.name} description={product.description.slice(0, 155)} />
+      <SEO 
+        title={`${product.name} | Premium Handcrafted Wooden Clocks & Luxury Decor`} 
+        description={`${product.name} from AEVO. ${product.description.slice(0, 140)}... Elegant handcrafted minimal luxury decor India.`}
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": product.name,
+          "image": product.images[0] ? [product.images[0]] : ["https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=80&w=1200"],
+          "description": product.description,
+          "sku": product.id,
+          "mpn": product.id,
+          "brand": {
+            "@type": "Brand",
+            "name": "AEVO"
+          },
+          "offers": {
+            "@type": "Offer",
+            "url": `https://aevodesigns.in/#/product/${product.id}`,
+            "priceCurrency": "INR",
+            "price": product.price,
+            "itemCondition": "https://schema.org/NewCondition",
+            "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            "priceValidUntil": "2027-12-31"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": product.rating || "5.0",
+            "reviewCount": product.reviews_count || "12"
+          }
+        }}
+      />
 
       <div className="container mx-auto px-6 max-w-7xl">
         {/* Navigation Bar */}

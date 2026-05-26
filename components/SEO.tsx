@@ -8,40 +8,80 @@ interface SEOProps {
 }
 
 const SEO: React.FC<SEOProps> = ({ title, description, schema }) => {
-  useEffect(() => {
-    // Update Title
-    const baseTitle = 'AEVO';
-    document.title = title.includes(baseTitle) ? title : `${baseTitle} | ${title}`;
+  const schemaString = schema ? JSON.stringify(schema) : '';
 
-    // Update Description
+  useEffect(() => {
+    const baseTitle = 'AEVO';
+    const formattedTitle = title.includes(baseTitle) ? title : `${title} | ${baseTitle}`;
+    
+    // 1. Update title
+    document.title = formattedTitle;
+
+    // 2. Update Primary and social title tags
+    const updateTitleMeta = (selector: string, attr: string) => {
+      const el = document.querySelector(selector);
+      if (el) el.setAttribute(attr, formattedTitle);
+    };
+    updateTitleMeta('meta[name="title"]', 'content');
+    updateTitleMeta('meta[property="og:title"]', 'content');
+    updateTitleMeta('meta[property="twitter:title"]', 'content');
+
+    // 3. Update Meta Description and social descriptions
     if (description) {
-      let metaDescription = document.querySelector('meta[name="description"]');
-      if (metaDescription) {
-        metaDescription.setAttribute('content', description);
-      } else {
-        metaDescription = document.createElement('meta');
-        metaDescription.setAttribute('name', 'description');
-        metaDescription.setAttribute('content', description);
-        document.head.appendChild(metaDescription);
-      }
+      const updateDescriptionMeta = (selector: string, attr: string) => {
+        let el = document.querySelector(selector);
+        if (!el) {
+          el = document.createElement('meta');
+          if (selector.startsWith('meta[name=')) {
+            const name = selector.split('"')[1];
+            el.setAttribute('name', name);
+          } else if (selector.startsWith('meta[property=')) {
+            const property = selector.split('"')[1];
+            el.setAttribute('property', property);
+          }
+          document.head.appendChild(el);
+        }
+        el.setAttribute(attr, description);
+      };
+
+      updateDescriptionMeta('meta[name="description"]', 'content');
+      updateDescriptionMeta('meta[property="og:description"]', 'content');
+      updateDescriptionMeta('meta[property="twitter:description"]', 'content');
     }
 
-    // Inject JSON-LD Schema
-    if (schema) {
+    // 4. Update Canonical Link
+    const cleanPath = window.location.hash 
+      ? window.location.hash.replace('#', '') 
+      : window.location.pathname;
+    const formattedPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
+    const canonicalUrl = `https://aevodesigns.in${formattedPath}`;
+
+    let canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (canonicalEl) {
+      canonicalEl.setAttribute('href', canonicalUrl);
+    } else {
+      canonicalEl = document.createElement('link');
+      canonicalEl.setAttribute('rel', 'canonical');
+      canonicalEl.setAttribute('href', canonicalUrl);
+      document.head.appendChild(canonicalEl);
+    }
+
+    // 5. Inject Dynamic JSON-LD Schema
+    if (schemaString) {
       const script = document.createElement('script');
       script.type = 'application/ld+json';
-      script.text = JSON.stringify(schema);
-      script.id = 'json-ld-schema';
+      script.text = schemaString;
+      script.id = 'dynamic-json-ld';
       document.head.appendChild(script);
 
       return () => {
-        const existingScript = document.getElementById('json-ld-schema');
+        const existingScript = document.getElementById('dynamic-json-ld');
         if (existingScript) {
           document.head.removeChild(existingScript);
         }
       };
     }
-  }, [title, description, schema]);
+  }, [title, description, schemaString]);
 
   return null;
 };

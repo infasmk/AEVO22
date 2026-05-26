@@ -38,8 +38,11 @@ const Shop: React.FC = () => {
   return (
     <div className="pt-32 pb-32 bg-[#FCFCFA]">
       <SEO 
-        title="The Collection | Shop Luxury Clocks" 
-        description="Browse the AEVO registry of luxury clocks, featuring smart connectivity, minimalist wall designs, and high-end artisanal timepieces." 
+        title={activeCategory ? `${activeCategory} Collection | Premium Clocks & Decor` : "Handcrafted Luxury Home Decor & Premium Wall Clocks"} 
+        description={activeCategory 
+          ? `Discover our curated ${activeCategory} collection. Handcrafted premium home decor items, designer clocks, and bespoke wooden accents designed for elegant interiors.`
+          : "Browse AEVO's curated registry of premium wooden wall clocks, designer hanging clocks, customized decor pieces, and modern key holders built for modern homes."
+        } 
       />
       <div className="container mx-auto px-6">
         {/* Header */}

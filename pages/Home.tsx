@@ -48,8 +48,26 @@ const Home: React.FC = () => {
   return (
     <main className="min-h-screen bg-[#FCFCFA]">
       <SEO 
-        title="Premium Wall Clocks & Luxury Home Decor" 
-        description="Discover AEVO premium wall clocks, hanging clocks, and luxury home decor accessories designed for modern elegant interiors."
+        title="AEVO – Premium Wall Clocks & Luxury Home Decor" 
+        description="AEVO is a premium luxury decor brand specializing in high-quality wooden wall clocks, designer hanging clocks, customized timepieces, and key holders crafted for modern elegant interiors."
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "AEVO",
+          "url": "https://aevodesigns.in",
+          "logo": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=80&w=1200",
+          "description": "AEVO is India's premier luxury decor brand specializing in premium handcrafted wooden wall clocks, designer hanging clocks, customizable timepieces, key holders, and elegant home accessories.",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Kochi",
+            "addressRegion": "Kerala",
+            "addressCountry": "IN"
+          },
+          "sameAs": [
+            "https://www.facebook.com/aevo.luxury",
+            "https://www.instagram.com/aevo.luxury"
+          ]
+        }}
       />
 
       {/* Hero Showcase */}
