@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Disallow indexing/crawling of private admin routes
+Disallow: /admin/
+Disallow: /admin/*
+
+# Point crawlers directly to the premium XML sitemap
+Sitemap: https://aevo.luxury/sitemap.xml
