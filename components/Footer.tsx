@@ -12,7 +12,7 @@ const Footer: React.FC = () => {
           <div className="space-y-6">
             <h2 className="text-2xl font-serif text-black tracking-tighter">AEVO</h2>
             <p className="text-black/40 text-xs leading-relaxed max-w-xs italic">
-              Make Your Space Alive 
+              Crafting instruments of time that defy the temporary. Geneva born, globally curated.
             </p>
           </div>
           
@@ -30,8 +30,8 @@ const Footer: React.FC = () => {
           <div className="space-y-6">
             <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-[#B88E4B]">Concierge</h3>
             <ul className="space-y-3 text-black/50 text-xs">
-              <li><Link to="#" className="hover:text-black transition-colors"> Inquiry</Link></li>
-              <li><Link to="#" className="hover:text-black transition-colors">Our Story</Link></li>
+              <li><Link to="#" className="hover:text-black transition-colors">Bespoke Inquiry</Link></li>
+              <li><Link to="/about" className="hover:text-black transition-colors">Our Story</Link></li>
             </ul>
           </div>
 
@@ -50,7 +50,7 @@ const Footer: React.FC = () => {
 
         <div className="pt-10 border-t border-black/5 flex flex-col md:flex-row justify-between items-center text-[8px] text-black/30 uppercase tracking-[0.3em]">
           <div className="flex flex-col md:flex-row items-center md:space-x-4 space-y-2 md:space-y-0 text-center md:text-left">
-            <p>© 2026 AEVO DESIGNS</p>
+            <p>© 2024 AEVO Atelier Geneva.</p>
             <p className="hidden md:block opacity-20">|</p>
             <p>
               Created by <span className="text-[#A68E74] font-black">Infas.mk</span> || 

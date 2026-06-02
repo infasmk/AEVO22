@@ -10,6 +10,7 @@ import Home from './pages/Home';
 import Shop from './pages/Shop';
 import ProductDetail from './pages/ProductDetail';
 import Wishlist from './pages/Wishlist';
+import About from './pages/About';
 import LoadingScreen from './components/LoadingScreen';
 
 // Admin Imports
@@ -91,6 +92,7 @@ const App: React.FC = () => {
             <Route path="/shop" element={<Shop />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/about" element={<About />} />
           </Route>
 
           {/* Admin Routes */}
