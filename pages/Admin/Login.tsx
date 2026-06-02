@@ -95,7 +95,7 @@ const AdminLogin: React.FC = () => {
         </div>
 
         <p className="mt-8 text-center text-white/10 text-[8px] uppercase tracking-[0.5em] font-black">
-          © AEVO Atelier Geneva • Cryptographic Vault v15.4
+          © AEVO Designs Geneva • Cryptographic Vault v15.4
         </p>
       </div>
     </div>

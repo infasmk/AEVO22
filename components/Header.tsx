@@ -155,7 +155,7 @@ const Header: React.FC = () => {
 
             {/* In-drawer Footer Details */}
             <div className="pt-12 pb-6 border-t border-black/[0.03] text-center text-[8px] text-black/30 uppercase tracking-[0.3em] space-y-3">
-              <p>© 2024 AEVO ATELIER.</p>
+              <p>© 2024 AEVO Designs.</p>
               <p>CREATED BY INFAS.MK || TEAM WEBBITS</p>
               <div className="flex justify-center space-x-4 pt-1 text-[7px]">
                 <Link to="#" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">PRIVACY</Link>

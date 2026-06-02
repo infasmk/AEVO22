@@ -26,9 +26,9 @@ const ProductDetail: React.FC = () => {
   };
 
   const handleAcquire = () => {
-    const phoneNumber = "919745019658";
+    const phoneNumber = "919495360488";
     const colorText = selectedColor ? `Selected Finish: ${selectedColor.name}` : "";
-    const message = `Hello AEVO Atelier, I am interested in acquiring the following masterpiece:
+    const message = `Hello AEVO Designs, I am interested in acquiring the following masterpiece:
     
 Piece: ${product.name}
 ID: ${product.id}
