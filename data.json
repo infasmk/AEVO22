@@ -1,6 +1,28 @@
 {
   "products": [
     {
+      "name": "ENCLOSE",
+      "price": 5499,
+      "original_price": 0,
+      "category": "Elite Series",
+      "tag": "Latest",
+      "description": "Crafted from treated solid wood, this geometric wall clock blends a bold circular dial with an open square frame. Its clean lines, natural finish, and silent precision movement make it a refined statement for modern interiors.",
+      "stock": 9996,
+      "images": [
+        "https://i.ibb.co/chBW4XM4/1.jpg",
+        "https://i.ibb.co/nqCzRF1Q/2.png",
+        "https://i.ibb.co/vCSZvdrd/3-1.png",
+        "https://i.ibb.co/Gf2tm4P4/3.png"
+      ],
+      "colors": [],
+      "specs": {},
+      "key_features": [],
+      "id": "p-1780384100489",
+      "rating": 5,
+      "reviews_count": 0,
+      "created_at": "2026-06-02T07:08:20.489Z"
+    },
+    {
       "name": "CADENCE",
       "price": 2899,
       "original_price": 0,
@@ -23,7 +45,7 @@
     },
     {
       "name": "MATRIX",
-      "price": 0,
+      "price": 5499,
       "original_price": 0,
       "category": "Elite Series",
       "tag": "None",
