@@ -152,7 +152,7 @@ const AdminPromotions: React.FC = () => {
                   className="w-full bg-[#F9F7F5] rounded-2xl p-6 text-sm font-bold border border-black/5 focus:border-[#A68E74] outline-none shadow-inner transition-all" 
                   value={formData.button_text} 
                   onChange={e => setFormData({...formData, button_text: e.target.value})} 
-                  placeholder="e.g. Shop the Vault" 
+                  placeholder="e.g. Shop Liked " 
                 />
               </div>
 

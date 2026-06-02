@@ -170,7 +170,7 @@ const AdminLayout: React.FC = () => {
               <div className="space-y-6 border-t border-black/5 pt-12">
                 <div className="px-4">
                    <h3 className="text-[10px] uppercase tracking-[0.4em] font-black text-black/30">Synchronize Registry</h3>
-                   <p className="text-[11px] font-serif italic text-black/50 mt-2">Paste valid JSON protocol to update the archive state immediately.</p>
+                   <p className="text-[11px] font-serif italic text-black/50 mt-2">Paste valid JSON protocol to update the Collection state immediately.</p>
                 </div>
                 <textarea 
                   className="w-full h-48 bg-white border border-black/10 rounded-3xl p-8 text-[11px] font-mono text-black outline-none focus:border-[#A68E74] shadow-inner transition-all resize-none"

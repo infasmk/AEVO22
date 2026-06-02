@@ -79,7 +79,7 @@ Please guide me through the acquisition process.`;
         <div className="flex items-center justify-between mb-8 md:mb-12">
            <button onClick={() => navigate(-1)} className="text-[#A68E74] hover:text-black flex items-center space-x-2 text-[10px] uppercase tracking-widest transition-colors font-black">
              <ChevronLeft className="w-4 h-4" />
-             <span className="hidden sm:inline">Back to Archive</span>
+             <span className="hidden sm:inline">Back to Collection</span>
              <span className="sm:hidden">Back</span>
            </button>
            <div className="flex space-x-6">
@@ -201,9 +201,9 @@ Please guide me through the acquisition process.`;
                     onClick={handleAcquire}
                     className="w-full bg-[#A68E74] text-white py-6 md:py-8 rounded-full text-[11px] md:text-[12px] font-black uppercase tracking-[0.5em] hover:scale-[1.02] active:scale-95 transition-all shadow-2xl flex items-center justify-center space-x-4 shadow-[#A68E74]/20"
                   >
-                    <span>Secure Acquisition</span>
+                    <span>Book Now</span>
                   </button>
-                  <p className="mt-6 text-[8px] md:text-[9px] uppercase tracking-[0.3em] text-[#A68E74]/60 font-black">Direct line to the AEVO Artisan Concierge</p>
+                  <p className="mt-6 text-[8px] md:text-[9px] uppercase tracking-[0.3em] text-[#A68E74]/60 font-black">Direct message  to the AEVO DESIGNS</p>
                 </div>
               </div>
             )}
@@ -215,17 +215,17 @@ Please guide me through the acquisition process.`;
                   onClick={handleAcquire}
                   className="w-full bg-[#A68E74] text-white py-6 md:py-8 rounded-full text-[11px] md:text-[12px] font-black uppercase tracking-[0.5em] hover:scale-[1.02] active:scale-95 transition-all shadow-2xl flex items-center justify-center space-x-4 shadow-[#A68E74]/20"
                 >
-                  <span>Secure Acquisition</span>
+                  <span>Book Now</span>
                 </button>
-                <p className="mt-6 text-[8px] md:text-[9px] uppercase tracking-[0.3em] text-[#A68E74]/60 font-black">Direct line to the AEVO Artisan Concierge</p>
+                <p className="mt-6 text-[8px] md:text-[9px] uppercase tracking-[0.3em] text-[#A68E74]/60 font-black">Direct message  to the AEVO DESIGNS</p>
               </div>
             )}
           </div>
         </div>
         
-        {/* Anatomy of Excellence Section */}
+        {/* Features Section */}
         <div className="pt-16 md:pt-24 border-t border-black/5 mb-16 md:mb-24">
-          <h2 className="text-[#A68E74] uppercase text-[9px] font-black tracking-[0.8em] mb-10 md:mb-16 text-center">Anatomy of Excellence</h2>
+          <h2 className="text-[#A68E74] uppercase text-[9px] font-black tracking-[0.8em] mb-10 md:mb-16 text-center">Features</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10 max-w-5xl mx-auto px-4">
               {(product.key_features || []).map((item, idx) => (
@@ -240,7 +240,7 @@ Please guide me through the acquisition process.`;
                 </div>
               ))}
               {(!product.key_features || product.key_features.length === 0) && (
-                <div className="col-span-full text-center py-10 opacity-20 italic font-serif text-sm">Registry archives for this piece are in preparation.</div>
+                <div className="col-span-full text-center py-10 opacity-20 italic font-serif text-sm">Registry Collections for this piece are in preparation.</div>
               )}
           </div>
         </div>

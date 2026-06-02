@@ -98,7 +98,7 @@ const AdminProducts: React.FC = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 border-b border-black/[0.05] pb-8 md:pb-10">
         <div className="space-y-2">
           <h1 className="text-3xl lg:text-4xl font-serif text-black italic">Inventory Registry</h1>
-          <p className="text-[#A68E74] text-[9px] lg:text-[10px] uppercase tracking-[0.5em] font-black">Archive Management Portal</p>
+          <p className="text-[#A68E74] text-[9px] lg:text-[10px] uppercase tracking-[0.5em] font-black">Collection Management Portal</p>
         </div>
         <div className="flex w-full sm:w-auto gap-4">
           <Link to="/admin/collections" className="flex-1 sm:flex-none px-6 lg:px-8 py-4 rounded-2xl text-[9px] font-black uppercase tracking-widest border border-black/10 bg-white hover:bg-black hover:text-white transition-all active:scale-95 flex items-center justify-center">Manage Collections</Link>
@@ -111,7 +111,7 @@ const AdminProducts: React.FC = () => {
         <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-black/20 w-5 h-5 transition-colors group-focus-within:text-[#A68E74]" />
         <input 
           type="text" 
-          placeholder="Search the archive..."
+          placeholder="Search the Collection..."
           className="w-full pl-12 sm:pl-16 pr-8 py-4 sm:py-6 bg-white border border-black/10 rounded-2xl md:rounded-3xl text-[10px] md:text-[11px] uppercase tracking-[0.2em] font-black outline-none focus:border-[#A68E74] shadow-sm transition-all focus:shadow-xl focus:shadow-black/5"
           value={searchTerm} 
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -168,7 +168,7 @@ const AdminProducts: React.FC = () => {
                       <input className="w-full bg-white rounded-2xl p-4 sm:p-6 text-sm sm:text-lg font-bold border border-black/10 focus:border-[#A68E74] outline-none shadow-sm transition-all" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Aurelius Zenith" required />
                     </div>
                     <div className="space-y-3 sm:space-y-4">
-                      <label className="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Archive Narrative</label>
+                      <label className="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Collection Narrative</label>
                       <textarea className="w-full bg-white rounded-3xl p-4 sm:p-6 text-sm sm:text-lg font-light italic leading-relaxed border border-black/10 h-24 sm:h-48 outline-none shadow-sm focus:border-[#A68E74] transition-all" value={formData.description || ''} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Philosophy behind this creation..." required />
                     </div>
                   </div>
@@ -249,7 +249,7 @@ const AdminProducts: React.FC = () => {
 
                  <div className="space-y-6 sm:space-y-8">
                     <div className="flex items-center justify-between">
-                      <label className="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Anatomy of Excellence</label>
+                      <label className="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-black/40 font-black">Features</label>
                       <button type="button" onClick={() => setFeatures([...features, {title: '', description: ''}])} className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#A68E74] hover:text-black transition-colors">+ Architect Feature</button>
                     </div>
                     <div className="space-y-4 sm:space-y-6">

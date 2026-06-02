@@ -40,8 +40,8 @@ const Shop: React.FC = () => {
       <SEO 
         title={activeCategory ? `${activeCategory} Collection | Premium Clocks & Decor` : "Handcrafted Luxury Home Decor & Premium Wall Clocks"} 
         description={activeCategory 
-          ? `Discover our curated ${activeCategory} collection. Handcrafted premium home decor items, designer clocks, and bespoke wooden accents designed for elegant interiors.`
-          : "Browse AEVO's curated registry of premium wooden wall clocks, designer hanging clocks, customized decor pieces, and modern key holders built for modern homes."
+          ? `Discover our curated ${activeCategory} collection. Handcrafted premium home decor items, designer clocks, and  wooden accents designed for elegant interiors.`
+          : "Browse AEVO's Featured Designs of premium wooden wall clocks, designer hanging clocks, customized decor pieces, and modern key holders built for modern homes."
         } 
       />
       <div className="container mx-auto px-6">
@@ -117,7 +117,7 @@ const Shop: React.FC = () => {
             
             {filteredProducts.length === 0 && (
               <div className="text-center py-40 border border-dashed border-black/10 rounded-[3rem]">
-                <h2 className="text-2xl font-serif text-black/60 mb-4">Archive Empty</h2>
+                <h2 className="text-2xl font-serif text-black/60 mb-4">Collection Empty</h2>
                 <p className="text-black/30 text-sm italic mb-8">Adjust your filtration criteria to reveal more instruments.</p>
                 <button onClick={() => {setSearchParams({}); setSortBy('latest');}} className="text-[#8C7861] text-[9px] uppercase font-bold tracking-[0.4em] border-b border-[#8C7861] pb-2">Reset Protocols</button>
               </div>

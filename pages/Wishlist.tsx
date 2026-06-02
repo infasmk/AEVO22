@@ -14,7 +14,7 @@ const Wishlist: React.FC = () => {
       <div className="container mx-auto px-6 max-w-7xl">
         <header className="text-center mb-24">
           <span className="text-[#8C7861] uppercase text-[10px] font-black tracking-[0.6em] mb-4 block animate-fadeInUp">Personal Collection</span>
-          <h1 className="text-5xl md:text-8xl font-serif text-black/80 italic animate-fadeInUp">The Vault</h1>
+          <h1 className="text-5xl md:text-8xl font-serif text-black/80 italic animate-fadeInUp">Liked </h1>
           <div className="w-12 h-px bg-black/10 mx-auto mt-10" />
         </header>
 
@@ -31,7 +31,7 @@ const Wishlist: React.FC = () => {
               to="/shop" 
               className="inline-block text-[#8C7861] text-[9px] uppercase font-black tracking-[0.5em] border-b border-[#8C7861] pb-2 hover:text-black hover:border-black transition-all"
             >
-              Explore the Archive
+              Explore the Collection
             </Link>
           </div>
         )}

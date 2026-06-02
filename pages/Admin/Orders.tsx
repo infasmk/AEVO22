@@ -43,7 +43,7 @@ const AdminOrders: React.FC = () => {
             <thead>
               <tr className="text-[10px] uppercase tracking-[0.4em] text-black/30 border-b border-black/5 bg-[#FDFBF9]/50">
                 <th className="px-10 py-8 font-black">Client Protocol</th>
-                <th className="px-10 py-8 font-black">Archive Pieces</th>
+                <th className="px-10 py-8 font-black">Collection Pieces</th>
                 <th className="px-10 py-8 font-black">Investment</th>
                 <th className="px-10 py-8 font-black">Status Logic</th>
                 <th className="px-10 py-8 font-black">Registry Date</th>
@@ -93,7 +93,7 @@ const AdminOrders: React.FC = () => {
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={5} className="px-10 py-32 text-center text-black/15 uppercase tracking-[0.8em] text-[11px] font-black italic">The acquisition archive is currently silent</td>
+                  <td colSpan={5} className="px-10 py-32 text-center text-black/15 uppercase tracking-[0.8em] text-[11px] font-black italic">The acquisition Collection is currently silent</td>
                 </tr>
               )}
             </tbody>

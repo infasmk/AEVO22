@@ -20,9 +20,9 @@ const Header: React.FC = () => {
   }, []);
 
   const navLinks = [
-    { name: 'The Archive', path: '/shop', number: '01' },
-    { name: 'Heritage', path: '/about', number: '02' },
-    { name: 'The Vault', path: '/wishlist', number: '03' },
+    { name: 'The Collection', path: '/shop', number: '01' },
+    { name: 'Home', path: '/about', number: '02' },
+    { name: 'Liked ', path: '/wishlist', number: '03' },
   ];
 
   const handleLogoClick = (e: React.MouseEvent) => {
@@ -50,8 +50,8 @@ const Header: React.FC = () => {
 
         {/* Navigation - Desktop */}
         <nav className="hidden lg:flex items-center space-x-12 text-[9px] uppercase tracking-[0.4em] font-black">
-          <Link to="/shop" className={`transition-colors ${location.pathname === '/shop' ? 'text-black' : 'text-[#A68E74] hover:text-black'}`}>Archive</Link>
-          <Link to="/about" className="text-[#A68E74] hover:text-black transition-colors">Heritage</Link>
+          <Link to="/shop" className={`transition-colors ${location.pathname === '/shop' ? 'text-black' : 'text-[#A68E74] hover:text-black'}`}>Collection</Link>
+          <Link to="/about" className="text-[#A68E74] hover:text-black transition-colors">Home</Link>
         </nav>
 
         {/* Logo - Signature Gold */}

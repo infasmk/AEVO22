@@ -73,7 +73,7 @@ const AdminBanners: React.FC = () => {
 
   const triggerDelete = (id: string, title: string) => {
     setConfirm({
-      title: "Archive Hero Asset",
+      title: "Collection Hero Asset",
       message: `Are you certain you wish to purge "${title}" from the cinematic showcase? This asset will be memorialized and removed from active rotation.`,
       onConfirm: async () => {
         const success = await deleteBanner(id);
@@ -232,7 +232,7 @@ const AdminBanners: React.FC = () => {
                     >
                       <option value="New Arrival">New Arrival</option>
                       <option value="Limited Release">Limited Release</option>
-                      <option value="Artisanal Heritage">Artisanal Heritage</option>
+                      <option value="Artisanal Home">Artisanal Home</option>
                       <option value="Best Seller">High Momentum</option>
                     </select>
                   </div>

@@ -95,7 +95,7 @@ const Home: React.FC = () => {
                 onClick={() => navigate('/shop')}
                 className="px-12 py-4 bg-[#A68E74] text-white rounded-full uppercase text-[9px] font-black tracking-[0.3em] transition-all hover:scale-105 active:scale-95 animate-fadeInUp shadow-2xl" 
               >
-                Browse Archive
+                Browse Collection
               </button>
             </div>
           </div>
@@ -122,7 +122,7 @@ const Home: React.FC = () => {
       <section className="py-20 md:py-32">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center justify-between mb-16 space-y-8 md:space-y-0">
-            <h2 className="text-2xl font-serif text-black/80">Curated Registry</h2>
+            <h2 className="text-2xl font-serif text-black/80">Featured Designs</h2>
             {!isRegistryEmpty && (
               <div className="flex space-x-8 md:space-x-12 overflow-x-auto no-scrollbar w-full md:w-auto pb-4 md:pb-0">
                 {tabs.map(tab => (
@@ -223,7 +223,7 @@ const Home: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-14 text-left">
             <div className="space-y-4">
-              <h3 className="text-lg font-serif text-black italic border-b border-[#A68E74]/10 pb-3 font-medium">Bespoke Wall Clocks</h3>
+              <h3 className="text-lg font-serif text-black italic border-b border-[#A68E74]/10 pb-3 font-medium"> Wall Clocks</h3>
               <p className="text-black/50 text-[12px] md:text-sm italic font-light leading-relaxed">
                 Timekeeping is the focal architectural statement in modern homes. To elevate modern luxury interiors, selecting the <strong className="font-semibold text-black/70">best luxury wall clocks</strong> is of pristine importance. AEVO is a <span className="text-[#A68E74] font-medium">premium decor brand</span> crafting authentic <strong className="font-semibold text-black/70">premium wall clocks</strong>, <strong className="font-semibold text-black/70">modern wall clocks</strong>, and magnificent <strong className="font-semibold text-black/70">designer wall clocks</strong>.
               </p>
@@ -238,7 +238,7 @@ const Home: React.FC = () => {
                 A highly unified aesthetic extends far beyond clock dials to encompass premium interior decor and exquisite <strong className="font-semibold text-black/70">home decoration items</strong>. We invite you to explore our custom-forged <strong className="font-semibold text-black/70">designer key holders</strong> that turn simple organization into a grand ritual of luxury lifestyle decor.
               </p>
               <p className="text-black/50 text-[12px] md:text-sm italic font-light leading-relaxed">
-                Curate your entrance lobbies with a bespoke <strong className="font-semibold text-black/70">wall mounted key holder</strong>, an aesthetic <strong className="font-semibold text-black/70">modern key holder</strong>, or a handmade companion like our structural <strong className="font-semibold text-black/70">wooden key holder</strong>. These pieces pair perfectly with minimal luxury decor.
+                Curate your entrance lobbies with a  <strong className="font-semibold text-black/70">wall mounted key holder</strong>, an aesthetic <strong className="font-semibold text-black/70">modern key holder</strong>, or a handmade companion like our structural <strong className="font-semibold text-black/70">wooden key holder</strong>. These pieces pair perfectly with minimal luxury decor.
               </p>
             </div>
 
@@ -309,7 +309,7 @@ const Home: React.FC = () => {
       {/* Narrative Section */}
       <section className="py-24 md:py-40 bg-[#F9F7F5] border-y border-black/[0.03] text-center">
         <div className="container mx-auto px-6">
-          <span className="text-[#A68E74] uppercase text-[9px] font-black tracking-[0.8em] block mb-10">Heritage</span>
+          <span className="text-[#A68E74] uppercase text-[9px] font-black tracking-[0.8em] block mb-10">Home</span>
           <h2 className="text-3xl md:text-6xl font-serif italic text-black/60 max-w-4xl mx-auto leading-tight px-4">
             "Artistry that honors the silence between seconds."
           </h2>
