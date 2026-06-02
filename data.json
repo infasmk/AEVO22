@@ -1,5 +1,47 @@
 {
   "products": [
+     {
+      "name": "LEVITATE",
+      "price": 5999,
+      "original_price": 7990,
+      "category": "Elite Series",
+      "tag": "Best Seller",
+      "description": "AEVO FLOATING WOODEN TIMEPIECE CARVED FROM TREATED NATURAL WOOD, THIS SCULPTURAL TIMEPIECE APPEARS TO FLOATIN SPACECLEAN GEOMETRY, WARM GRAIN, AND PRECISE DETAILING COME TOGETHER IN A DESIGN THAT IS QUIET, BALANCED, AND ENDURING.",
+      "stock": 100,
+      "images": [
+        "https://i.ibb.co/Xxctgb0x/MODEL-LEVITATE-jpg.jpg",
+        "https://i.ibb.co/39fKHW5q/MODEL-LEVITATE-2-jpg.jpg",
+        "https://i.ibb.co/1gx14zb/MODEL-LEVITATE-INFO.png"
+      ],
+      "colors": [],
+      "specs": {},
+      "key_features": [],
+      "id": "p-1779119084226",
+      "rating": 5,
+      "reviews_count": 20,
+      "created_at": "2026-05-18T15:44:44.226Z"
+    },
+     {
+      "name": "TUSKER",
+      "price": 7999,
+      "original_price": 0,
+      "category": "Elite Series",
+      "tag": "Latest",
+      "description": "A sculptural elephant form reimagines time as art. Crafted from treated wood with a deep black finish and bold gold numerals, this piece stands out through its striking silhouette and refined detailing. More than a clock, it’s a statement designed to define the space it lives in.",
+      "stock": 100,
+      "images": [
+        "https://i.ibb.co/SFfnr3t/photo-2026-05-18-21-57-22.jpg",
+        "https://i.ibb.co/23r4YYvY/photo-2026-05-18-21-57-40.jpg",
+        "https://i.ibb.co/zhvp7Cct/photo-2026-05-18-21-57-44.jpg"
+      ],
+      "colors": [],
+      "specs": {},
+      "key_features": [],
+      "id": "p-1779121749992",
+      "rating": 5,
+      "reviews_count": 0,
+      "created_at": "2026-05-18T16:29:09.992Z"
+    },
     {
       "name": "ENCLOSE",
       "price": 5499,
@@ -64,27 +106,7 @@
       "reviews_count": 0,
       "created_at": "2026-05-18T16:33:23.332Z"
     },
-    {
-      "name": "TUSKER",
-      "price": 7999,
-      "original_price": 0,
-      "category": "Elite Series",
-      "tag": "Latest",
-      "description": "A sculptural elephant form reimagines time as art. Crafted from treated wood with a deep black finish and bold gold numerals, this piece stands out through its striking silhouette and refined detailing. More than a clock, it’s a statement designed to define the space it lives in.",
-      "stock": 100,
-      "images": [
-        "https://i.ibb.co/SFfnr3t/photo-2026-05-18-21-57-22.jpg",
-        "https://i.ibb.co/23r4YYvY/photo-2026-05-18-21-57-40.jpg",
-        "https://i.ibb.co/zhvp7Cct/photo-2026-05-18-21-57-44.jpg"
-      ],
-      "colors": [],
-      "specs": {},
-      "key_features": [],
-      "id": "p-1779121749992",
-      "rating": 5,
-      "reviews_count": 0,
-      "created_at": "2026-05-18T16:29:09.992Z"
-    },
+   
     {
       "name": "ENCLOSE",
       "price": 5499,
@@ -169,27 +191,7 @@
       "reviews_count": 0,
       "created_at": "2026-05-18T15:49:13.456Z"
     },
-    {
-      "name": "LEVITATE",
-      "price": 5999,
-      "original_price": 0,
-      "category": "Elite Series",
-      "tag": "Best Seller",
-      "description": "AEVO FLOATING WOODEN TIMEPIECE CARVED FROM TREATED NATURAL WOOD, THIS SCULPTURAL TIMEPIECE APPEARS TO FLOATIN SPACECLEAN GEOMETRY, WARM GRAIN, AND PRECISE DETAILING COME TOGETHER IN A DESIGN THAT IS QUIET, BALANCED, AND ENDURING.",
-      "stock": 100,
-      "images": [
-        "https://i.ibb.co/Xxctgb0x/MODEL-LEVITATE-jpg.jpg",
-        "https://i.ibb.co/39fKHW5q/MODEL-LEVITATE-2-jpg.jpg",
-        "https://i.ibb.co/1gx14zb/MODEL-LEVITATE-INFO.png"
-      ],
-      "colors": [],
-      "specs": {},
-      "key_features": [],
-      "id": "p-1779119084226",
-      "rating": 5,
-      "reviews_count": 0,
-      "created_at": "2026-05-18T15:44:44.226Z"
-    },
+   
     {
       "name": "ASCEND",
       "price": 4999,
