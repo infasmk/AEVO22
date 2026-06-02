@@ -36,8 +36,8 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-6 flex items-center justify-between">
         {/* Navigation - Adaptive Layout */}
         <nav className="flex items-center space-x-6 sm:space-x-12 text-[9px] uppercase tracking-[0.4em] font-black">
-          <Link to="/shop" className={`transition-colors ${location.pathname === '/shop' ? 'text-black' : 'text-[#A68E74] hover:text-black'}`}>Archive</Link>
-          <Link to="/about" className={`transition-colors ${location.pathname === '/about' ? 'text-black' : 'text-[#A68E74] hover:text-black'}`}>Heritage</Link>
+          <Link to="/shop" className={`transition-colors ${location.pathname === '/shop' ? 'text-black' : 'text-[#A68E74] hover:text-black'}`}></Link>
+          <Link to="/about" className={`transition-colors ${location.pathname === '/about' ? 'text-black' : 'text-[#A68E74] hover:text-black'}`}></Link>
         </nav>
 
         {/* Logo - Signature Gold */}
