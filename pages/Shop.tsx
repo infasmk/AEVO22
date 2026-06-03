@@ -95,11 +95,7 @@ const Shop: React.FC = () => {
               </select>
             </div>
 
-            <div className="p-8 bg-[#FDFBF7] rounded-3xl border border-black/5 space-y-4">
-              <h3 className="font-serif text-black/80 text-lg">Concierge</h3>
-              <p className="text-[10px] text-black/30 uppercase tracking-widest leading-relaxed">Private viewing requests for the Luxury Series are handled via our artisans in Geneva.</p>
-              <button className="w-full bg-black text-white py-4 rounded-full text-[9px] uppercase font-black tracking-widest hover:scale-105 transition-transform">Book Viewing</button>
-            </div>
+           
           </aside>
 
           {/* Product Grid */}

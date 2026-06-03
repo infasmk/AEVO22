@@ -164,8 +164,8 @@ const Home: React.FC = () => {
           <div className="container mx-auto px-6">
             <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-4">
               <div className="space-y-3">
-                <span className="text-[#A68E74] uppercase text-[8px] font-black tracking-[0.8em] block">Official Collections</span>
-                <h2 className="text-xl md:text-3xl font-serif text-black italic">Atelier Series Taxonomy</h2>
+                <span className="text-[#A68E74] uppercase text-[8px] font-black tracking-[0.8em] block">Aevo Designs</span>
+                <h2 className="text-xl md:text-3xl font-serif text-black italic">Collections</h2>
               </div>
               <button 
                 onClick={() => navigate('/shop')}

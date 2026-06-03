@@ -141,7 +141,7 @@ const AdminDashboard: React.FC = () => {
          <div className="flex justify-between items-center mb-16">
             <div>
               <h3 className="text-[10px] font-black uppercase tracking-[0.6em] text-black/30">Curation Balance</h3>
-              <p className="text-[11px] font-serif italic text-[#A68E74] mt-2">Distribution of pieces across official collections.</p>
+              <p className="text-[11px] font-serif italic text-[#A68E74] mt-2">Distribution of pieces across Aevo Designs.</p>
             </div>
             <Link to="/admin/collections" className="text-[9px] uppercase tracking-widest font-black p-4 bg-black/5 rounded-full hover:bg-black hover:text-white transition-all">Manage Taxonomy</Link>
          </div>

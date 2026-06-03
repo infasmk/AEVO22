@@ -238,7 +238,7 @@ const About: React.FC = () => {
               Explore Collections
             </Link>
             <a 
-              href="mailto:concierge@aevo.luxury" 
+              href="mailto:@aevo.luxury" 
               className="px-8 py-3 bg-white border border-black/10 hover:border-black text-black font-bold text-[10px] tracking-widest uppercase transition-all rounded-sm"
             >
               Custom Inquiries
