@@ -91,7 +91,7 @@ const Shop: React.FC = () => {
                 <option value="latest">Latest Acquisitions</option>
                 <option value="price-low">Price: Ascending</option>
                 <option value="price-high">Price: Descending</option>
-                <option value="best-selling">High Momentum</option>
+                <option value="best-selling">High  Momentum</option>
               </select>
             </div>
 
