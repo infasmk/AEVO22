@@ -71,7 +71,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     category: 'Smart Clocks',
     images: [
       'https://images.unsplash.com/photo-1544117518-30dd5978bbbe?auto=format&fit=crop&q=80&w=1000',
-      'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=80&w=1000'
+      'https://i.ibb.co/4wM9JdBv/IMG-2694.jpg?auto=format&fit=crop&q=80&w=1000'
     ],
     specs: { 'Battery': '7 Days', 'Display': 'AMOLED' },
     // Fix: Added missing required key_features
@@ -130,7 +130,7 @@ export const INITIAL_BANNERS: Banner[] = [
     title: 'The Platinum Standard',
     subtitle: 'Limited release precision engineering',
     // Fix: image -> image_url, tag -> tag_label, added display_order
-    image_url: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=1600',
+    image_url: 'https://i.ibb.co/4wM9JdBv/IMG-2694.jpg?auto=format&fit=crop&q=1600',
     tag_label: 'Latest Models',
     display_order: 1
   },

@@ -55,7 +55,7 @@ const Home: React.FC = () => {
           "@type": "Organization",
           "name": "AEVO",
           "url": "https://aevodesigns.in",
-          "logo": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=80&w=1200",
+          "logo": "https://i.ibb.co/4wM9JdBv/IMG-2694.jpg?auto=format&fit=crop&q=80&w=1200",
           "description": "AEVO is India's premier luxury decor brand specializing in premium handcrafted wooden wall clocks, designer hanging clocks, customizable timepieces, key holders, and elegant home accessories.",
           "address": {
             "@type": "PostalAddress",

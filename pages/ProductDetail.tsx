@@ -49,7 +49,7 @@ Please guide me through the acquisition process.`;
           "@context": "https://schema.org",
           "@type": "Product",
           "name": product.name,
-          "image": product.images[0] ? [product.images[0]] : ["https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=80&w=1200"],
+          "image": product.images[0] ? [product.images[0]] : ["https://i.ibb.co/4wM9JdBv/IMG-2694.jpg?auto=format&fit=crop&q=80&w=1200"],
           "description": product.description,
           "sku": product.id,
           "mpn": product.id,
